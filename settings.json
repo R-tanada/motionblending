@@ -1,0 +1,10 @@
+{
+    "xArmIP": "192.168.1.240",
+    "MotiveServerIP": "133.68.35.155",
+    "MotiveLocalIP": "133.68.35.155",
+    "BendingSensorCOM1": "COM3",
+    "BendingSensorCOM2": "COM7",
+    "BendingSensorNum": 1,
+    "WeightSliderListPos":[0.5, 0.5],
+    "WeightSliderListRot":[0.5, 0.5]
+}
