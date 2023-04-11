@@ -4,18 +4,19 @@
 # Summary:  振動フィードバック制御マネージャー
 # -----------------------------------------------------------------------
 
-from typing import List
-import pyaudio
-import numpy as np
-from scipy import signal
+import math
 import winsound
 from typing import List
-import math
 
-from CyberneticAvatarMotion.CyberneticAvatarMotionBehaviour import CyberneticAvatarMotionBehaviour
-from MotionFilter.MotionFilter import MotionFilter
-from VibrotactileFeedback.AudioDeviceIndexes import AudioDeviceIndexes
+import numpy as np
+import pyaudio
+from CyberneticAvatarMotion.CyberneticAvatarMotionBehaviour import \
+    CyberneticAvatarMotionBehaviour
 from FileIO.FileIO import FileIO
+from MotionFilter.MotionFilter import MotionFilter
+from scipy import signal
+from VibrotactileFeedback.AudioDeviceIndexes import AudioDeviceIndexes
+
 
 class VibrotactileFeedbackManager:
     def __init__(self):
@@ -38,14 +39,14 @@ class VibrotactileFeedbackManager:
         # ----- Find audio device indexes ----- #
         audioDeviceIndexes = AudioDeviceIndexes()
         ListIndexNum = audioDeviceIndexes.Find(host_api='MME', name='スピーカー (3- Sound Blaster Play! 3')
-        ListIndexNum = listIndexNum
+        ListIndexNum = [10]
         OutputDeviceNum = len(ListIndexNum)
 
         self.p = pyaudio.PyAudio()
         self.format = pyaudio.paInt16
         self.channels = 1
         self.rate = 44100
-        self.amp = 10000
+        self.amp = 100
         self.freq = 200
         self.CHUNK = int(self.rate / self.freq)
         self.sin = np.sin(2.0 * np.pi * np.arange(self.CHUNK) * float(self.freq) / float(self.rate))
@@ -82,8 +83,17 @@ class VibrotactileFeedbackManager:
     def close(self):
         self.p.terminate()
 
-    def velocityFeedback(self, robotflag):
-        if robotflag:
-            self.data_out = 1
+    def velocityFeedback(self, position, Flag):
+        self.posList.append(position)
+
+        if len(self.posList) == 2:
+            vel  = np.linalg.norm(np.diff(self.posList, n=1, axis=0) / self.dt)
+            if Flag == True:
+                self.data_out = vel
+            else:
+                self.data_out = 0
+
+            del self.posList[0]
+
         else:
-            self.data_out = 0
+            pass

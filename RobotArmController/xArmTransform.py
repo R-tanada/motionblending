@@ -6,9 +6,10 @@
 
 #from _typeshed import Self
 from math import pi
-import numpy as np
 
+import numpy as np
 from MotionFilter.MotionFilter import MotionFilter
+
 
 class xArmTransform:
     """
@@ -19,15 +20,15 @@ class xArmTransform:
     roll, pitch, yaw    = 0, 0, 0
 
 # ----- Initial Position and Rotation ----- #
-    __initX, __initY, __initZ           = 370, 0, 320
-    __initRoll, __initPitch, __initYaw  = 180, 0, 90
+    __initX, __initY, __initZ           = 280, 0, 250
+    __initRoll, __initPitch, __initYaw  = 180, 0, 0
 
     # ----- Minimum limitation ----- #
-    __minX, __minY, __minZ          = 310, -300, 225
+    __minX, __minY, __minZ          = 200, -300, 150
     __minRoll, __minPitch, __minYaw = -90, -65, -90
 
     # ----- Maximum limitation ----- #
-    __maxX, __maxY, __maxZ          = 650, 300, 650
+    __maxX, __maxY, __maxZ          = 630, 300, 450
     __maxRoll, __maxPitch, __maxYaw = 90, 70, 90
 
     def __init__(self):

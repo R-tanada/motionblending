@@ -246,7 +246,7 @@ class ParticipantMotionManager:
             Count of loop.
 
         Returns
-        ----------
+        ----------`
         Value for control of the xArm gripper: dict
         {'gripperValue1': float value}
         """

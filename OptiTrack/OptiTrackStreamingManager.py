@@ -61,11 +61,6 @@ class OptiTrackStreamingManager:
 			self.position['participant'+str(new_id)] = np.array(position)
 			self.rotation['participant'+str(new_id)] = np.array(rotation)
 
-		# if new_id == 3:
-		# 	self.position['endEffector'] = np.array(position)
-		# 	self.rotation['endEffector'] = np.array(rotation)
-
-
 	def stream_run(self):
 		streamingClient = NatNetClient.NatNetClient(serverIP=serverAddress, localIP=localAddress)
 

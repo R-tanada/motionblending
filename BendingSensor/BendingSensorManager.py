@@ -4,13 +4,14 @@
 # Summary:  曲げセンサからのデータ取得用マネージャー
 # -----------------------------------------------------------------------
 
-from UDP.UDPManager import UDPManager
 import serial
+from UDP.UDPManager import UDPManager
+
 
 class BendingSensorManager:
 
     bendingValue = 0
-    
+
     def __init__(self, BendingSensor_connectionmethod, ip, port) -> None:
         self.ip             = ip
         self.port           = port
@@ -22,15 +23,18 @@ class BendingSensorManager:
 
         elif BendingSensor_connectionmethod == 'wired':
             self.serialObject = serial.Serial(ip, port)
-            not_used = self.serialObject.readline()
+            # try:
+            #     not_used = self.serialObject.readline()
+            # except:
+            #     pass
 
-            
-    
+
+
     def StartReceiving(self, fromUdp: bool = False):
         """
         Receiving data from bending sensor and update self.bendingValue
         """
-        
+
         if fromUdp:
             sock = self.udpManager.sock
 
@@ -44,7 +48,7 @@ class BendingSensorManager:
 
             except KeyboardInterrupt:
                 print('KeyboardInterrupt >> Stop: BendingSensorManager.py')
-        
+
         else:
             try:
                 while True:
@@ -53,6 +57,6 @@ class BendingSensorManager:
 
             except KeyboardInterrupt:
                 print('KeyboardInterrupt >> Stop: BendingSensorManager.py')
-    
+
     def EndReceiving(self):
         self.udpManager.CloseSocket()

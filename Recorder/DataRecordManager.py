@@ -4,11 +4,13 @@
 # Summary:  Data Recording Manager
 # -----------------------------------------------------------------------
 
-import os
 import csv
+import datetime
+import os
+
 import numpy as np
 import tqdm
-import datetime
+
 
 class DataRecordManager:
     dictPosition = {}
@@ -48,7 +50,7 @@ class DataRecordManager:
         for i in range(self.bendingSensorNum):
             self.dictGripperValue['gripperValue'+str(i+1)] = []
 
-    def Record(self, position, rotation, bendingSensor, duration):
+    def Record(self, position, rotation , bendingSensor = None, duration = None):
         """
         Record the data.
 
@@ -70,13 +72,14 @@ class DataRecordManager:
             self.dictPosition['participant'+str(i+1)].append(position)
             self.dictRotation['participant'+str(i+1)].append(rotation)
 
-        for i in range(self.otherRigidBodyNum):
-            self.dictPosition[self.otherRigidBodyNames[i]].append(position[self.otherRigidBodyNames[i]])
-            self.dictRotation[self.otherRigidBodyNames[i]].append(rotation[self.otherRigidBodyNames[i]])
+            for i in range(self.otherRigidBodyNum):
+                self.dictPosition[self.otherRigidBodyNames[i]].append(position[self.otherRigidBodyNames[i]])
+                self.dictRotation[self.otherRigidBodyNames[i]].append(rotation[self.otherRigidBodyNames[i]])
 
-        for i in range(self.bendingSensorNum):
-            self.dictGripperValue['gripperValue'+str(i+1)].append([bendingSensor['gripperValue'+str(i+1)]])
-
+        if bendingSensor:
+            for i in range(self.bendingSensorNum):
+                # self.dictGripperValue['gripperValue'+str(i+1)].append([bendingSensor['gripperValue'+str(i+1)]])
+                self.dictGripperValue['gripperValue'+str(i+1)].append([bendingSensor])
 
     def ExportSelf(self, dirPath: str = 'ExportData',participant: str = '',conditions:str = '',number:str = ''):
         """
