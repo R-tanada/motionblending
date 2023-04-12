@@ -2,15 +2,6 @@
     "xArmIP": "192.168.1.240",
     "MotiveServerIP": "133.68.35.155",
     "MotiveLocalIP": "133.68.35.155",
-    "BendingSensorCOM1": "COM7",
-    "BendingSensorCOM2": "COM15",
-    "BendingSensorNum": 0,
-    "WeightSliderListPos": [
-        1,
-        0
-    ],
-    "WeightSliderListRot": [
-        1,
-        0
-    ]
+    "BendingSensorCOM": "COM7",
+    "Mounting": "defalt"
 }

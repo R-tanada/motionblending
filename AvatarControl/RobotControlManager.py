@@ -28,19 +28,6 @@ from VibrotactileFeedback.VibrotactileFeedbackManager import \
     VibrotactileFeedbackManager
 from xarm.wrapper import XArmAPI
 
-# ---------- Settings: Number of recorded motion, rigidbodies and devices ---------- #
-otherRigidBodyCount             = 0     # Number of RigidBodies of non-participants
-
-recordedParticipantMotionCount  = 0     # Number of motion data of pre recorded
-recordedGripperValueCount       = 0     # Number of gripper data of pre recorded
-
-# ---------- Settings: Input mode ---------- #
-motionDataInputMode     = 'optitrack'
-gripperDataInputMode    = 'bendingsensor'
-
-# ---------- Settings: Shared method ---------- #
-sharedMethod = 'integration'
-
 # ----- Safety settings. Unit: [mm] ----- #
 movingDifferenceLimit = 1000
 
@@ -52,42 +39,9 @@ class RobotControlManagerClass:
         self.xArmIP = settings_data['xArmIP']
         self.MotiveServerIP = settings_data['MotiveServerIP']
         self.MotiveLocalIP = settings_data['MotiveLocalIP']
-        self.BendingSensorCOMs = [settings_data['BendingSensorCOM1'], settings_data['BendingSensorCOM2']]
-        self.BendingSensorNum = settings_data['BendingSensorNum']
-        self.weightSliderListPos = settings_data['WeightSliderListPos']
-        self.weightSliderListRot = settings_data['WeightSliderListRot']
-        print(self.weightSliderListPos)
+        self.BendingSensorCOMs = settings_data['BendingSensorCOM']
 
     def SendDataToRobot(self, participantNum, executionTime: int = 9999, isFixedFrameRate: bool = False, frameRate: int = 90, isChangeOSTimer: bool = False, isExportData: bool = True, isEnablexArm: bool = True):
-        """
-        Send the position and rotation to the xArm
-
-        Parameters
-        ----------
-        participantNum: int
-            Number of participants
-        executionTime: (Optional) int
-            Unit: [s]
-            Execution time
-        isFixedFrameRate: (Optional) bool
-            Use fixed frame rate.
-            Default is depending on the PC specs.
-        frameRate: (Optional) int
-            Frame rate of the loop of this method
-        isChangeOSTimer: (Optional, only for Windows) bool
-            Change the Windows OS timer.
-            ----- CAUTION -----
-                Since this option changes the OS timer, it will affect the performance of other programs.
-                Ref: https://python-ai-learn.com/2021/02/07/time/
-                Ref: https://docs.microsoft.com/en-us/windows/win32/api/timeapi/nf-timeapi-timebeginperiod
-        isExportData: (Optional) bool
-            Export recorded data.
-            Participants' motion data (Position: xyz, Quaternion: xyzw)
-            Other rigid bodys' motion data (Position: xyz, Quaternion: xyzw)
-            Gripper value.
-        isEnablexArm: (Optional) bool
-            For debug mode. If False, xArm will not be enabled.
-        """
 
         # ----- Change OS timer ----- #
         if isFixedFrameRate and isChangeOSTimer:
@@ -117,21 +71,11 @@ class RobotControlManagerClass:
                                                                        BendingSensor_ConnectionMethod='wired',bendingSensorSerialCOMs=self.BendingSensorCOMs)
         # weightSliderManager                 = WeightSliderManager(WeightSlider_ConnectionMethod='wireless',ip=self.wirelessIpAddress,port=self.weightSliderPort)
         # vibrotactileFeedbackManager         = VibrotactileFeedbackManager()
-        # Graph2DManager                      = Graph_2D(n=2)
-        # motionFunc                          = SimpleMotionFunction(latency_time = 1, UserControlWeight = 0.8)
-        targetPos = [537.1, 77.9, 127.7]
-        targetRot = [179.7, -17.3, 17.2]
-        robotMotion = RobotMotion(targetPos, targetRot, MaxFlame = 2000, Threshold = 150, AutoGrip = True, Motion = 'MinimumJerk')
-        # recordedMotion              = RecordedMotion(MotionPath = 'Recorder/RecordedData/___Transform_Participant_1_20230411_1404.csv', GripPath = 'Recorder/RecordedData/___GripperValue_1_20230411_1404.csv', threshold = 200)
-        # noiseMotion = NoiseMotion(Frequency=0.1, Scale=50, UserControlWeight=0.5, Latency=0)
-
 
         # ----- Initialize robot arm ----- #
         if isEnablexArm:
             arm = XArmAPI(self.xArmIP)
             self.InitializeAll(arm, transform)
-
-        # bendingFeedback = LoadCellManager(arm)
 
         # ----- Control flags ----- #
         isMoving    = False
@@ -170,14 +114,6 @@ class RobotControlManagerClass:
                     # ----- Bending sensor ----- #
                     dictBendingValue = participantMotionManager.GripperControlValue(loopCount=self.loopCount)
 
-                    # ----- Bending sensor for integration or one side ----- #
-                    if self.BendingSensorNum == 1:
-                        gripperValue = dictBendingValue['gripperValue1']
-                    elif self.BendingSensorNum == 2:
-                        gripperValue = (dictBendingValue['gripperValue1'] + dictBendingValue['gripperValue2'])/2
-
-                    gripperValue = 850
-
                     # ----- Get transform data----- #
                     localPosition = participantMotionManager.LocalPosition(loopCount=self.loopCount)
                     localRotation = participantMotionManager.LocalRotation(loopCount=self.loopCount)
@@ -195,12 +131,7 @@ class RobotControlManagerClass:
                     # position_tr, rotation_tr = [0] * 3, [0] * 3
                     # position_tr[0], position_tr[1], position_tr[2]  = position[2], position[1], -1 * position[0]
                     # rotation_tr[0], rotation_tr[1], rotation_tr[2]  = rotation[1], -1 * rotation[2], -1 * rotation[0]
-
-                    # ------ MotionFunction ------ #
-                    position_tr, rotation_tr, gripperValue = robotMotion.ChangeToRobotMotion(position_tr, rotation_tr, gripperValue, self.loopCount, time.perf_counter()-taskStartTime)
-                    # position_tr, rotation_tr, gripperValue = recordedMotion.FusionWithRecordedMotion(position_tr, rotation_tr, gripperValue)
-                    # position_tr, rotation_tr, = noiseMotion.MotionFunction(position_tr, rotation_tr, time.perf_counter()-taskStartTime)
-
+                    
                     # ----- Set xArm transform ----- #
                     transform.x, transform.y, transform.z = position_tr[0], position_tr[1], position_tr[2]
                     transform.roll, transform.pitch, transform.yaw = rotation_tr[0], rotation_tr[1], rotation_tr[2]
@@ -283,30 +214,10 @@ class RobotControlManagerClass:
                     elif keycode == 's':
                         caBehaviour.SetOriginPosition(participantMotionManager.LocalPosition())
                         caBehaviour.SetInversedMatrix(participantMotionManager.LocalRotation())
-
-                        # # ----- weight slider list (For participantNum)  ----- #
-                        # weightSliderList = []
-                        # weightSliderList_0 = [1/participantNum for n in range(participantNum)]
-                        # weightSliderList = [weightSliderList_0,weightSliderList_0]
-
-                        # ----- weight slider list ----- #
-                        # self.weightSliderListPos[0].remove('weightSliderListPos')
-                        # self.weightSliderListRot[0].remove('weightSliderListRot')
-                        # weightSliderListPosstr = self.weightSliderListPos[0]
-                        # weightSliderListRotstr = self.weightSliderListRot[0]
-                        # weightSliderListPosfloat = list(map(float,weightSliderListPosstr))
-                        # weightSliderListRotfloat = list(map(float,weightSliderListRotstr))
-                        weightSliderList = [self.weightSliderListPos, self.weightSliderListRot]
-
-                        # self.weightSliderList = [[0,1],[0,1]]
-                        # self.weightSliderList = [[0.5,0.5],[0.5,0.5]]
-
-                        # print(weightSliderList)
+                        participantMotionManager.SetInitialBendingValue()
 
                         position, rotation = caBehaviour.GetSharedTransformWithCustomWeight(participantMotionManager.LocalPosition(), participantMotionManager.LocalRotation(),weightSliderList )
                         beforeX, beforeY, beforeZ = position[2], position[0], position[1]
-
-                        participantMotionManager.SetInitialBendingValue()
 
                         isMoving    = True
                         taskStartTime = time.perf_counter()
@@ -335,20 +246,6 @@ class RobotControlManagerClass:
             traceback.print_exc()
 
     def InitRobotArm(self, robotArm, transform, isSetInitPosition = True):
-        """
-        Initialize the xArm
-
-        Parameters
-        ----------
-        robotArm: XArmAPI
-            XArmAPI object.
-        transform: xArmTransform
-            xArmTransform object.
-        isSetInitPosition: (Optional) bool
-            True -> Set to "INITIAL POSITION" of the xArm studio
-            False -> Set to "ZERO POSITION" of the xArm studio
-        """
-
         robotArm.connect()
         robotArm.motion_enable(enable=True)
         robotArm.set_mode(0)             # set mode: position control mode
@@ -370,15 +267,6 @@ class RobotControlManagerClass:
         print('Initialized > xArm')
 
     def InitGripper(self, robotArm):
-        """
-        Initialize the gripper
-
-        Parameters
-        ----------
-        robotArm: XArmAPI
-            XArmAPI object.
-        """
-
         robotArm.set_tgpio_modbus_baudrate(2000000)
         robotArm.set_gripper_mode(0)
         robotArm.set_gripper_enable(True)
@@ -390,16 +278,6 @@ class RobotControlManagerClass:
         print('Initialized > xArm gripper')
 
     def ConvertToModbusData(self, value: int):
-        """
-        Converts the data to modbus type.
-
-        Parameters
-        ----------
-        value: int
-            The data to be converted.
-            Range: 0 ~ 800
-        """
-
         if int(value) <= 255 and int(value) >= 0:
             dataHexThirdOrder = 0x00
             dataHexAdjustedValue = int(value)
@@ -423,215 +301,12 @@ class RobotControlManagerClass:
         return modbus_data
 
     def PrintProcessInfo(self):
-        """
-        Print process information.
-        """
-
         print('----- Process info -----')
         print('Total loop count > ', self.loopCount)
         for ttask in self.taskTime:
             print('Task time\t > ', ttask, '[s]')
         print('Error count\t > ', self.errorCount)
         print('------------------------')
-
-    # ----- For debug ----- #
-    def BendingSensorTest(self):
-        """
-        For testing.
-        Only get the value of the bending sensor.
-        """
-
-        bendingSensorManagerMaster          = BendingSensorManager(ip=self.wirelessIpAddress, port=self.bendingSensorPorts[0])
-        bendingSensorManagerBeginner        = BendingSensorManager(ip=self.wirelessIpAddress, port=self.bendingSensorPorts[1])
-
-        # ----- Start receiving bending sensor value from UDP socket ----- #
-        bendingSensorThreadMaster = threading.Thread(target=bendingSensorManagerMaster.StartReceiving)
-        bendingSensorThreadMaster.setDaemon(True)
-        bendingSensorThreadMaster.start()
-
-        bendingSensorThreadBeginner = threading.Thread(target=bendingSensorManagerBeginner.StartReceiving)
-        bendingSensorThreadBeginner.setDaemon(True)
-        bendingSensorThreadBeginner.start()
-
-        try:
-            while True:
-                bendingSensorValue1 = bendingSensorManagerMaster.bendingValue
-                bendingSensorValue2 = bendingSensorManagerBeginner.bendingValue
-                print('Sensor1 > ' + str(bendingSensorValue1) + '   Sensor2 > ' + str(bendingSensorValue2))
-
-        except KeyboardInterrupt:
-            print('KeyboardInterrupt >> Stop: RobotControlManager.BendingSensorTest()')
-            bendingSensorManagerMaster.EndReceiving()
-            bendingSensorManagerBeginner.EndReceiving()
-
-    def LoadCellTest(self):
-        """
-        For testing.
-        Only get the value of the load cell.
-        """
-
-        transform = xArmTransform()
-        loadCellManager = LoadCellManager()
-
-        arm = XArmAPI(self.xArmIpAddress)
-        self.InitRobotArm(arm, transform)
-
-        while True:
-            val = loadCellManager.GetLoadCellAnalogValue(arm)
-            print(val)
-
-    def AudioTest(self):
-        """
-        For testing.
-        Only play the audio.
-        """
-
-        audioManager = AudioManager()
-
-        while True:
-            keycode = input()
-            if keycode == 'p':
-                audioManager.PlayPositive()
-
-    def eRubberTactileFeedbackTest(self):
-        arm = XArmAPI(self.xArmIpAddress)
-        transform = xArmTransform()
-        self.InitRobotArm(arm, transform)
-        self.InitGripper(arm)
-
-        loadCellManager = LoadCellManager(arm)
-        audioManager = AudioManager(6)
-
-        bendingSensorManager = BendingSensorManager(ip=self.wirelessIpAddress, port=self.bendingSensorPorts[0])
-
-        # ----- Start receiving bending sensor value from UDP socket ----- #
-        bendingSensorThread = threading.Thread(target=bendingSensorManager.StartReceiving)
-        bendingSensorThread.setDaemon(True)
-        bendingSensorThread.start()
-
-        beforeLoadValue = loadCellManager.InitialLoadCellValue
-
-        isGripping = False
-        threshold = 0.2
-
-        from AvatarControl.MotionFilter import MotionFilter
-        n = 2
-        fs = 180
-        motionFilter = MotionFilter(n,1,fs)
-        loadValList = []
-
-        try:
-            while True:
-                code, ret = arm.getset_tgpio_modbus_data(self.ConvertToModbusData(bendingSensorManager.bendingValue))
-
-                val = loadCellManager.GetLoadCellAnalogValue(arm)
-                loadVal = abs(val[1][1] - beforeLoadValue)
-                #print(val[1][1])
-
-                #audioManager.AddRawAnalogValue(loadVal)
-
-                if loadVal < 0:
-                    loadVal = 0
-
-                beforeLoadValue = val[1][1]
-
-                # ----- Detect gripping ----- #
-                loadDiffFromInit = val[1][1] - loadCellManager.InitialLoadCellValue
-                if not isGripping and loadDiffFromInit > threshold:
-                    isGripping = True
-                elif isGripping and loadDiffFromInit < threshold:
-                    isGripping = False
-
-                if isGripping:
-                    print('Gripping')
-                    #audioManager.PlaySinWave()
-
-                loadValList.append(val[1][1])
-                if len(loadValList) > 9:
-                    hpfDat = motionFilter.HighPassFilter(loadValList)
-                    loadValList.pop(0)
-
-                    audioManager.PlayRawAnalog(hpfDat)
-                    # print(hpfDat)
-
-        except KeyboardInterrupt:
-            print('End')
-
-    def CheckGraph(self):
-        # ----- Settings: Plot ----- #
-        import math
-
-        import matplotlib.pyplot as plt
-
-        times = [0 for i in range(200)]
-        loads = [0 for i in range(200)]
-        grippers = [0 for i in range(200)]
-
-        time = 0
-        load = 0
-        gripper = 0
-
-        # initialize matplotlib
-        plt.ion()
-        plt.figure()
-        li_load,    = plt.plot(times, loads, color='red', label='Load value')
-        li_gripper, = plt.plot(times, grippers, color='blue', label='Gripper')
-
-
-        plt.ylim(-0.1,900)
-        plt.xlabel("time")
-        plt.ylabel("diff load value")
-        #plt.title("real time plot")
-        # ----- End settings: Plot ----- #
-
-
-        arm = XArmAPI(self.xArmIpAddress)
-        transform = xArmTransform()
-        self.InitRobotArm(arm, transform)
-        self.InitGripper(arm)
-
-        loadCellManager = LoadCellManager(arm)
-        beforeLoadValue = loadCellManager.InitialLoadCellValue
-
-        bendingSensorManager = BendingSensorManager(ip=self.wirelessIpAddress, port=self.bendingSensorPorts[0])
-
-        # ----- Start receiving bending sensor value from UDP socket ----- #
-        bendingSensorThread = threading.Thread(target=bendingSensorManager.StartReceiving)
-        bendingSensorThread.setDaemon(True)
-        bendingSensorThread.start()
-
-        try:
-            while True:
-                #code, ret = arm.getset_tgpio_modbus_data(self.ConvertToModbusData(bendingSensorManager.bendingValue))
-
-                val = loadCellManager.GetLoadCellAnalogValue(arm)
-                loadVal = abs(val[1][1] - beforeLoadValue)
-                beforeLoadValue = val[1][1]
-
-                time += 0.1
-                load = loadVal * 10000
-                gripper = arm.get_gripper_position()[1]
-
-                times.append(time)
-                times.pop(0)
-                loads.append(load)
-                loads.pop(0)
-                grippers.append(gripper)
-                grippers.pop(0)
-
-                li_load.set_xdata(times)
-                li_load.set_ydata(loads)
-                li_gripper.set_xdata(times)
-                li_gripper.set_ydata(grippers)
-
-                plt.xlim(min(times), max(times))
-                plt.draw()
-                plt.legend()
-
-                plt.pause(0.01)
-
-        except KeyboardInterrupt:
-            print('END')
 
     def InitializeAll(self, robotArm, transform, isSetInitPosition=True):
         """
