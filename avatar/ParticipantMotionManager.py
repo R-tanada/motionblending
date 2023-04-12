@@ -12,7 +12,7 @@ import csv
 # ----- Custom class ----- #
 from UDP.UDPManager import UDPManager
 from OptiTrack.OptiTrackStreamingManager import OptiTrackStreamingManager
-from BendingSensor.BendingSensorManager import BendingSensorManager
+from BendingSensorManager import BendingSensorManager
 
 # ----- Numeric range remapping ----- #
 # targetMin   = 200

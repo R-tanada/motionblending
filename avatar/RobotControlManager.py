@@ -13,20 +13,13 @@ from datetime import datetime
 from enum import Flag
 
 import numpy as np
-from Audio.AudioManager import AudioManager
-from BendingSensor.BendingSensorManager import BendingSensorManager
-from CyberneticAvatarMotion.CyberneticAvatarMotionBehaviour import \
+from BendingSensorManager import BendingSensorManager
+from CyberneticAvatarMotionBehaviour import \
     CyberneticAvatarMotionBehaviour
 from FileIO.FileIO import FileIO
-from Graph.Graph_2D import Graph_2D
-from LoadCell.LoadCellManager import LoadCellManager
 from matplotlib.pyplot import flag
 # ----- Motion Function -----#
-from ParticipantMotion.LatencyMotion import LatencyMotion
-from ParticipantMotion.NoiseMotion import NoiseMotion
-from ParticipantMotion.ParticipantMotionManager import ParticipantMotionManager
-from ParticipantMotion.RecordedMotion import RecordedMotion
-from ParticipantMotion.RobotMotion import RobotMotion
+from avatar.ParticipantMotionManager import ParticipantMotionManager
 from Recorder.DataRecordManager import DataRecordManager
 from RobotArmController.WeightSliderManager import WeightSliderManager
 # ----- Custom class ----- #
@@ -521,7 +514,7 @@ class RobotControlManagerClass:
         isGripping = False
         threshold = 0.2
 
-        from MotionFilter.MotionFilter import MotionFilter
+        from MotionFilter import MotionFilter
         n = 2
         fs = 180
         motionFilter = MotionFilter(n,1,fs)
