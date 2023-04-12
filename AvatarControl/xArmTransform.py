@@ -8,7 +8,7 @@
 from math import pi
 
 import numpy as np
-from MotionFilter import MotionFilter
+from AvatarControl.MotionFilter import MotionFilter
 
 
 class xArmTransform:

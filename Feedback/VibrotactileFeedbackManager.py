@@ -10,10 +10,10 @@ from typing import List
 
 import numpy as np
 import pyaudio
-from CyberneticAvatarMotion.CyberneticAvatarMotionBehaviour import \
+from CyberneticAvatarMotionBehaviour import \
     CyberneticAvatarMotionBehaviour
 from FileIO.FileIO import FileIO
-from MotionFilter.MotionFilter import MotionFilter
+from AvatarControl.MotionFilter import MotionFilter
 from scipy import signal
 from VibrotactileFeedback.AudioDeviceIndexes import AudioDeviceIndexes
 

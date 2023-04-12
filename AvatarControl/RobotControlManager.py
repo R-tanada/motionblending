@@ -514,7 +514,7 @@ class RobotControlManagerClass:
         isGripping = False
         threshold = 0.2
 
-        from MotionFilter import MotionFilter
+        from AvatarControl.MotionFilter import MotionFilter
         n = 2
         fs = 180
         motionFilter = MotionFilter(n,1,fs)
