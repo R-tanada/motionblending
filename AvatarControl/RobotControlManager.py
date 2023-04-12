@@ -131,7 +131,7 @@ class RobotControlManagerClass:
                     # position_tr, rotation_tr = [0] * 3, [0] * 3
                     # position_tr[0], position_tr[1], position_tr[2]  = position[2], position[1], -1 * position[0]
                     # rotation_tr[0], rotation_tr[1], rotation_tr[2]  = rotation[1], -1 * rotation[2], -1 * rotation[0]
-                    
+
                     # ----- Set xArm transform ----- #
                     transform.x, transform.y, transform.z = position_tr[0], position_tr[1], position_tr[2]
                     transform.roll, transform.pitch, transform.yaw = rotation_tr[0], rotation_tr[1], rotation_tr[2]
@@ -141,23 +141,10 @@ class RobotControlManagerClass:
                     diffY = transform.y - beforeY
                     diffZ = transform.z - beforeZ
                     beforeX, beforeY, beforeZ = transform.x, transform.y, transform.z
-
-                    if diffX == 0 and  diffY == 0 and diffZ == 0 and  isFixedFrameRate:
-                        print('[WARNING] >> Rigid body is not captured by the mocap camera.')
-                    elif abs(diffX) > movingDifferenceLimit or abs(diffY) > movingDifferenceLimit or abs(diffZ) > movingDifferenceLimit :
-                        isMoving = False
-                        print('[ERROR] >> A rapid movement has occurred. Please enter "r" to reset xArm, or "q" to quit')
-                    else:
-                        if isEnablexArm:
-                            # ----- Send to xArm ----- #
-                            arm.set_servo_cartesian(transform.Transform(isLimit=True,isOnlyPosition=False))
-
-                    # ----- Gripper control ----- #
-                    if isEnablexArm:
-                        code, ret = arm.getset_tgpio_modbus_data(self.ConvertToModbusData(gripperValue))
-
-                    # # ----- Vibrotactile Feedback ----- #
-                    # vibrotactileFeedbackManager.velocityFeedback(position_tr, robotMotion.VibrotactileFeedback)
+                            
+                    # ----- robot control ----- #
+                    arm.set_servo_cartesian(transform.Transform(isLimit=True,isOnlyPosition=False))
+                    code, ret = arm.getset_tgpio_modbus_data(self.ConvertToModbusData(gripperValue))
 
                     # ----- Data recording ----- #
                     dataRecordManager.Record(position_tr, rotation_tr, gripperValue, time.perf_counter()-taskStartTime)
@@ -244,38 +231,6 @@ class RobotControlManagerClass:
             windll.winmm.timeEndPeriod(1)
             import traceback
             traceback.print_exc()
-
-    def InitRobotArm(self, robotArm, transform, isSetInitPosition = True):
-        robotArm.connect()
-        robotArm.motion_enable(enable=True)
-        robotArm.set_mode(0)             # set mode: position control mode
-        robotArm.set_state(state=0)      # set state: sport state
-
-        if isSetInitPosition:
-            robotArm.clean_error()
-            robotArm.clean_warn()
-            initX, initY, initZ, initRoll, initPitch, initYaw = transform.GetInitialTransform()
-            robotArm.set_position(x=initX, y=initY, z=initZ, roll=initRoll, pitch=initPitch, yaw=initYaw, wait=True)
-        else:
-            robotArm.reset(wait=True)
-
-        robotArm.motion_enable(enable=True)
-        robotArm.set_mode(1)
-        robotArm.set_state(state=0)
-
-        time.sleep(0.5)
-        print('Initialized > xArm')
-
-    def InitGripper(self, robotArm):
-        robotArm.set_tgpio_modbus_baudrate(2000000)
-        robotArm.set_gripper_mode(0)
-        robotArm.set_gripper_enable(True)
-        robotArm.set_gripper_position(0, speed=5000)
-
-        robotArm.getset_tgpio_modbus_data(self.ConvertToModbusData(850))
-
-        time.sleep(0.5)
-        print('Initialized > xArm gripper')
 
     def ConvertToModbusData(self, value: int):
         if int(value) <= 255 and int(value) >= 0:

@@ -53,6 +53,7 @@ class ParticipantMotionManager:
         """
         Set init bending value
         """
+        
         self.InitBendingSensorValue = self.gripperSensorManager.sensorValue
 
     def LocalPosition(self, loopCount: int = 0):
@@ -91,6 +92,7 @@ class ParticipantMotionManager:
         participants' local rotation: dict
         {'participant1': [x, y, z, w] or [x, y, z]}
         """
+
         dictRot = self.optiTrackStreamingManager.rotation
 
         return dictRot
@@ -112,12 +114,6 @@ class ParticipantMotionManager:
         {'gripperValue1': float value}
         """
 
-        dictGripperValue = {}
-        bendingVal = self.gripperSensorManager.bendingValue
-        bendingValueNorm = bendingVal* (targetMax - targetMin) + targetMin
+        sensorVal = self.gripperSensorManager.bendingValue
 
-        if bendingValueNorm > targetMax:
-            bendingValueNorm = targetMax
-        elif bendingValueNorm < targetMin:
-            bendingValueNorm = targetMin
-        dictGripperValue['gripperValue'+str(i+1)] = bendingValueNorm
+        return sensorVal

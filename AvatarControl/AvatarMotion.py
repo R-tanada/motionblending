@@ -5,11 +5,10 @@
 # -----------------------------------------------------------------------
 
 import numpy as np
-import scipy.spatial.transform as scitransform
 import quaternion
 import math
 
-class CyberneticAvatarMotionBehaviour:
+class AvatarMotion:
 
     originPositions     = {}
     inversedMatrixforPosition ={}
@@ -20,7 +19,7 @@ class CyberneticAvatarMotionBehaviour:
         self.inversedMatrixforPosition = np.array([[1,0,0],[0,1,0],[0,0,1]])
         self.inversedMatrix = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
 
-    def GetSharedTransform(self, position: dict, rotation: dict, isRelativePosition: bool = True, isRelativeRotation: bool = True):
+    def GetAvatarMotion(self, position: dict, rotation: dict, isRelativePosition: bool = True, isRelativeRotation: bool = True):
         if type(position) is np.ndarray:
             position = self.NumpyArray2Dict(position)
         
