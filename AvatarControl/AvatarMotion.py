@@ -19,7 +19,7 @@ class AvatarMotion:
         self.inversedMatrixforPosition = np.array([[1,0,0],[0,1,0],[0,0,1]])
         self.inversedMatrix = np.array([[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]])
 
-    def GetAvatarMotion(self, position: dict, rotation: dict, isRelativePosition: bool = True, isRelativeRotation: bool = True):
+    def HomoTransform(self, position: dict, rotation: dict, isRelativePosition: bool = True, isRelativeRotation: bool = True):
         if type(position) is np.ndarray:
             position = self.NumpyArray2Dict(position)
         
@@ -34,7 +34,7 @@ class AvatarMotion:
         return relativePosition, relativeRotation_euler
     
 
-    def SetOriginPosition(self, position) -> None:
+    def GetOriginPosition(self, position) -> None:
         # ----- numpy array to dict: position ----- #
         if type(position) is np.ndarray:
             position = self.NumpyArray2Dict(position)

@@ -1,6 +1,6 @@
 import serial
 
-class GripperSensorManager:
+class GripperSensor:
     
     bendingValue = 0
 

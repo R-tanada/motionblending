@@ -11,25 +11,19 @@ import time
 from ctypes import windll
 from datetime import datetime
 from enum import Flag
-
-import numpy as np
-from BendingSensorManager import BendingSensorManager
-from CyberneticAvatarMotionBehaviour import \
-    CyberneticAvatarMotionBehaviour
-from FileIO.FileIO import FileIO
 from matplotlib.pyplot import flag
-# ----- Motion Function -----#
-from avatar.ParticipantMotionManager import ParticipantMotionManager
-from Recorder.DataRecordManager import DataRecordManager
-from RobotArmController.WeightSliderManager import WeightSliderManager
-# ----- Custom class ----- #
-from RobotArmController.xArmTransform import xArmTransform
-from VibrotactileFeedback.VibrotactileFeedbackManager import \
-    VibrotactileFeedbackManager
-from xarm.wrapper import XArmAPI
+import numpy as np
 
-# ----- Safety settings. Unit: [mm] ----- #
-movingDifferenceLimit = 1000
+# ----- custum class ----- #
+from AvatarControl.GripperSensor import GripperSensor
+from AvatarControl.AvatarMotion import AvatarMotion
+from FileIO.FileIO import FileIO
+from AvatarControl.ParticipantMotion import ParticipantMotion
+from Recorder.DataRecordManager import DataRecordManager
+from AvatarControl.xArmTransform import xArmTransform
+
+# ----- xarm SDK ----- #
+from xarm.wrapper import XArmAPI
 
 class RobotControlManagerClass:
     def __init__(self) -> None:
@@ -63,12 +57,10 @@ class RobotControlManagerClass:
 
 
         # ----- Instantiating custom classes ----- #
-        caBehaviour                         = CyberneticAvatarMotionBehaviour(defaultParticipantNum=participantNum)
+        avatarMotion                         = AvatarMotion()
         transform                           = xArmTransform()
         dataRecordManager                   = DataRecordManager(participantNum=participantNum, otherRigidBodyNum=otherRigidBodyCount)
-        participantMotionManager            = ParticipantMotionManager(defaultParticipantNum=participantNum, recordedParticipantNum=recordedParticipantMotionCount, motionInputSystem=motionDataInputMode,mocapServer=self.MotiveServerIP,mocapLocal=self.MotiveLocalIP,
-                                                                       gripperInputSystem=gripperDataInputMode, bendingSensorNum=self.BendingSensorNum, recordedGripperValueNum=recordedGripperValueCount,
-                                                                       BendingSensor_ConnectionMethod='wired',bendingSensorSerialCOMs=self.BendingSensorCOMs)
+        participantMotion           = ParticipantMotion(defaultParticipantNum=participantNum, mocapServer = self.MotiveServerIP, mocapLocal = self.MotiveLocalIP, bendingSensorSerialCOMs = self.BendingSensorCOMs)
         # weightSliderManager                 = WeightSliderManager(WeightSlider_ConnectionMethod='wireless',ip=self.wirelessIpAddress,port=self.weightSliderPort)
         # vibrotactileFeedbackManager         = VibrotactileFeedbackManager()
 
@@ -88,37 +80,15 @@ class RobotControlManagerClass:
         try:
             while True:
                 if isMoving:
-                    if time.perf_counter() - taskStartTime > executionTime:
-                        # ----- Exit processing after task time elapses ----- #
-                        isMoving    = False
-
-                        self.taskTime.append(time.perf_counter() - taskStartTime)
-                        self.PrintProcessInfo()
-
-                        # ----- Export recorded data ----- #
-                        if isExportData:
-                            dataRecordManager.ExportSelf(dirPath='C:/Users/SANOLAB/Documents/GitHub/ms-proj-sharedavatar/Experiment1/Python/Recorder/RecordedData/2023_04_11',participant=self.participantname,conditions=self.condition)
-
-                        # ----- Disconnect ----- #
-                        if isEnablexArm:
-                            arm.disconnect()
-
-                        windll.winmm.timeEndPeriod(1)
-
-                        print('----- Finish task -----')
-                        break
-
                     # ---------- Start control process timer ---------- #
                     loopStartTime = time.perf_counter()
 
                     # ----- Bending sensor ----- #
-                    dictBendingValue = participantMotionManager.GripperControlValue(loopCount=self.loopCount)
+                    dictBendingValue = participantMotion.GripperControlValue(loopCount=self.loopCount)
 
                     # ----- Get transform data----- #
-                    localPosition = participantMotionManager.LocalPosition(loopCount=self.loopCount)
-                    localRotation = participantMotionManager.LocalRotation(loopCount=self.loopCount)
-
-                    position,rotation = caBehaviour.GetSharedTransformWithCustomWeight(localPosition, localRotation, weightSliderList)
+                    position, rotation = AvatarMotion.HomoTransform(participantMotion.LocalPosition(loopCount=self.loopCount), participantMotion.LocalRotation(loopCount=self.loopCount))
+                    gripper = avatarMotion.GetGripperMotion()
 
                     position = position * 1000
 
@@ -203,7 +173,7 @@ class RobotControlManagerClass:
                         caBehaviour.SetInversedMatrix(participantMotionManager.LocalRotation())
                         participantMotionManager.SetInitialBendingValue()
 
-                        position, rotation = caBehaviour.GetSharedTransformWithCustomWeight(participantMotionManager.LocalPosition(), participantMotionManager.LocalRotation(),weightSliderList )
+                        position, rotation = caBehaviour.GetSharedTransformWithCustomWeight(participantMotionManager.LocalPosition(), participantMotionManager.LocalRotation())
                         beforeX, beforeY, beforeZ = position[2], position[0], position[1]
 
                         isMoving    = True

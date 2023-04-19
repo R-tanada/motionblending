@@ -11,7 +11,7 @@ import csv
 
 # ----- Custom class ----- #
 from OptiTrack.OptiTrackStreamingManager import OptiTrackStreamingManager
-from AvatarControl.GripperSensorManager import GripperSensorManager
+from AvatarControl.GripperSensor import GripperSensorManager
 
 # ----- Numeric range remapping ----- #
 # targetMin   = 200
@@ -20,7 +20,7 @@ targetMax   = 850
 originalMin = 0
 originalMax = 1
 
-class ParticipantMotionManager:
+class ParticipantMotion:
     def __init__(self, rigidbodyNum: int, mocapServer: str = '', mocapLocal: str = '', gripperNum: int = 1, bendingSensorSerialCOMs: list = []) -> None:
 
         self.rigidbodyNum            = rigidbodyNum
