@@ -2,7 +2,7 @@ import csv
 import sys
 
 import numpy as np
-from MotionFilter import MotionFilter
+from AvatarControl.MotionFilter import MotionFilter
 
 
 class RecordedMotion:

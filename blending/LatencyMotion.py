@@ -2,7 +2,7 @@ import random
 import numpy as np
 from matplotlib import pyplot as plt
 
-from MotionFilter import MotionFilter
+from AvatarControl.MotionFilter import MotionFilter
 
 class LatencyMotion:
     def __init__(self, latency_time, UserControlWeight) -> None:
