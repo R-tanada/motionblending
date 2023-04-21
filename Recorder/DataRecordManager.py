@@ -91,7 +91,7 @@ class DataRecordManager:
             Directory path (not include the file name).
         """
         # transformHeader = ['time','x','y','z','qx','qy','qz','qw']
-        transformHeader = ['time','y','z','x','pitch','yow', 'roll']
+        transformHeader = ['time','x','y','z','roll','pitch', 'yow']
         bendingSensorHeader = ['bendingValue']
 
         print('\n---------- DataRecordManager.ExportSelf ----------')

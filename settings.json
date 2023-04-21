@@ -1,7 +1,11 @@
 {
-    "xArmIP": "192.168.1.240",
-    "MotiveServerIP": "133.68.35.155",
-    "MotiveLocalIP": "133.68.35.155",
-    "BendingSensorCOM": "COM7",
-    "Mounting": "defalt"
+    "xArmConfigs": [
+                    {"IP": "192.168.1.240", "Mount": "right"},
+                    {"IP": "192.168.1.217", "Mount": "left"}
+                ],
+    "SensorSerialCOMs": ["COM3", "COM15"],
+    "ParticipantsConfigs": [
+                            {"ArmToUse": ["left", "right"], "GripperToUse": ["left", "right"]}
+                            ]
+
 }
