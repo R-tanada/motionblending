@@ -5,7 +5,8 @@
                 ],
     "SensorSerialCOMs": ["COM3", "COM15"],
     "ParticipantsConfigs": [
-                            {"ArmToUse": ["left", "right"], "GripperToUse": ["left", "right"]}
+                            {"Arm": ["left", "right"], "Gripper": ["left", "right"], "weigh": 0.5},
+                            {"Arm": ["left", "right"], "Gripper": ["left", "right"], "weigh": 0.5}
                             ]
 
 }

@@ -22,8 +22,7 @@ class ParticipantMotionManager:
     streamingThread.setDaemon(True)
     streamingThread.start()
 
-    def __init__(self, ArmToUse: list = ['left', 'right'], GripperToUse: list = ['left', 'right'], SensorPort, RigidBodyNum :int, RecordedMotion: bool = False, RecordedMotionPath: str = '', RecordedGripperPath: str = '') -> None:
-        self.GripperToUse               = GripperToUse
+    def __init__(self, ParticipantConfig, SensorPort, RigidBodyNum :int) -> None:
         self.recordedMotion             = {}
         self.recordedGripperValue       = {}
         self.recordedMotionLength       = []
@@ -32,81 +31,68 @@ class ParticipantMotionManager:
         self.GripperValueMin = 0
         self.SensorInputValueMax = 1
         self.SensorInputValueMin = 0
-        self.rigitBodyNums = []
+        self.rigitBodyNums = {}
+        self.participantConfig = ParticipantConfig
 
-        for i in len(ArmToUse):
-            self.rigitBodyNums.append(ParticipantMotionManager.rigitBodyCount)
+        {"Arm": ["left", "right"], "Gripper": ["left", "right"], "weight": 0.5}
+
+        for mount in len(self.participantConfig['Arm']):
+            self.rigitBodyNums[mount] = (ParticipantMotionManager.rigitBodyCount)
             ParticipantMotionManager.rigitBodyCount += 1
 
         self.sensorManagers = {} 
-        for Gripper in self.GripperToUse:
+        for Gripper in self.participantConfig['Gripper']:
             self.sensorManagers[Gripper] = (GripperSensorManager(ip=self.ip[i], port=self.port[i]))
 
             # ----- Start receiving bending sensor value from UDP socket ----- #
             SensorThread = threading.Thread(target = self.sensorManagers[Gripper].StartReceiving)
             SensorThread.setDaemon(True)
             SensorThread.start()
-        
-        if RecordedMotion == True:
-            with open(RecordedMotionPath) as f:
-                reader = csv.reader(f)
-                data = [row for row in reader][1:]
-                data = [[float(v) for v in row] for row in data]
-                self.recordedMotion = iter(data) 
-
-            with open(RecordedGripperPath) as f:
-                reader = csv.reader(f)
-                data = [row for row in reader][1:] 
-                data = [[float(v) for v in row] for row in data]  
-                self.recordedGripperValue = iter(data)
 
     def GetParticipantMotion(self):
-        return dict(self.LocalPosition, )
+        participantMotion = {}
+        for config in self.participantConfig['Arm']:
+            participantMotion[config] = {'positon': self.GetLocalPosition(config), 'rotation': self.GetLocalRotation(config), 'gripper': self.GetGripperControlValue[config]}
         
+        return participantMotion
 
-    def GetLocalPosition(self):
-        for rigidBodyNum in self.rigitBodyNums:
-            rigidBodyPos = ParticipantMotionManager.optiTrackStreamingManager.position
+    def GetLocalPosition(self, config):
+        position = ParticipantMotionManager.optiTrackStreamingManager.position[self.rigitBodyNums[config]]
+        return position * 1000
 
-        # If the data is ended, the last value is returned.
-        for i in range(self.recordedParticipantNum):
-            recordedParticipantNum = self.defaultParticipantNum + i+1
-            if loopCount >= self.recordedMotionLength[i]:
-                dictPos['participant'+str(recordedParticipantNum)] = np.array(self.recordedMotion['participant'+str(recordedParticipantNum)][-1][0:3])
-                continue
-
-        return dictPos
-
-    def GetLocalRotation(self):
-        dictRot = {}
-        dictRot = self.optiTrackStreamingManager.rotation
-
-        # If the data is ended, the last value is returned.
-        for i in range(self.recordedParticipantNum):
-            recordedParticipantNum = self.defaultParticipantNum + i+1
-            if loopCount >= self.recordedMotionLength[i]:
-                dictRot['participant'+str(recordedParticipantNum)] = np.array(self.recordedMotion['participant'+str(recordedParticipantNum)][-1][3:8])
-                continue
-
-            dictRot['participant'+str(recordedParticipantNum)] = np.array(self.recordedMotion['participant'+str(recordedParticipantNum)][loopCount][3:8])
-
-        return dictRot
+    def GetLocalRotation(self, config):
+        rotation = ParticipantMotionManager.optiTrackStreamingManager.rotation[self.rigitBodyNums[config]]
+        return rotation
     
     def SetInitialBendingValue(self):
-        for Gripper in self.GripperToUse:
+        for Gripper in self.Gripper:
             self.InitSensorValues[Gripper] = self.sensorManagers[Gripper].sensorValue
 
-    def GripperControlValue(self, loopCount: int = 0):
+    def GetGripperControlValue(self, config):
         dictGripperValue = {}
-        for Gripper in range(self.GripperToUse):
-            bendingVal = self.sensorManagers[Gripper].sensorValue - self.InitSensorValues[Gripper]
-            bendingValueNorm = bendingVal * (self.SensorInputValueMax - self.GripperValueMin) + self.GripperValueMin
+        bendingVal = self.sensorManagers[config].sensorValue - self.InitSensorValues[config]
+        bendingValueNorm = bendingVal * (self.SensorInputValueMax - self.GripperValueMin) + self.GripperValueMin
 
-            if bendingValueNorm > self.SensorInputValueMax:
-                bendingValueNorm = self.SensorInputValueMax
-            elif bendingValueNorm < self.GripperValueMin:
-                bendingValueNorm = self.GripperValueMin
+        if bendingValueNorm > self.SensorInputValueMax:
+            bendingValueNorm = self.SensorInputValueMax
+        elif bendingValueNorm < self.GripperValueMin:
+            bendingValueNorm = self.GripperValueMin
 
-            dictGripperValue['gripperValue'+str(i+1)] = bendingValueNorm
+        dictGripperValue['gripperValue'+str(i+1)] = bendingValueNorm
 
-        return dictGripperValue
+        return bendingVal
+    
+    # def GripperControlValue(self, loopCount: int = 0):
+    #     dictGripperValue = {}
+    #     for Gripper in range(self.GripperToUse):
+    #         bendingVal = self.sensorManagers[Gripper].sensorValue - self.InitSensorValues[Gripper]
+    #         bendingValueNorm = bendingVal * (self.SensorInputValueMax - self.GripperValueMin) + self.GripperValueMin
+
+    #         if bendingValueNorm > self.SensorInputValueMax:
+    #             bendingValueNorm = self.SensorInputValueMax
+    #         elif bendingValueNorm < self.GripperValueMin:
+    #             bendingValueNorm = self.GripperValueMin
+
+    #         dictGripperValue['gripperValue'+str(i+1)] = bendingValueNorm
+
+    #     return dictGripperValue

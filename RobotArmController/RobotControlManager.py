@@ -1,34 +1,15 @@
-# -----------------------------------------------------------------------
-# Author:   Takayoshi Hagiwara (KMD)
-# Created:  2021/8/19
-# Summary:  Robot arm motion control manager
-# -----------------------------------------------------------------------
-
-import datetime
 import json
-import threading
 import time
 from ctypes import windll
-from datetime import datetime
-from enum import Flag
 
 import numpy as np
-from Audio.AudioManager import AudioManager
-from BendingSensor.BendingSensorManager import BendingSensorManager
-from CyberneticAvatarMotion.CyberneticAvatarMotionBehaviour import \
-    CyberneticAvatarMotionBehaviour
-from FileIO.FileIO import FileIO
-from Graph.Graph_2D import Graph_2D
-from LoadCell.LoadCellManager import LoadCellManager
+from Sensor.SensorManager import GripperSensorManager
+from CyberneticAvatarMotion.CyberneticAvatarMotionManager import CyberneticAvatarMotionManager
 from matplotlib.pyplot import flag
 # ----- Motion Function -----#
 from ParticipantMotion.ParticipantMotionManager import ParticipantMotionManager
-from Recorder.DataRecordManager import DataRecordManager
-from RobotArmController.WeightSliderManager import WeightSliderManager
 # ----- Custom class ----- #
 from RobotArmController.xArmTransform import xArmTransform
-from VibrotactileFeedback.VibrotactileFeedbackManager import \
-    VibrotactileFeedbackManager
 from xarm.wrapper import XArmAPI
 
 
@@ -62,14 +43,11 @@ class RobotControlManagerClass:
 
 
         # ----- Instantiating custom classes ----- #
-        caBehaviour                         = CyberneticAvatarMotionBehaviour(defaultParticipantNum = participantNum)
-        transform                           = xArmTransform()
-        dataRecordManager                   = DataRecordManager(participantNum=participantNum, otherRigidBodyNum=otherRigidBodyCount)
-
+        CA_Manager                         = CyberneticAvatarMotionManager(defaultParticipantNum = participantNum)
+        transform                          = xArmTransform()
         participantManagers = []
-        participantMotions = []
         for participantConfig in self.ParticipantConfigs:
-            participantManagers.append(ParticipantMotionManager(ArmToUse = participantConfig['ArmToUse'], GripperToUse = participantConfig['GripperToUse'], RigidBodyNum = ))
+            participantManagers.append(ParticipantMotionManager(participantConfig))
 
         # ----- Initialize robot arm ----- #
         if isEnablexArm:
@@ -81,10 +59,6 @@ class RobotControlManagerClass:
         # ----- Control flags ----- #
         isMoving    = False
 
-        # ----- Internal flags ----- #
-        isPrintFrameRate    = False     # For debug
-        isPrintData         = False     # For debug
-
         try:
             while True:
                 if isMoving:
@@ -95,38 +69,27 @@ class RobotControlManagerClass:
                     for i in len(participantManagers):
                         participantMotions[i] = participantManagers[i].GetParticipantMotion()
 
-                    
-                    position, rotation = caBehaviour.GetSharedTransformWithCustomWeight(participantMotions, weightSliderList)
-                    gripper = caBehaviour.GetSharedGripperValue
+                    participantMotions = [
+                        {
+                        'right': {'position': [1, 1, 1], 'rotation': [1, 1, 1], 'gripper': 5}, 
+                        'left': {'position': [1, 1, 1], 'rotation': [1, 1, 1], 'gripper': 5}
+                        }, 
+                        {
+                        'right': {'position': [1, 1, 1], 'rotation': [1, 1, 1], 'gripper': 5}
+                        }
+                    ]
 
-                    position = position * 1000
+                    transform = CA_Manager.GetSharedTransform(participantMotions, weightSliderList)
 
-
-                    # ----- Set xArm transform ----- #
-                    transform.x, transform.y, transform.z = position[2], position[0], position[1]
-                    transform.roll, transform.pitch, transform.yaw = rotation[2], rotation[0], rotation[1]
-
-                    # ----- Safety check (Position) ---- #
-                    diffX = transform.x - beforeX
-                    diffY = transform.y - beforeY
-                    diffZ = transform.z - beforeZ
-                    beforeX, beforeY, beforeZ = transform.x, transform.y, transform.z
-
-                    if abs(diffX) > movingDifferenceLimit or abs(diffY) > movingDifferenceLimit or abs(diffZ) > movingDifferenceLimit :
-                        isMoving = False
-                        print('[ERROR] >> A rapid movement has occurred. Please enter "r" to reset xArm, or "q" to quit')
+                    transform = {
+                                'left': {'position': [0, 0, 0], 'rotation': [0, 0, 0], 'gripper': 0},
+                                'right': {'position': [0, 0, 0], 'rotation': [0, 0, 0], 'gripper': 0}
+                                }  
 
                     if isEnablexArm:
-                        for transform in transforms:
-                            arms[transform['Mount']].set_servo_cartesian(transform.Transform(isLimit=True,isOnlyPosition=False))
-                            arms[transform['Mount']].getset_tgpio_modbus_data(self.ConvertToModbusData(transform['Gripper']))
-
-
-                    # # ----- Vibrotactile Feedback ----- #
-                    # vibrotactileFeedbackManager.velocityFeedback(position_tr, robotMotion.VibrotactileFeedback)
-
-                    # ----- Data recording ----- #
-                    dataRecordManager.Record(position_tr, rotation_tr, gripperValue, time.perf_counter()-taskStartTime)
+                        for xArmConfig in self.xArmConfigs:
+                            arms[xArmConfig['Mount']].set_servo_cartesian([transform['position'],transform['rotation']])
+                            arms[xArmConfig['Mount']].getset_tgpio_modbus_data(self.ConvertToModbusData(transform['gripper']))
 
                     # ----- If xArm error has occured ----- #
                     for arm in arms:
@@ -172,14 +135,8 @@ class RobotControlManagerClass:
 
                     # ----- Start streaming ----- #
                     elif keycode == 's':
-                        caBehaviour.SetOriginPosition(participantMotionManager.LocalPosition())
+                        Behaviour.SetOriginPosition(participantMotionManager.LocalPosition())
                         caBehaviour.SetInversedMatrix(participantMotionManager.LocalRotation())
-
-                        # ----- weight slider list ----- #
-                        weightSliderList = [self.weightSliderListPos, self.weightSliderListRot]
-
-                        position, rotation = caBehaviour.GetSharedTransformWithCustomWeight(participantMotionManager.LocalPosition(), participantMotionManager.LocalRotation(),weightSliderList )
-                        beforeX, beforeY, beforeZ = position[2], position[0], position[1]
 
                         participantMotionManager.SetInitialBendingValue()
 
