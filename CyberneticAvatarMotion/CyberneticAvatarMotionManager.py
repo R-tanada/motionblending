@@ -35,8 +35,20 @@ class CyberneticAvatarMotionManager:
 
     def GetSharedTransform(self, position: dict, rotation: dict, weight: list):
 
+        participantMotions = [
+            {
+            'right': {'position': [1, 1, 1], 'rotation': [1, 1, 1], 'gripper': 5}, 
+            'left': {'position': [1, 1, 1], 'rotation': [1, 1, 1], 'gripper': 5}
+            }, 
+            {
+            'right': {'position': [1, 1, 1], 'rotation': [1, 1, 1], 'gripper': 5}
+            }
+        ]
+
         pos = self.GetRelativePosition(position)
         rot = self.GetRelativeRotation(rotation)
+
+        self.ConvetAxis()
 
         # ----- Shared transform ----- #
         sharedPosition = [0, 0, 0]
@@ -76,6 +88,20 @@ class CyberneticAvatarMotionManager:
             self.beforeRotations['participant'+str(i+1)]    = rot['participant'+str(i+1)]
 
         return sharedPosition, sharedRotation_euler
+    
+    def ConvetAxis(self, positon, rotation, mount):
+        if mount == 'virtical':
+            position = [position[0], positon[1], positon[2]]
+            rotation = [rotation[0], rotation[1], rotation[2], rotation[3]]
+
+        elif mount == 'right':
+            position = [position[0], positon[1], positon[2]]
+            rotation = [rotation[0], rotation[1], rotation[2], rotation[3]]
+ 
+        elif mount == 'left':
+            position = [position[0], positon[1], positon[2]]
+            rotation = [rotation[0], rotation[1], rotation[2], rotation[3]]
+
 
     def SetInitPosition(self, position) -> None:
         # ----- numpy array to dict: position ----- #
