@@ -89,7 +89,10 @@ class CyberneticAvatarMotionManager:
 
         return sharedPosition, sharedRotation_euler
     
-    def ConvetAxis(self, positon, rotation, mount):
+    def IntegrationWithWeight(self):
+        
+    
+    def ConvertAxis(self, positon, rotation, mount):
         if mount == 'virtical':
             position = [position[0], positon[1], positon[2]]
             rotation = [rotation[0], rotation[1], rotation[2], rotation[3]]
