@@ -8,4 +8,3 @@ if __name__ == '__main__':
     robotControlManager.SendDataToRobot(isEnablexArm = True, isFixedFrameRate = True, isPrintFrameRate = True)
 
     print('\n----- End program: ExManager.py -----')
-    print('hello')
