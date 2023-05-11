@@ -1,0 +1,88 @@
+{
+    "xArmConfigs": {
+        "xArm1": {
+            "IP": "192.168.1.240",
+            "Mount": "right",
+            "InitPos": [
+                200,
+                0,
+                450
+            ],
+            "InitRot": [
+                180,
+                0,
+                0
+            ],
+            "MaxPos": [
+                240,
+                40,
+                490
+            ],
+            "MinPos": [
+                160,
+                -40,
+                410
+            ],
+            "MaxRot": [
+                220,
+                20,
+                20
+            ],
+            "MinRot": [
+                180,
+                -20,
+                -20
+            ]
+        },
+        "xArm2": {
+            "IP": "192.168.1.228",
+            "Mount": "left",
+            "InitPos": [
+                200,
+                0,
+                450
+            ],
+            "InitRot": [
+                180,
+                0,
+                0
+            ],
+            "MaxPos": [
+                240,
+                40,
+                490
+            ],
+            "MinPos": [
+                160,
+                -40,
+                410
+            ],
+            "MaxRot": [
+                220,
+                20,
+                20
+            ],
+            "MinRot": [
+                180,
+                -20,
+                -20
+            ]
+        }
+    },
+    "ParticipantsConfigs": {
+        "participant1": [
+            {
+                "Mount": "right",
+                "RigidBody": 1,
+                "SerialCOM": "None",
+                "Weight": 1
+            },
+            {
+                "Mount": "left",
+                "RigidBody": 2,
+                "SerialCOM": "None",
+                "Weight": 1
+            }
+        ]
+    }
+}

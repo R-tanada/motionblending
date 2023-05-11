@@ -5,8 +5,8 @@
 # -----------------------------------------------------------------------
 
 from threading import local
-from . import NatNetClient
 import numpy as np
+from . import NatNetClient
 
 serverAddress = ''
 localAddress = ''
@@ -16,16 +16,14 @@ class OptiTrackStreamingManager:
 	position = {}	# dict { 'ParticipantN': [x, y, z] }. 	N is the number of participants' rigid body. Unit = [m]
 	rotation = {}	# dict { 'ParticipantN': [x, y, z, w]}. N is the number of participants' rigid body
 
-	def __init__(self, rigid_body_num: int = 2, mocapServer: str = '', mocapLocal: str = ''):
+	def __init__(self, mocapServer: str = '', mocapLocal: str = ''):
 		global serverAddress
 		global localAddress
 		serverAddress = mocapServer
 		localAddress = mocapLocal
 
-		for i in range(rigid_body_num):
-			self.position['rigid_body'+str(i+1)] = np.zeros(3)
-			self.rotation['rigid_body'+str(i+1)] = np.zeros(4)
-
+		self.position = {}
+		self.rotation = {}
 
 	# This is a callback function that gets connected to the NatNet client and called once per mocap frame.
 	def receive_new_frame(self, data_dict):
@@ -42,24 +40,10 @@ class OptiTrackStreamingManager:
 			print(out_string)
 
 	# This is a callback function that gets connected to the NatNet client. It is called once per rigid body per frame
-	def receive_rigid_body_frame( self, rigid_body_id, position, rotation ):
-		"""
-		Receives the position and rotation of the active RigidBody.
-		Position: [x, y, z], Unit = [m]
-		Rotation: [x, y, z, w]
-
-		Parameters
-		----------
-		new_id: int
-			RigidBody id
-		position: array
-			Position
-		rotation: array
-			Rotation
-		"""
-		if 'rigid_body'+str(rigid_body_id) in self.position:
-			self.position['rigid_body'+str(rigid_body_id)] = np.array(position)
-			self.rotation['rigid_body'+str(rigid_body_id)] = np.array(rotation)
+	def receive_rigid_body_frame( self, new_id, position, rotation):
+		if str(new_id) in self.position.keys():
+			self.position[str(new_id)] = np.array(position)
+			self.rotation[str(new_id)] = np.array(rotation)
 
 	def stream_run(self):
 		streamingClient = NatNetClient.NatNetClient(serverIP=serverAddress, localIP=localAddress)
