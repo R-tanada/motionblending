@@ -22,12 +22,12 @@ class RobotControlManager:
         self.cyberneticManager = CyberneticAvatarMotionManager(ParticipantConfigs, xArmConfigs)
         self.xarmManager = xArmManager(xArmConfigs)
 
-        self.loopTime = 180
+        self.loopTime = 0
         self.FrameList = []
 
-    def SendDataToRobot(self, isEnablexArm: bool = False, isFixedFrameRate = True, isPrintFrameRate = True):
-        if isFixedFrameRate:
-            windll.winmm.timeBeginPeriod(1)
+    def SendDataToRobot(self, isEnablexArm: bool = False, FrameRate = 240, isPrintFrameRate = True):
+        windll.winmm.timeBeginPeriod(1)
+        self.loopTime = 1/ FrameRate
 
         # ----- Control flags ----- #
         isMoving    = False
@@ -41,15 +41,15 @@ class RobotControlManager:
                         self.xarmManager.SendDataToRobot(self.cyberneticManager.GetSharedTransform())
                         self.xarmManager.CheckError()
 
-                    self.CheckFrameRate(time.perf_counter() - loopStartTime)
-                    # self.FixFrameRate(time.perf_counter - loopStartTime)
+                    self.FixFrameRate(time.perf_counter() - loopStartTime)
+                    if isPrintFrameRate:
+                        self.CheckFrameRate(time.perf_counter() - loopStartTime)
 
                 else:
                     keycode = input('Input > "s": start control \n')
 
                     if keycode == 's':
                         self.cyberneticManager.SetParticipantInitMotion()
-
                         isMoving    = True
 
         except KeyboardInterrupt:
@@ -80,3 +80,4 @@ class RobotControlManager:
         self.FrameList.append(1/ loopTime)
         if len(self.FrameList) == 30:
             print(sum(self.FrameList)/ len(self.FrameList))
+            self.FrameList = []
