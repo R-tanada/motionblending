@@ -23,15 +23,11 @@ class RobotControlManager:
         self.xarmManager = xArmManager(xArmConfigs)
 
         self.loopTime = 180
+        self.FrameList = []
 
     def SendDataToRobot(self, isEnablexArm: bool = False, isFixedFrameRate = True, isPrintFrameRate = True):
         if isFixedFrameRate:
             windll.winmm.timeBeginPeriod(1)
-
-        # ----- Process info ----- #
-        listFrameRate = []
-        loopCount = 0
-        taskStartTime = 0
 
         # ----- Control flags ----- #
         isMoving    = False
@@ -45,15 +41,9 @@ class RobotControlManager:
                         self.xarmManager.SendDataToRobot(self.cyberneticManager.GetSharedTransform())
                         self.xarmManager.CheckError()
 
-                    # if loopCount % 20 == 0 and isPrintFrameRate:
-                    #     if loopCount != 0:
-                    #         listFrameRate.append(1 / (time.perf_counter() - loopStartTime))
-                    #         print("Average FPS: ", sum(listFrameRate)/len(listFrameRate))
+                    self.CheckFrameRate(time.perf_counter() - loopStartTime)
+                    # self.FixFrameRate(time.perf_counter - loopStartTime)
 
-                    # if isFixedFrameRate:
-                    #     self.FixFrameRate(time.perf_counter - loopStartTime)
-
-                    # loopCount += 1
                 else:
                     keycode = input('Input > "s": start control \n')
 
@@ -61,7 +51,6 @@ class RobotControlManager:
                         self.cyberneticManager.SetParticipantInitMotion()
 
                         isMoving    = True
-                        taskStartTime = time.perf_counter()
 
         except KeyboardInterrupt:
             print('\nKeyboardInterrupt >> Stop: RobotControlManager.SendDataToRobot()')
@@ -87,3 +76,7 @@ class RobotControlManager:
         else:
             time.sleep(sleepTime)
 
+    def CheckFrameRate(self, loopTime):
+        self.FrameList.append(1/ loopTime)
+        if len(self.FrameList) == 30:
+            print(sum(self.FrameList)/ len(self.FrameList))
