@@ -19,7 +19,8 @@ class ParticipantMotionManager:
     def __init__(self, ParticipantConfig: dict) -> None:
         self.participantConfig = ParticipantConfig
         self.InitPosition = {}
-        self.InitRotation = {}
+        self.InitQuaternion = {}
+        self.InitInverseMatrix = {}
         self.InitGripper = {}
 
         for Config in self.participantConfig:
@@ -33,7 +34,7 @@ class ParticipantMotionManager:
             SensorThread.setDaemon(True)
             SensorThread.start()
 
-    def GetParticipantMotion(self):
+    def GetMotion(self):
         participantMotion = {}
         position = self.GetRelativePosition()
         rotation = self.GetRelativeRotation()
@@ -43,34 +44,34 @@ class ParticipantMotionManager:
 
         return participantMotion
 
-    def GetRelativePosition(self):
+    def GetPosition(self):
         relativePosition = {}
         for Config in self.participantConfig:
-            position = (ParticipantMotionManager.optiTrackStreamingManager.position[ str(Config['RigidBody'])] - self.InitPosition[Config['Mount']]) * 1000
+            position = (ParticipantMotionManager.optiTrackStreamingManager.position[ str(Config['RigidBody'])]) * 1000
             relativePosition[Config['Mount']] = self.ConvertAxis_Position(position, Config['Mount'])
 
         return relativePosition
 
-    def GetRelativeRotation(self):
+    def GetQuaternion(self):
         relativeRotation = {}
         for Config in self.participantConfig:
-            rotation = np.dot(self.InitRotation[Config['Mount']], ParticipantMotionManager.optiTrackStreamingManager.rotation[str(Config['RigidBody'])])
+            rotation = ParticipantMotionManager.optiTrackStreamingManager.rotation[str(Config['RigidBody'])]
             relativeRotation[Config['Mount']] = self.CnvertAxis_Rotation(rotation, Config['Mount'])
         return relativeRotation
 
     def SetInitPosition(self):
         for Config in self.participantConfig:
-            self.InitPosition[Config['Mount']] = ParticipantMotionManager.optiTrackStreamingManager.position[str(Config['RigidBody'])]
+            self.InitPosition[Config['Mount']] = ParticipantMotionManager.optiTrackStreamingManager.position[str(Config['RigidBody'])] * 1000
 
-    def SetInitRotation(self) -> None:
+    def SetInitQuaternion(self) -> None:
         for Config in self.participantConfig:
-            q = ParticipantMotionManager.optiTrackStreamingManager.rotation[str(Config['RigidBody'])]
+            q = self.InitQuaternion[Config['Mount']] = ParticipantMotionManager.optiTrackStreamingManager.rotation[str(Config['RigidBody'])]
             qw, qx, qy, qz = q[3], q[1], q[2], q[0]
             mat4x4 = np.array([ [qw, -qy, qx, qz],
                                 [qy, qw, -qz, qx],
                                 [-qx, qz, qw, qy],
                                 [-qz,-qx, -qy, qw]])
-            self.InitRotation[Config['Mount']] = np.linalg.inv(mat4x4)
+            self.InitInverseMatrix[Config['Mount']] = np.linalg.inv(mat4x4)
 
     def ConvertAxis_Position(self, position, axis):
         if axis == 'vertical':

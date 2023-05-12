@@ -26,7 +26,7 @@ class CyberneticAvatarMotionManager:
         for participant in participantMotions.keys():
             for mount in participantMotions[participant].keys():
                 sharedMotions[mount]['position'] += np.array(participantMotions[participant][mount]['position']) * participantMotions[participant][mount]['weight']
-                sharedMotions[mount]['rotation'] += np.array(self.Quaternion2Euler(participantMotions[participant][mount]['rotation'])) * participantMotions[participant][mount]['weight']
+                sharedMotions[mount]['rotation'] += self.Quaternion2Euler(np.dot(participantMotions[participant].InitInverseMatrix[mount], self.SlerpFunction(participantMotions[participant]['rotation'], participantMotions[participant][mount]['weight'], participant, mount)))
                 sharedMotions[mount]['gripper'] += np.array(participantMotions[participant][mount]['gripper']) * participantMotions[participant][mount]['weight']
 
         return sharedMotions
@@ -96,4 +96,13 @@ class CyberneticAvatarMotionManager:
 
         rotQuat = [q1, q2, q3, q0]
         return rotQuat
+
+    def SlerpFunction(self, quaternion, weight, participant, mount):
+        e = 0.0000001
+        initQ = self.participantManagers[participant].InitQuaternion[mount]
+        theta = math.acos(np.dot(initQ, quaternion))
+        return (math.sin((1 - weight) * theta)/ math.sin(theta) + e) * initQ + (math.sin(weight * theta)/ math.sin(theta) + e) * quaternion
+
+
+
 
