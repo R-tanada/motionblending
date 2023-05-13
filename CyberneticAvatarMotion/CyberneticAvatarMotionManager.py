@@ -4,7 +4,7 @@ import numpy as np
 import quaternion
 import scipy.spatial.transform as scitransform
 
-from ParticipantMotion.ParticipantMotionManager import ParticipantMotionManager
+from ParticipantMotion.ParticipantMotionManager import ParticipantManager
 
 
 class CyberneticAvatarMotionManager:
@@ -13,10 +13,10 @@ class CyberneticAvatarMotionManager:
 
         self.participantManagers = {}
         for participant in ParticipantConfigs.keys():
-            self.participantManagers[participant] = ParticipantMotionManager(ParticipantConfigs[participant])
+            self.participantManagers[participant] = ParticipantManager(ParticipantConfigs[participant])
 
     def GetSharedTransform(self):
-        return self.IntegrationWithWeight(self.GetParticipantRelativeMotion())
+        return self.IntegrationWithWeight(self.GetParticipantMotion())
 
     def IntegrationWithWeight(self, participantMotions: dict):
         sharedMotions = {}
@@ -26,22 +26,22 @@ class CyberneticAvatarMotionManager:
         for participant in participantMotions.keys():
             for mount in participantMotions[participant].keys():
                 sharedMotions[mount]['position'] += np.array(participantMotions[participant][mount]['position']) * participantMotions[participant][mount]['weight']
-                sharedMotions[mount]['rotation'] += self.Quaternion2Euler(np.dot(participantMotions[participant].InitInverseMatrix[mount], self.SlerpFunction(participantMotions[participant]['rotation'], participantMotions[participant][mount]['weight'], participant, mount)))
+                sharedMotions[mount]['rotation'] += self.Quaternion2Euler(np.dot(participantMotions[participant]['rotation'][2], self.SlerpFunction(participantMotions[participant]['rotation'][0], participantMotions[participant]['rotation'][0], participantMotions[participant][mount]['weight'])))
                 sharedMotions[mount]['gripper'] += np.array(participantMotions[participant][mount]['gripper']) * participantMotions[participant][mount]['weight']
 
         return sharedMotions
 
-    def GetParticipantRelativeMotion(self):
-        relativeMotions = {}
+    def GetParticipantMotion(self):
+        motions = {}
         for participant in self.participantManagers.keys():
-            relativeMotions[participant] = self.participantManagers[participant].GetParticipantMotion()
+            motions[participant] = self.participantManagers[participant].GetParticipantMotion()
 
-        return relativeMotions
+        return motions
 
     def SetParticipantInitMotion(self):
         for participant in self.participantManagers.keys():
-            self.participantManagers[participant].SetInitPosition()
-            self.participantManagers[participant].SetInitRotation()
+            self.participantManagers[participant].SetParticipantInitPosition()
+            self.participantManagers[participant].SetParticipantInitRotation()
 
     def Quaternion2Euler(self, q, isDeg: bool = True):
         qx, qy, qz, qw = q[0], q[1], q[2], q[3]
@@ -97,11 +97,10 @@ class CyberneticAvatarMotionManager:
         rotQuat = [q1, q2, q3, q0]
         return rotQuat
 
-    def SlerpFunction(self, quaternion, weight, participant, mount):
+    def SlerpFunction(self, Quaternion, initQuaternion, weight):
         e = 0.0000001
-        initQ = self.participantManagers[participant].InitQuaternion[mount]
-        theta = math.acos(np.dot(initQ, quaternion))
-        return (math.sin((1 - weight) * theta)/ math.sin(theta) + e) * initQ + (math.sin(weight * theta)/ math.sin(theta) + e) * quaternion
+        theta = math.acos(np.dot(initQuaternion, Quaternion))
+        return (math.sin((1 - weight) * theta)/ math.sin(theta) + e) * initQuaternion + (math.sin(weight * theta)/ math.sin(theta) + e) * quaternion
 
 
 

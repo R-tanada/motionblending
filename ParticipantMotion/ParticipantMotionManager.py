@@ -29,15 +29,15 @@ class ParticipantManager:
             SensorThread.setDaemon(True)
             SensorThread.start()
 
-    def GetMotion(self):
-        participantMotion = {}
-        position = self.Getpositions()
-        rotation = self.Getrotations()
+    def GetParticipantMotion(self):
+        participantMotions = {}
+        position = self.GetParticipantPosition()
+        rotation = self.GetParticipantRotation()
         gripper = self.GetGripperControlValue()
         for Config in self.participantConfig:
-            participantMotion[Config['Mount']] = {'position': position[Config['Mount']], 'rotation': rotation[Config['Mount']], 'gripper': gripper[Config['Mount']], 'weight': Config['Weight']}
+            participantMotions[Config['Mount']] = {'position': position[Config['Mount']], 'rotation': rotation[Config['Mount']], 'gripper': gripper[Config['Mount']], 'weight': Config['Weight']}
 
-        return participantMotion
+        return participantMotions
 
     def GetParticipantPosition(self):
         positions = {}
@@ -52,6 +52,14 @@ class ParticipantManager:
             rotations[Config['Mount']] = self.motionManagers[Config['Mount']].GetRotation()
 
         return rotations
+    
+    def SetParticipantInitPosition(self):
+        for Config in self.participantConfig:
+            self.motionManagers[Config['Mount']].SetInitPosition()
+
+    def SetParticipantInitRotation(self):
+        for Config in self.participantConfig:
+            self.motionManagers[Config['Mount']].SetInitRotation()
 
     def GetGripperControlValue(self):
         gripper = {}
@@ -89,7 +97,7 @@ class MotionManager:
         return self.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] - self.initPosition, self.mount)
     
     def GetRotation(self):
-        return self.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount), self.initQuaternion, self.initInverseMatrix
+        return [self.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount), self.initQuaternion, self.initInverseMatrix]
     
     def SetInitPosition(self):
         self.initPosition = MotionManager.optiTrackStreamingManager.position[self.rigidBody]
