@@ -42,7 +42,7 @@ class ParticipantManager:
     def GetParticipantPosition(self):
         positions = {}
         for Config in self.participantConfig:
-            positions[Config['Mount']] = (self.motionManagers[Config['Mount']].GetPosition()) * 1000
+            positions[Config['Mount']] = (self.motionManagers[Config['Mount']].GetPosition())
 
         return positions
 
@@ -94,7 +94,7 @@ class MotionManager:
         MotionManager.optiTrackStreamingManager.rotation[str(self.rigidBody)] = np.zeros(4)
 
     def GetPosition(self):
-        return self.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] - self.initPosition, self.mount)
+        return self.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] - self.initPosition, self.mount) * 1000
     
     def GetRotation(self):
         return [self.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount), self.initQuaternion, self.initInverseMatrix]
