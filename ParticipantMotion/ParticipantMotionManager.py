@@ -21,20 +21,13 @@ class ParticipantManager:
 
         self.motionManagers= {}
         for Config in self.participantConfig:
-            self.motionManagers[Config['Mount']] = MotionManager(Config['Mount'], Config['RigidBody'])
-
-        self.sensorManagers = {}
-        for Config in self.participantConfig:
-            self.sensorManagers[Config['Mount']] = (GripperSensorManager(Config['SerialCOM'], BandRate = 9600))
-            SensorThread = threading.Thread(target = self.sensorManagers[Config['Mount']].StartReceiving)
-            SensorThread.setDaemon(True)
-            SensorThread.start()
+            self.motionManagers[Config['Mount']] = MotionManager(Config['Mount'], Config['RigidBody'], Config['SerialCOM'])
 
     def GetParticipantMotion(self):
         participantMotions = {}
         position = self.GetParticipantPosition()
         rotation = self.GetParticipantRotation()
-        gripper = self.GetGripperControlValue()
+        gripper = self.GetParticipantGripperValue()
         for Config in self.participantConfig:
             participantMotions[Config['Mount']] = {'position': position[Config['Mount']], 'rotation': rotation[Config['Mount']], 'gripper': gripper[Config['Mount']], 'weight': Config['Weight']}
 
@@ -54,6 +47,12 @@ class ParticipantManager:
 
         return rotations
     
+    def GetParticipantGripperValue(self):
+        gripper = {}
+        for Config in self.participantConfig:
+            gripper[Config['Mount']] = self.motionManagers[Config['Mount']].GetGripperValue()
+        return gripper
+    
     def SetParticipantInitPosition(self):
         for Config in self.participantConfig:
             self.motionManagers[Config['Mount']].SetInitPosition()
@@ -62,21 +61,6 @@ class ParticipantManager:
         for Config in self.participantConfig:
             self.motionManagers[Config['Mount']].SetInitRotation()
 
-    def GetGripperControlValue(self):
-        gripper = {}
-        for Config in self.participantConfig:
-            gripper[Config['Mount']] = self.ConvertSensorToGripper(self.sensorManagers[Config['Mount']].sensorValue)
-        return gripper
-
-    def ConvertSensorToGripper(self, sensorValue, InputMax = 1, InputMin = 0, TargetMax = 850, TargetMin = 0):
-        gripperValue = ((sensorValue - InputMin) / (InputMax - InputMin)) * (TargetMax - TargetMin) + TargetMin
-
-        if gripperValue > TargetMax:
-            gripperValue = TargetMax
-        elif gripperValue < TargetMin:
-            gripperValue = TargetMin
-
-        return gripperValue
 
 class MotionManager:
     optiTrackStreamingManager = OptiTrackStreamingManager(mocapServer = "133.68.35.155", mocapLocal = "133.68.35.155")
@@ -84,51 +68,92 @@ class MotionManager:
     streamingThread.setDaemon(True)
     streamingThread.start()
 
-    def __init__(self, Mount, RigidBody) -> None:
+    def __init__(self, Mount, RigidBody, SerialCOM) -> None:
         self.mount = Mount
         self.rigidBody = RigidBody
-        self.isMoving_Pos = False
-        self.isMoving_Rot = False
-        self.isMoving_Grip = False
         self.initPosition = []
         self.initQuaternion = []
         self.initInverseMatrix = []
+        self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = False
 
-        self.minimunJerk = MinimumJerk()
+        self.automation = MinimumJerk()
 
         MotionManager.optiTrackStreamingManager.position[str(self.rigidBody)] = np.zeros(3)
         MotionManager.optiTrackStreamingManager.rotation[str(self.rigidBody)] = np.zeros(4)
 
+        self.sensorManager = GripperSensorManager(SerialCOM, BandRate = 9600)
+        sensorThread = threading.Thread(target = self.sensorManager.StartReceiving)
+        sensorThread.setDaemon(True)
+        sensorThread.start()
+
     def GetPosition(self):
-        if self.isMoving_Pos == False and self.isMoving_Rot == False and self.isMoving_Grip == False:
+        if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             position = self.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] - self.initPosition, self.mount) * 1000
         else:
-            position, self.isMoving = self.minimunJerk.GetPosition()
+            position, isMoving = self.automation.GetPosition()
+            if isMoving == False:
+                self.isMoving_Pos = isMoving
+                self.SetInitPosition(Adjust = True, position = position)
 
         return position
     
     def GetRotation(self):
-        if self.isMoving_Pos == False and self.isMoving_Rot == False and self.isMoving_Grip == False:
-            rotation = self.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] - self.initPosition, self.mount) * 1000
-        elif self.isMoving == True:
-            rotation, self.isMoving = self.minimunJerk.GetPosition()
+        if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
+            rotation = self.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
+        else:
+            rotation, isMoving = self.automation.GetRotation()
+            if isMoving == False:
+                self.isMoving_Rot = isMoving
+                self.SetInitRotation(Adjust = True, rotation = rotation)
 
-        return position
+        return [rotation, self.initQuaternion, self.initInverseMatrix]
     
-    def GetRotation(self):
-        return [self.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount), self.initQuaternion, self.initInverseMatrix]
-    
-    def SetInitPosition(self):
-        self.initPosition = MotionManager.optiTrackStreamingManager.position[self.rigidBody]
+    def GetGripperValue(self):
+        if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
+            gripper = self.ConvertSensorToGripper(self.sensorManager.sensorValue)
+        else:
+            gripper, isMoving = self.automation.GetGripperValue()
+            if isMoving == False:
+                self.isMoving_Grip = isMoving
 
-    def SetInitRotation(self) -> None:
-        q = self.initQuaternion = self.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
-        qw, qx, qy, qz = q[3], q[1], q[2], q[0]
-        mat4x4 = np.array([ [qw, -qy, qx, qz],
-                            [qy, qw, -qz, qx],
-                            [-qx, qz, qw, qy],
-                            [-qz,-qx, -qy, qw]])
-        self.nitInverseMatrix = np.linalg.inv(mat4x4)
+        return gripper
+    
+    def SetInitPosition(self, Adjust = False, position = None):
+        if Adjust:
+            self.initPosition -= (position - MotionManager.optiTrackStreamingManager.position[self.rigidBody])
+        else:
+            self.initPosition = MotionManager.optiTrackStreamingManager.position[self.rigidBody]
+
+    def SetInitRotation(self, Adjust = False, rotation = None) -> None:
+        if Adjust:
+            qw, qx, qy, qz = rotation[3], rotation[1], rotation[2], rotation[0]
+            mat4x4 = np.array([ [qw, -qy, qx, qz],
+                                [qy, qw, -qz, qx],
+                                [-qx, qz, qw, qy],
+                                [-qz,-qx, -qy, qw]])
+            mat4x4_inverse = np.linalg.inv(mat4x4)
+            q = self.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
+            qw, qx, qy, qz = q[3], q[1], q[2], q[0]
+            mat4x4 = np.array([ [qw, -qy, qx, qz],
+                                [qy, qw, -qz, qx],
+                                [-qx, qz, qw, qy],
+                                [-qz,-qx, -qy, qw]])
+            q = self.initQuaternion = np.dot(mat4x4, np.dot(mat4x4_inverse, self.initQuaternion))
+            qw, qx, qy, qz = q[3], q[1], q[2], q[0]
+            mat4x4 = np.array([ [qw, -qy, qx, qz],
+                                [qy, qw, -qz, qx],
+                                [-qx, qz, qw, qy],
+                                [-qz,-qx, -qy, qw]])
+            self.initInverseMatrix = np.linalg.inv(mat4x4)
+            
+        else:
+            q = self.initQuaternion = self.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
+            qw, qx, qy, qz = q[3], q[1], q[2], q[0]
+            mat4x4 = np.array([ [qw, -qy, qx, qz],
+                                [qy, qw, -qz, qx],
+                                [-qx, qz, qw, qy],
+                                [-qz,-qx, -qy, qw]])
+            self.initInverseMatrix = np.linalg.inv(mat4x4)
     
     def ConvertAxis_Position(self, position, axis):
         if axis == 'vertical':
@@ -149,3 +174,13 @@ class MotionManager:
             rotation = [rotation[2], rotation[1], -1 * rotation[0], rotation[3]]
 
         return rotation
+    
+    def ConvertSensorToGripper(self, sensorValue, InputMax = 1, InputMin = 0, TargetMax = 850, TargetMin = 0):
+        gripperValue = ((sensorValue - InputMin) / (InputMax - InputMin)) * (TargetMax - TargetMin) + TargetMin
+
+        if gripperValue > TargetMax:
+            gripperValue = TargetMax
+        elif gripperValue < TargetMin:
+            gripperValue = TargetMin
+
+        return gripperValue

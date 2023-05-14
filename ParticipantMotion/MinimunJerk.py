@@ -13,27 +13,27 @@ class MinimumJerk:
 
     def GetPosition(self):
         try:
-            position = self.posRetained = next(self.predictedPosition)
+            position, isMoving = self.posRetained = next(self.predictedPosition), True
         except StopIteration:
-            position = self.posRetained
+            position, isMoving = self.posRetained, False
 
-        return position
+        return position, isMoving
     
     def GetRotation(self):
         try:
-            rotation = self.rotRetained = next(self.predictedRotation)
+            rotation, isMoving = self.rotRetained = next(self.predictedRotation), True
         except StopIteration:
-            rotation = self.rotRetained
+            rotation, isMoving = self.rotRetained, False
 
-        return rotation
+        return rotation, isMoving
     
     def GetGripperValue(self):
         try:
-            gripper = self.gripRetained = next(self.predictedGripper)
+            gripper, isMoving = self.gripRetained = next(self.predictedGripper), True
         except StopIteration:
-            gripper = self.gripRetained
+            gripper, isMoving = self.gripRetained, False
 
-        return gripper
+        return gripper, isMoving
 
     def MonitoringMotion(self, position):
         isMoving = False
