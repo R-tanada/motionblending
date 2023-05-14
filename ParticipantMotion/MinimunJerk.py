@@ -1,14 +1,14 @@
 import numpy as np
 
 class MinimumJerk:
-    def __init__(self, TargetPosition: list, Threshold) -> None:
+    def __init__(self, Target: list, Threshold = 200) -> None:
         self.InitPos = {}
         self.predictedPosition = []
         self.predictedRotation = []
         self.predictedGripper = []
         self.dataList = []
-        self.targetPosition = TargetPosition - self.InitPos
         self.Threshold = Threshold
+        self.target = Target
         self.dt = 1/ 240
 
     def GetPosition(self):
@@ -39,7 +39,7 @@ class MinimumJerk:
         isMoving = False
         velocity, acceleration = self.CalculateMotionInfo(position)
 
-        if np.linalg.norm(self.targetPosition - position):
+        if np.linalg.norm(self.target[] - position):
             self.CreateMinimumJerkMotion(position, velocity, acceleration)
             isMoving = True
 

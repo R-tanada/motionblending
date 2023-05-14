@@ -75,13 +75,23 @@
                 "Mount": "right",
                 "RigidBody": 1,
                 "SerialCOM": "None",
-                "Weight": 1
+                "Weight": 1,
+                "Target": [
+                    {"position": [0, 0, 0], "rotation": [0, 0, 0], "gripper": 300},
+                    {"position": [0, 0, 0], "rotation": [0, 0, 0], "gripper": 300},
+                    {"position": [0, 0, 0], "rotation": [0, 0, 0], "gripper": 300}
+                ]
             },
             {
                 "Mount": "left",
                 "RigidBody": 2,
                 "SerialCOM": "None",
-                "Weight": 1
+                "Weight": 1,
+                "Target": [
+                    {"position": [0, 0, 0], "rotation": [0, 0, 0], "gripper": 300},
+                    {"position": [0, 0, 0], "rotation": [0, 0, 0], "gripper": 300},
+                    {"position": [0, 0, 0], "rotation": [0, 0, 0], "gripper": 300}
+                ]
             }
         ]
     }

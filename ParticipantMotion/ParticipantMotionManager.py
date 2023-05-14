@@ -54,7 +54,7 @@ class MotionManager:
         self.initInverseMatrix = []
         self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = False
 
-        self.automation = MinimumJerk()
+        self.automation = MinimumJerk(Config['Target'])
 
         MotionManager.optiTrackStreamingManager.position[str(self.rigidBody)] = np.zeros(3)
         MotionManager.optiTrackStreamingManager.rotation[str(self.rigidBody)] = np.zeros(4)
