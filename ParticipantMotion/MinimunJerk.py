@@ -43,6 +43,8 @@ class MinimumJerk:
         if np.linalg.norm(self.target[self.target_index] - position):
             self.CreateMotionData(position, rotation, gripper, self.target[self.target_index], 'Sin')
             self.target_index += 1
+            if self.target_index == 3:
+                self.target_index = 0
             isMoving = True
 
         return isMoving
