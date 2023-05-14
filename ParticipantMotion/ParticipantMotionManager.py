@@ -20,20 +20,13 @@ class ParticipantManager:
 
         self.motionManagers= {}
         for Config in self.participantConfig:
-            self.motionManagers[Config['Mount']] = MotionManager(Config['Mount'], Config['RigidBody'])
-
-        self.sensorManagers = {}
-        for Config in self.participantConfig:
-            self.sensorManagers[Config['Mount']] = (GripperSensorManager(Config['SerialCOM'], BandRate = 9600))
-            SensorThread = threading.Thread(target = self.sensorManagers[Config['Mount']].StartReceiving)
-            SensorThread.setDaemon(True)
-            SensorThread.start()
+            self.motionManagers[Config['Mount']] = MotionManager(Config['Mount'], Config['RigidBody'], Config['SerialCOM'])
 
     def GetParticipantMotion(self):
         participantMotions = {}
         position = self.GetParticipantPosition()
         rotation = self.GetParticipantRotation()
-        gripper = self.GetGripperControlValue()
+        gripper = self.GetParticipantGripperValue()
         for Config in self.participantConfig:
             participantMotions[Config['Mount']] = {'position': position[Config['Mount']], 'rotation': rotation[Config['Mount']], 'gripper': gripper[Config['Mount']], 'weight': Config['Weight']}
 
@@ -53,6 +46,12 @@ class ParticipantManager:
 
         return rotations
     
+    def GetParticipantGripperValue(self):
+        gripper = {}
+        for Config in self.participantConfig:
+            gripper[Config['Mount']] = self.motionManagers[Config['Mount']].GetGripperValue()
+        return gripper
+    
     def SetParticipantInitPosition(self):
         for Config in self.participantConfig:
             self.motionManagers[Config['Mount']].SetInitPosition()
@@ -61,21 +60,6 @@ class ParticipantManager:
         for Config in self.participantConfig:
             self.motionManagers[Config['Mount']].SetInitRotation()
 
-    def GetGripperControlValue(self):
-        gripper = {}
-        for Config in self.participantConfig:
-            gripper[Config['Mount']] = self.ConvertSensorToGripper(self.sensorManagers[Config['Mount']].sensorValue)
-        return gripper
-
-    def ConvertSensorToGripper(self, sensorValue, InputMax = 1, InputMin = 0, TargetMax = 850, TargetMin = 0):
-        gripperValue = ((sensorValue - InputMin) / (InputMax - InputMin)) * (TargetMax - TargetMin) + TargetMin
-
-        if gripperValue > TargetMax:
-            gripperValue = TargetMax
-        elif gripperValue < TargetMin:
-            gripperValue = TargetMin
-
-        return gripperValue
 
 class MotionManager:
     optiTrackStreamingManager = OptiTrackStreamingManager(mocapServer = "133.68.35.155", mocapLocal = "133.68.35.155")
@@ -83,7 +67,7 @@ class MotionManager:
     streamingThread.setDaemon(True)
     streamingThread.start()
 
-    def __init__(self, Mount, RigidBody) -> None:
+    def __init__(self, Mount, RigidBody, SerialCOM) -> None:
         self.mount = Mount
         self.rigidBody = RigidBody
         self.initPosition = []
@@ -93,11 +77,19 @@ class MotionManager:
         MotionManager.optiTrackStreamingManager.position[str(self.rigidBody)] = np.zeros(3)
         MotionManager.optiTrackStreamingManager.rotation[str(self.rigidBody)] = np.zeros(4)
 
+        self.sensorManager = GripperSensorManager(SerialCOM, BandRate = 9600)
+        sensorThread = threading.Thread(target = self.sensorManager.StartReceiving)
+        sensorThread.setDaemon(True)
+        sensorThread.start()
+
     def GetPosition(self):
         return self.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] - self.initPosition, self.mount) * 1000
     
     def GetRotation(self):
         return [self.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount), self.initQuaternion, self.initInverseMatrix]
+    
+    def GetGripperValue(self):
+        return self.ConvertSensorToGripper(self.sensorManager.sensorValue)
     
     def SetInitPosition(self):
         self.initPosition = MotionManager.optiTrackStreamingManager.position[self.rigidBody]
@@ -130,3 +122,13 @@ class MotionManager:
             rotation = [rotation[2], rotation[1], -1 * rotation[0], rotation[3]]
 
         return rotation
+    
+    def ConvertSensorToGripper(self, sensorValue, InputMax = 1, InputMin = 0, TargetMax = 850, TargetMin = 0):
+        gripperValue = ((sensorValue - InputMin) / (InputMax - InputMin)) * (TargetMax - TargetMin) + TargetMin
+
+        if gripperValue > TargetMax:
+            gripperValue = TargetMax
+        elif gripperValue < TargetMin:
+            gripperValue = TargetMin
+
+        return gripperValue
