@@ -21,37 +21,14 @@ class ParticipantManager:
 
         self.motionManagers= {}
         for Config in self.participantConfig:
-            self.motionManagers[Config['Mount']] = MotionManager(Config['Mount'], Config['RigidBody'], Config['SerialCOM'])
+            self.motionManagers[Config['Mount']] = MotionManager(Config)
 
     def GetParticipantMotion(self):
         participantMotions = {}
-        position = self.GetParticipantPosition()
-        rotation = self.GetParticipantRotation()
-        gripper = self.GetParticipantGripperValue()
         for Config in self.participantConfig:
-            participantMotions[Config['Mount']] = {'position': position[Config['Mount']], 'rotation': rotation[Config['Mount']], 'gripper': gripper[Config['Mount']], 'weight': Config['Weight']}
+            participantMotions[Config['Mount']] = self.motionManagers[Config['Mount']].GetMotionData()
 
         return participantMotions
-
-    def GetParticipantPosition(self):
-        positions = {}
-        for Config in self.participantConfig:
-            positions[Config['Mount']] = (self.motionManagers[Config['Mount']].GetPosition())
-
-        return positions
-
-    def GetParticipantRotation(self):
-        rotations = {}
-        for Config in self.participantConfig:
-            rotations[Config['Mount']] = self.motionManagers[Config['Mount']].GetRotation()
-
-        return rotations
-    
-    def GetParticipantGripperValue(self):
-        gripper = {}
-        for Config in self.participantConfig:
-            gripper[Config['Mount']] = self.motionManagers[Config['Mount']].GetGripperValue()
-        return gripper
     
     def SetParticipantInitPosition(self):
         for Config in self.participantConfig:
@@ -68,9 +45,10 @@ class MotionManager:
     streamingThread.setDaemon(True)
     streamingThread.start()
 
-    def __init__(self, Mount, RigidBody, SerialCOM) -> None:
-        self.mount = Mount
-        self.rigidBody = RigidBody
+    def __init__(self, Config) -> None:
+        self.mount = Config['Mount']
+        self.rigidBody = Config['RigidBody']
+        self.weight = Config['Weight']
         self.initPosition = []
         self.initQuaternion = []
         self.initInverseMatrix = []
@@ -81,10 +59,18 @@ class MotionManager:
         MotionManager.optiTrackStreamingManager.position[str(self.rigidBody)] = np.zeros(3)
         MotionManager.optiTrackStreamingManager.rotation[str(self.rigidBody)] = np.zeros(4)
 
-        self.sensorManager = GripperSensorManager(SerialCOM, BandRate = 9600)
+        self.sensorManager = GripperSensorManager(Config['SerialCOM'], BandRate = 9600)
         sensorThread = threading.Thread(target = self.sensorManager.StartReceiving)
         sensorThread.setDaemon(True)
         sensorThread.start()
+
+    def GetMotionData(self):
+        position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
+        if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
+            if self.automation.MonitoringMotion(position, rotation, gripper):
+                self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = True
+
+        return {'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight}
 
     def GetPosition(self):
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:

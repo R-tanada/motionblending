@@ -35,7 +35,7 @@ class MinimumJerk:
 
         return gripper, isMoving
 
-    def MonitoringMotion(self, position):
+    def MonitoringMotion(self, position, rotation, gripper):
         isMoving = False
         velocity, acceleration = self.CalculateMotionInfo(position)
 
