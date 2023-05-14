@@ -100,7 +100,7 @@ class CyberneticAvatarMotionManager:
     def SlerpFunction(self, Quaternion, initQuaternion, weight):
         e = 0.0000001
         theta = math.acos(np.dot(initQuaternion, Quaternion))
-        return (math.sin((1 - weight) * theta)/ math.sin(theta) + e) * initQuaternion + (math.sin(weight * theta)/ math.sin(theta) + e) * quaternion
+        return (math.sin((1 - weight) * theta)/ (math.sin(theta) + e)) * initQuaternion + (math.sin(weight * theta)/ (math.sin(theta) + e)) * Quaternion
 
 
 
