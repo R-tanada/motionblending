@@ -94,8 +94,7 @@ class MotionManager:
         MotionManager.optiTrackStreamingManager.rotation[str(self.rigidBody)] = np.zeros(4)
 
     def GetPosition(self):
-        position = self.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] - self.initPosition, self.mount) * 1000
-        return position
+        return self.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] - self.initPosition, self.mount) * 1000
     
     def GetRotation(self):
         return [self.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount), self.initQuaternion, self.initInverseMatrix]
