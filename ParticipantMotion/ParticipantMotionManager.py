@@ -101,7 +101,7 @@ class MotionManager:
                             [qy, qw, -qz, qx],
                             [-qx, qz, qw, qy],
                             [-qz,-qx, -qy, qw]])
-        self.nitInverseMatrix = np.linalg.inv(mat4x4)
+        self.initInverseMatrix = np.linalg.inv(mat4x4)
     
     def ConvertAxis_Position(self, position, axis):
         if axis == 'vertical':
