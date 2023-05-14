@@ -8,6 +8,7 @@ import numpy as np
 # ----- Custom class ----- #
 from OptiTrack.OptiTrackStreamingManager import OptiTrackStreamingManager
 from Sensor.SensorManager import GripperSensorManager
+from ParticipantMotion.MinimunJerk import MinimumJerk
 
 
 class ParticipantManager:
@@ -86,19 +87,32 @@ class MotionManager:
     def __init__(self, Mount, RigidBody) -> None:
         self.mount = Mount
         self.rigidBody = RigidBody
-        self.isMoving = False
+        self.isMoving_Pos = False
+        self.isMoving_Rot = False
+        self.isMoving_Grip = False
         self.initPosition = []
         self.initQuaternion = []
         self.initInverseMatrix = []
+
+        self.minimunJerk = MinimumJerk()
 
         MotionManager.optiTrackStreamingManager.position[str(self.rigidBody)] = np.zeros(3)
         MotionManager.optiTrackStreamingManager.rotation[str(self.rigidBody)] = np.zeros(4)
 
     def GetPosition(self):
-        if self.isMoving == False:
+        if self.isMoving_Pos == False and self.isMoving_Rot == False and self.isMoving_Grip == False:
             position = self.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] - self.initPosition, self.mount) * 1000
+        else:
+            position, self.isMoving = self.minimunJerk.GetPosition()
+
+        return position
+    
+    def GetRotation(self):
+        if self.isMoving_Pos == False and self.isMoving_Rot == False and self.isMoving_Grip == False:
+            rotation = self.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] - self.initPosition, self.mount) * 1000
         elif self.isMoving == True:
-            position = 
+            rotation, self.isMoving = self.minimunJerk.GetPosition()
+
         return position
     
     def GetRotation(self):
