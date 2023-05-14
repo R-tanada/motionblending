@@ -11,6 +11,7 @@ class MinimumJerk:
         self.target = Target
         self.dt = 1/ 240
         self.target_index = 0
+        self.flag = False
 
     def GetPosition(self):
         try:
@@ -38,14 +39,21 @@ class MinimumJerk:
 
     def MonitoringMotion(self, position, rotation, gripper):
         isMoving = False
+        diff = np.linalg.norm(self.target[self.target_index] - position)
         # velocity, acceleration = self.CalculateMotionInfo(position)
 
-        if np.linalg.norm(self.target[self.target_index] - position):
-            self.CreateMotionData(position, rotation, gripper, self.target[self.target_index], 'Sin')
-            self.target_index += 1
-            if self.target_index == 3:
-                self.target_index = 0
-            isMoving = True
+        if diff > self.Threshold:
+            self.flag = True
+
+        if self.flag == True:
+            if diff <= self.Threshold:
+                self.CreateMotionData(position, rotation, gripper, self.target[self.target_index], 'Sin')
+                self.target_index += 1
+                if self.target_index == 3:
+                    self.target_index = 0
+                isMoving = True
+                self.flag = False
+
 
         return isMoving
 
