@@ -51,7 +51,7 @@ class MinimumJerk:
 
     def MonitoringMotion(self, position, rotation, gripper):
         isMoving = False
-        diff = np.linalg.norm(self.target[self.target_index]['position'] - position)
+        diff = np.linalg.norm(self.target[self.target_index]['position'] - np.array(position))
         # velocity, acceleration = self.CalculateMotionInfo(position)
 
         if diff > self.Threshold:
