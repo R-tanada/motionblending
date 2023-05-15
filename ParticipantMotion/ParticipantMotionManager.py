@@ -53,6 +53,7 @@ class MotionManager:
         self.initQuaternion = []
         self.initInverseMatrix = []
         self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = False
+        self.initFlag = False
 
         self.automation = MinimumJerk(Config['Target'])
 
@@ -70,7 +71,7 @@ class MotionManager:
             if self.initFlag == True:
                 self.SetInitPosition(Adjust = True, position = self.position)
                 self.SetInitRotation(Adjust = True, rotation = self.rotation)
-                self.initFalg = False
+                self.initFlag = False
             if self.automation.MonitoringMotion(position, rotation, gripper):
                 self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = True
 
@@ -78,9 +79,9 @@ class MotionManager:
 
     def GetPosition(self):
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
-            position = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000 - self.initPosition, self.mount)
+            position = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount) - self.initPosition
         else:
-            self.position, self.isMoving = self.automation.GetPosition()
+            self.position, self.isMoving_Pos = self.automation.GetPosition()
 
         return position
     
@@ -88,7 +89,7 @@ class MotionManager:
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             rotation = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
         else:
-            self.rotation, self.isMoving = self.automation.GetRotation()
+            self.rotation, self.isMoving_Rot = self.automation.GetRotation()
 
         return [rotation, self.initQuaternion, self.initInverseMatrix]
     
@@ -98,16 +99,16 @@ class MotionManager:
         else:
             gripper, isMoving = self.automation.GetGripperValue()
             if isMoving == False:
-                self.isMoving = isMoving
+                self.isMoving_Grip = isMoving
                 self.initFlag = True
 
         return gripper
     
     def SetInitPosition(self, Adjust = False, position = None):
         if Adjust:
-            self.initPosition -= (np.array(position) - MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000)
+            self.initPosition -= (np.array(position) - cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000), self.mount)
         else:
-            self.initPosition = MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000
+            self.initPosition = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount)
 
     def SetInitRotation(self, Adjust = False, rotation = None) -> None:
         if Adjust:
