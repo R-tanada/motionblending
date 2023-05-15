@@ -39,10 +39,10 @@ class CustomFunction:
         rotEuler = np.array([tx, ty, tz])
         return rotEuler
 
-    def Euler2Quaternion(self, e):
-        roll = np.deg2rad(e[0])
-        pitch = np.deg2rad(e[1])
-        yaw = np.deg2rad(e[2])
+    def Euler2Quaternion(self, euler):
+        roll = np.deg2rad(euler[0])
+        pitch = np.deg2rad(euler[1])
+        yaw = np.deg2rad(euler[2])
 
         cosRoll = np.cos(roll/2.0)
         sinRoll = np.sin(roll / 2.0)
@@ -59,7 +59,7 @@ class CustomFunction:
         rotQuat = [q1, q2, q3, q0]
         return rotQuat
 
-    def SlerpFunction(self, Quaternion, initQuaternion, weight):
+    def Slerp_Quaternion(self, Quaternion, initQuaternion, weight):
         e = 0.0000001
         dot = np.dot(initQuaternion, Quaternion)
         if dot > 1:
