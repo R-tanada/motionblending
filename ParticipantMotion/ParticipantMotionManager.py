@@ -52,8 +52,8 @@ class MotionManager:
 
         self.automation = MinimumJerk(Config['Target'])
 
-        MotionManager.optiTrackStreamingManager.position[str(self.rigidBody)] = np.zeros(3)
-        MotionManager.optiTrackStreamingManager.rotation[str(self.rigidBody)] = np.zeros(4)
+        MotionManager.optiTrackStreamingManager.position[self.rigidBody] = np.zeros(3)
+        MotionManager.optiTrackStreamingManager.rotation[self.rigidBody] = np.zeros(4)
 
         self.sensorManager = GripperSensorManager(Config['SerialCOM'], BandRate = 9600)
         sensorThread = threading.Thread(target = self.sensorManager.StartReceiving)
