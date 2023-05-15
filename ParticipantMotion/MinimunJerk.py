@@ -1,4 +1,5 @@
 import numpy as np
+import CustomFunction.CustomFunction as cf
 
 class MinimumJerk:
     def __init__(self, Target: list, Threshold = 200) -> None:
@@ -11,15 +12,10 @@ class MinimumJerk:
         self.Threshold = Threshold
         self.target = Target
         for target in self.target:
-            target['position'] -= initPos
-            target['rotation'] = self.Euler2Quaternion(target['rotation'])
-            initRot = self.Euler2Quaternion(initRot)
-            qw, qx, qy, qz = initRot[3], initRot[1], initRot[2], initRot[0]
-            mat4x4 = np.array([ [qw, -qy, qx, qz],
-                                [qy, qw, -qz, qx],
-                                [-qx, qz, qw, qy],
-                                [-qz,-qx, -qy, qw]])
-            mat4x4_inverse = np.linalg.inv(mat4x4)
+            target['position'] -= np.array(initPos)
+            target['rotation'] = cf.Euler2Quaternion(target['rotation'])
+            initRot = cf.Euler2Quaternion(initRot)
+            mat4x4_inverse = cf.Convert2Matrix_Quaternion(quaternion = initRot, inverse = True)
             target['rotation'] = np.dot(mat4x4_inverse, target['rotation'])
         self.dt = 1/ 240
         self.target_index = 0
@@ -27,7 +23,8 @@ class MinimumJerk:
 
     def GetPosition(self):
         try:
-            position, isMoving = self.posRetained = next(self.predictedPosition), True
+            position = self.posRetained = next(self.predictedPosition)
+            isMoving = True
         except StopIteration:
             position, isMoving = self.posRetained, False
 
@@ -35,7 +32,8 @@ class MinimumJerk:
     
     def GetRotation(self):
         try:
-            rotation, isMoving = self.rotRetained = next(self.predictedRotation), True
+            rotation = self.rotRetained = next(self.predictedRotation)
+            isMoving = True
         except StopIteration:
             rotation, isMoving = self.rotRetained, False
 
@@ -43,7 +41,8 @@ class MinimumJerk:
     
     def GetGripperValue(self):
         try:
-            gripper, isMoving = self.gripRetained = next(self.predictedGripper), True
+            gripper = self.gripRetained = next(self.predictedGripper)
+            isMoving = True
         except StopIteration:
             gripper, isMoving = self.gripRetained, False
 
@@ -59,7 +58,7 @@ class MinimumJerk:
 
         if self.flag == True:
             if diff <= self.Threshold:
-                self.CreateMotionData(position, rotation, gripper, self.target[self.target_index], 'Sin')
+                self.CreateMotionData(position, rotation, gripper, self.target[self.target_index], 'Liner')
                 self.target_index += 1
                 if self.target_index == 3:
                     self.target_index = 0
@@ -92,7 +91,7 @@ class MinimumJerk:
     def CreateMotionData(self, position, rotation, gripper, target, motion):
         diffPos = []
         diffRot = []
-        flameLength = 6000
+        flameLength = 1000
 
         def CreateMotion_Liner(target, data, split):
             motionlist = np.linspace(data, target, split)
@@ -109,7 +108,7 @@ class MinimumJerk:
             for j in range(4):
                 diffRot.append(CreateMotion_Liner(target['rotation'][j], rotation[0][j], flameLength))
             diffGrip = [850] * flameLength
-            diffGrip.append(CreateMotion_Liner(target['gripper'], gripper, 1000))
+            diffGrip = np.concatenate([diffGrip, CreateMotion_Liner(target['gripper'], 500)], 0)
 
         elif motion == 'Sin':
             for i in range(3):
@@ -125,23 +124,3 @@ class MinimumJerk:
 
     def ConvertToIterator(self, data):
         return iter(data)
-    
-    def Euler2Quaternion(self, e):
-        roll = np.deg2rad(e[0])
-        pitch = np.deg2rad(e[1])
-        yaw = np.deg2rad(e[2])
-
-        cosRoll = np.cos(roll/2.0)
-        sinRoll = np.sin(roll / 2.0)
-        cosPitch = np.cos(pitch / 2.0)
-        sinPitch = np.sin(pitch / 2.0)
-        cosYaw = np.cos(yaw / 2.0)
-        sinYaw = np.sin(yaw / 2.0)
-
-        q0 = cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw
-        q1 = sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw
-        q2 = cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw
-        q3 = cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw
-
-        rotQuat = [q1, q2, q3, q0]
-        return rotQuat
