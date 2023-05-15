@@ -5,7 +5,7 @@ import quaternion
 import scipy.spatial.transform as scitransform
 
 from ParticipantMotion.ParticipantMotionManager import ParticipantManager
-from CustomFunction.CustomFunction import CustomFunction as cf
+import CustomFunction.CustomFunction as cf
 
 
 class CyberneticAvatarMotionManager:
