@@ -70,7 +70,7 @@ class MotionManager:
 
     def GetPosition(self):
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
-            position = self.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] - self.initPosition, self.mount) * 1000
+            position = self.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000 - self.initPosition, self.mount)
         else:
             position, isMoving = self.automation.GetPosition()
             if isMoving == False:
@@ -102,9 +102,9 @@ class MotionManager:
     
     def SetInitPosition(self, Adjust = False, position = None):
         if Adjust:
-            self.initPosition -= (position - MotionManager.optiTrackStreamingManager.position[self.rigidBody])
+            self.initPosition -= (position - MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000)
         else:
-            self.initPosition = MotionManager.optiTrackStreamingManager.position[self.rigidBody]
+            self.initPosition = MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000
 
     def SetInitRotation(self, Adjust = False, rotation = None) -> None:
         if Adjust:
