@@ -59,7 +59,7 @@ class MotionManager:
         return {'position': self.GetPosition(), 'rotation': self.GetRotation(), 'gripper': self.GetGripperValue(), 'weight': self.weight}
 
     def GetPosition(self):
-        return self.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] - self.initPosition, self.mount) * 1000
+        return self.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000 - self.initPosition, self.mount)
     
     def GetRotation(self):
         return [self.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount), self.initQuaternion, self.initInverseMatrix]
@@ -68,7 +68,7 @@ class MotionManager:
         return self.ConvertSensorToGripper(self.sensorManager.sensorValue)
     
     def SetInitPosition(self):
-        self.initPosition = MotionManager.optiTrackStreamingManager.position[self.rigidBody]
+        self.initPosition = MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000
 
     def SetInitRotation(self) -> None:
         q = self.initQuaternion = self.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
