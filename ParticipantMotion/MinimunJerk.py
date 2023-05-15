@@ -13,10 +13,7 @@ class MinimumJerk:
         self.target = Target
         for target in self.target:
             target['position'] -= np.array(initPos)
-            target['rotation'] = cf.Euler2Quaternion(target['rotation'])
-            initRot = cf.Euler2Quaternion(initRot)
-            mat4x4_inverse = cf.Convert2Matrix_Quaternion(quaternion = initRot, inverse = True)
-            target['rotation'] = np.dot(mat4x4_inverse, target['rotation'])
+            target['rotation'] = cf.Euler2Quaternion(target['rotation'] - np.array(initRot))
         self.dt = 1/ 240
         self.target_index = 0
         self.flag = False
