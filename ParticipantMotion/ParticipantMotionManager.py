@@ -41,7 +41,7 @@ class MotionManager:
 
     def __init__(self, Config) -> None:
         self.mount = Config['Mount']
-        self.rigidBody = Config['RigidBody']
+        self.rigidBody = str(Config['RigidBody'])
         self.weight = Config['Weight']
         self.initPosition = []
         self.initQuaternion = []
