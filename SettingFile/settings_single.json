@@ -43,8 +43,32 @@
                 "SerialCOM": "None",
                 "Weight": 1,
                 "Target": [
-                    {"position": [312.2, -73.8, 449.1], "rotation": [179.9, -32, 0], "gripper": 300},
-                    {"position": [312.2, -73.8, 449.1], "rotation": [179.9, -32, 0], "gripper": 300}
+                    {
+                        "position": [
+                            312.2,
+                            -73.8,
+                            449.1
+                        ],
+                        "rotation": [
+                            179.9,
+                            -32,
+                            0
+                        ],
+                        "gripper": 300
+                    },
+                    {
+                        "position": [
+                            312.2,
+                            -73.8,
+                            449.1
+                        ],
+                        "rotation": [
+                            179.9,
+                            -32,
+                            0
+                        ],
+                        "gripper": 300
+                    }
                 ]
             }
         ]
