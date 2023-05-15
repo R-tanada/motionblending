@@ -108,7 +108,7 @@ class MinimumJerk:
             for j in range(4):
                 diffRot.append(CreateMotion_Liner(target['rotation'][j], rotation[0][j], flameLength))
             diffGrip = [850] * flameLength
-            diffGrip = np.concatenate([diffGrip, CreateMotion_Liner(target['gripper'], 500)], 0)
+            diffGrip = np.concatenate([diffGrip, CreateMotion_Liner(target['gripper'], gripper, 500)], 0)
 
         elif motion == 'Sin':
             for i in range(3):
