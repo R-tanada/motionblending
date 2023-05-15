@@ -12,7 +12,15 @@ class MinimumJerk:
         self.target = Target
         for target in self.target:
             target['position'] -= initPos
-            target['rotation'] -= initRot
+            target['rotation'] = self.Euler2Quaternion(target['rotation'])
+            initRot = self.Euler2Quaternion(initRot)
+            qw, qx, qy, qz = initRot[3], initRot[1], initRot[2], initRot[0]
+            mat4x4 = np.array([ [qw, -qy, qx, qz],
+                                [qy, qw, -qz, qx],
+                                [-qx, qz, qw, qy],
+                                [-qz,-qx, -qy, qw]])
+            mat4x4_inverse = np.linalg.inv(mat4x4)
+            target['rotation'] = np.dot(mat4x4_inverse, target['rotation'])
         self.dt = 1/ 240
         self.target_index = 0
         self.flag = False
@@ -98,16 +106,18 @@ class MinimumJerk:
         if motion == 'Liner':
             for i in range(3):
                 diffPos.append(CreateMotion_Liner(target['position'][i], position[i], flameLength))
-                diffRot.append(CreateMotion_Liner(target['rotation'][i], rotation[i], flameLength))
-                diffGrip = [850] * flameLength
-                diffGrip.append(CreateMotion_Liner(target['gripper'], gripper, 1000))
+            for j in range(4):
+                diffRot.append(CreateMotion_Liner(target['rotation'][j], rotation[0][j], flameLength))
+            diffGrip = [850] * flameLength
+            diffGrip.append(CreateMotion_Liner(target['gripper'], gripper, 1000))
 
         elif motion == 'Sin':
             for i in range(3):
                 diffPos.append(CreateMotion_Sin(target['position'][i], position[i], flameLength))
-                diffRot.append(CreateMotion_Sin(target['rotation'][i], rotation[i], flameLength))
-                diffGrip = [850] * flameLength
-                diffGrip.append(CreateMotion_Sin(target['gripper'], gripper, 1000))
+            for j in range(4):
+                diffRot.append(CreateMotion_Sin(target['rotation'][i], rotation[0][i], flameLength))
+            diffGrip = [850] * flameLength
+            diffGrip.append(CreateMotion_Sin(target['gripper'], gripper, 1000))
 
         self.predictedPosition = self.ConvertToIterator(np.transpose(np.array(diffPos)))
         self.predictedRotation = self.ConvertToIterator(np.transpose(np.array(diffRot)))
@@ -115,3 +125,23 @@ class MinimumJerk:
 
     def ConvertToIterator(self, data):
         return iter(data)
+    
+    def Euler2Quaternion(self, e):
+        roll = np.deg2rad(e[0])
+        pitch = np.deg2rad(e[1])
+        yaw = np.deg2rad(e[2])
+
+        cosRoll = np.cos(roll/2.0)
+        sinRoll = np.sin(roll / 2.0)
+        cosPitch = np.cos(pitch / 2.0)
+        sinPitch = np.sin(pitch / 2.0)
+        cosYaw = np.cos(yaw / 2.0)
+        sinYaw = np.sin(yaw / 2.0)
+
+        q0 = cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw
+        q1 = sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw
+        q2 = cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw
+        q3 = cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw
+
+        rotQuat = [q1, q2, q3, q0]
+        return rotQuat

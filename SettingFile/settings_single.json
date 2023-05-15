@@ -14,14 +14,14 @@
                 0
             ],
             "MaxPos": [
-                240,
-                40,
-                490
+                600,
+                150,
+                590
             ],
             "MinPos": [
-                160,
-                -40,
-                410
+                140,
+                -220,
+                300
             ],
             "MaxRot": [
                 220,
@@ -41,7 +41,11 @@
                 "Mount": "right",
                 "RigidBody": 1,
                 "SerialCOM": "None",
-                "Weight": 1
+                "Weight": 1,
+                "Target": [
+                    {"position": [390.9, -228.7, 538.8], "rotation": [168.3, -42.4, -8.6], "gripper": 300},
+                    {"position": [390.9, -228.7, 538.8], "rotation": [168.3, -42.4, -8.6], "gripper": 300}
+                ]
             }
         ]
     }
