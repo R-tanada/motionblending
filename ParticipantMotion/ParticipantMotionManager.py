@@ -106,7 +106,7 @@ class MotionManager:
     
     def SetInitPosition(self, Adjust = False, position = None):
         if Adjust:
-            self.initPosition -= (np.array(position) - cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000), self.mount)
+            self.initPosition -= (np.array(position) - cf.ConvertAxis_Position((MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000), self.mount))
         else:
             self.initPosition = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount)
 
