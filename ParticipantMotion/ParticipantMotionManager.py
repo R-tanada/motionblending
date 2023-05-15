@@ -12,10 +12,6 @@ from Sensor.SensorManager import GripperSensorManager
 class ParticipantManager:
     def __init__(self, ParticipantConfig: dict) -> None:
         self.participantConfig = ParticipantConfig
-        self.InitPosition = {}
-        self.InitQuaternion = {}
-        self.InitInverseMatrix = {}
-        self.InitGripper = {}
 
         self.motionManagers= {}
         for Config in self.participantConfig:
