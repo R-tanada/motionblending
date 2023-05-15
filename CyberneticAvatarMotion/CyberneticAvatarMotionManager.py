@@ -1,9 +1,4 @@
-import math
-
 import numpy as np
-import quaternion
-import scipy.spatial.transform as scitransform
-
 from ParticipantMotion.ParticipantMotionManager import ParticipantManager
 import CustomFunction.CustomFunction as cf
 

@@ -1,7 +1,5 @@
-import csv
 import json
 import threading
-import time
 
 import numpy as np
 
