@@ -8,6 +8,7 @@ import numpy as np
 # ----- Custom class ----- #
 from OptiTrack.OptiTrackStreamingManager import OptiTrackStreamingManager
 from Sensor.SensorManager import GripperSensorManager
+import CustomFunction.CustomFunction as cf
 
 class ParticipantManager:
     def __init__(self, ParticipantConfig: dict) -> None:
@@ -59,52 +60,18 @@ class MotionManager:
         return {'position': self.GetPosition(), 'rotation': self.GetRotation(), 'gripper': self.GetGripperValue(), 'weight': self.weight}
 
     def GetPosition(self):
-        return self.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000 - self.initPosition, self.mount)
+        return cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000 - self.initPosition, self.mount)
     
     def GetRotation(self):
-        return [self.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount), self.initQuaternion, self.initInverseMatrix]
+        return [cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount), self.initQuaternion, self.initInverseMatrix]
     
     def GetGripperValue(self):
-        return self.ConvertSensorToGripper(self.sensorManager.sensorValue)
+        return cf.ConvertSensorToGripper(self.sensorManager.sensorValue)
     
     def SetInitPosition(self):
         self.initPosition = MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000
 
     def SetInitRotation(self) -> None:
-        q = self.initQuaternion = self.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
-        qw, qx, qy, qz = q[3], q[1], q[2], q[0]
-        mat4x4 = np.array([ [qw, -qy, qx, qz],
-                            [qy, qw, -qz, qx],
-                            [-qx, qz, qw, qy],
-                            [-qz,-qx, -qy, qw]])
-        self.initInverseMatrix = np.linalg.inv(mat4x4)
+        self.initQuaternion = self.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
+        self.initInverseMatrix = cf.Convert2Matrix_Quaternion(quaternion = self.initQuaternion, inverse = True)
     
-    def ConvertAxis_Position(self, position, axis):
-        if axis == 'vertical':
-            position = [position[2], position[0], position[1]]
-        elif axis == 'left':
-            position = [position[2], -1 * position[1], position[0]]
-        elif axis == 'right':
-            position = [position[2], position[1], -1 * position[0]]
-
-        return position
-
-    def CnvertAxis_Rotation(self, rotation, axis):
-        if axis == 'vertical':
-            rotation = [rotation[2], rotation[0], rotation[1], rotation[3]]
-        elif axis == 'left':
-            rotation = [rotation[2], -1 * rotation[1], rotation[0], rotation[3]]
-        elif axis == 'right':
-            rotation = [rotation[2], rotation[1], -1 * rotation[0], rotation[3]]
-
-        return rotation
-    
-    def ConvertSensorToGripper(self, sensorValue, InputMax = 1, InputMin = 0, TargetMax = 850, TargetMin = 0):
-        gripperValue = ((sensorValue - InputMin) / (InputMax - InputMin)) * (TargetMax - TargetMin) + TargetMin
-
-        if gripperValue > TargetMax:
-            gripperValue = TargetMax
-        elif gripperValue < TargetMin:
-            gripperValue = TargetMin
-
-        return gripperValue
