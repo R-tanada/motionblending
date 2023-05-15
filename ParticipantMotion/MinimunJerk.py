@@ -2,9 +2,9 @@ import numpy as np
 import CustomFunction.CustomFunction as cf
 
 class MinimumJerk:
-    def __init__(self, Target: list, Threshold = 100) -> None:
-        initPos = [200, 0, 450]
-        initRot = [180, 0, 0]
+    def __init__(self, Target: list, xArmConfig: dict, Threshold = 100) -> None:
+        initPos = xArmConfig['InitPos']
+        initRot = xArmConfig['InitRot']
         self.predictedPosition = []
         self.predictedRotation = []
         self.predictedGripper = []

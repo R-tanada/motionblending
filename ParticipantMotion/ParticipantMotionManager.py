@@ -5,7 +5,7 @@ import time
 
 import numpy as np
 
-# ----- Custom class ----- #
+# # ----- Custom class ----- #
 from OptiTrack.OptiTrackStreamingManager import OptiTrackStreamingManager
 from Sensor.SensorManager import GripperSensorManager
 from ParticipantMotion.MinimunJerk import MinimumJerk
@@ -13,6 +13,12 @@ import CustomFunction.CustomFunction as cf
 
 
 class ParticipantManager:
+    with open('SettingFile/settings_single.json', 'r') as settings_file:
+        settings = json.load(settings_file)
+    xArmConfig = {}
+    for xArm in settings['xArmConfigs'].keys():
+        xArmConfig[settings['xArmConfigs'][xArm]['Mount']] = settings['xArmConfigs'][xArm]
+
     def __init__(self, ParticipantConfig: dict) -> None:
         self.participantConfig = ParticipantConfig
         self.position = []
@@ -20,7 +26,7 @@ class ParticipantManager:
 
         self.motionManagers= {}
         for Config in self.participantConfig:
-            self.motionManagers[Config['Mount']] = MotionManager(Config)
+            self.motionManagers[Config['Mount']] = MotionManager(Config, ParticipantManager.xArmConfig[Config['Mount']])
 
     def GetParticipantMotion(self):
         participantMotions = {}
@@ -44,7 +50,7 @@ class MotionManager:
     streamingThread.setDaemon(True)
     streamingThread.start()
 
-    def __init__(self, Config) -> None:
+    def __init__(self, Config, xArmConfig) -> None:
         self.mount = Config['Mount']
         self.rigidBody = str(Config['RigidBody'])
         self.weight = Config['Weight']
@@ -53,7 +59,7 @@ class MotionManager:
         self.initInverseMatrix = []
         self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = False
 
-        self.automation = MinimumJerk(Config['Target'])
+        self.automation = MinimumJerk(Config['Target'], xArmConfig)
 
         MotionManager.optiTrackStreamingManager.position[self.rigidBody] = np.zeros(3)
         MotionManager.optiTrackStreamingManager.rotation[self.rigidBody] = np.zeros(4)
