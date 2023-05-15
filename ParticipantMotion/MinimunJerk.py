@@ -2,7 +2,7 @@ import numpy as np
 import CustomFunction.CustomFunction as cf
 
 class MinimumJerk:
-    def __init__(self, Target: list, Threshold = 200) -> None:
+    def __init__(self, Target: list, Threshold = 100) -> None:
         initPos = [200, 0, 450]
         initRot = [180, 0, 0]
         self.predictedPosition = []

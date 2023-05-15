@@ -79,7 +79,7 @@ class MotionManager:
 
     def GetPosition(self):
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
-            position = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount) - self.initPosition
+            position = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount) - np.array(self.initPosition)
         else:
             self.position, self.isMoving_Pos = self.automation.GetPosition()
 
