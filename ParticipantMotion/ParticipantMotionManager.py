@@ -79,19 +79,19 @@ class MotionManager:
 
     def GetPosition(self):
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
-            position = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount) - np.array(self.initPosition)
+            self.position = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount) - np.array(self.initPosition)
         else:
             self.position, self.isMoving_Pos = self.automation.GetPosition()
 
-        return position
+        return self.position
     
     def GetRotation(self):
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
-            rotation = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
+            self.rotation = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
         else:
             self.rotation, self.isMoving_Rot = self.automation.GetRotation()
 
-        return [rotation, self.initQuaternion, self.initInverseMatrix]
+        return [self.rotation, self.initQuaternion, self.initInverseMatrix]
     
     def GetGripperValue(self):
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
