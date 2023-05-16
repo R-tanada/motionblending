@@ -75,6 +75,7 @@ class MotionManager:
                 self.SetInitPosition(position = self.position, adjust = True)
                 self.SetInitRotation(rotation = self.rotation, adjust = True)
                 self.isMoving = False
+                
             if self.automation.MonitoringMotion(position, rotation, gripper):
                 self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = True
 
