@@ -25,8 +25,8 @@ class xArmManager:
         if self.arm.error_code != 0:
             self.arm.clean_error()
         self.arm.motion_enable(enable=True)
-        self.arm.set_mode(0)             # set mode: position control mode
-        self.arm.set_state(state=0)      # set state: sport state
+        self.arm.set_mode(0)            
+        self.arm.set_state(state=0)    
 
         self.arm.set_position(x = InitPos[0], y = InitPos[1], z = InitPos[2], roll = InitRot[0], pitch = InitRot[1], yaw = InitRot[2], wait=True)
         print('Initialized > xArm')
