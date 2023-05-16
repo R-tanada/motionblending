@@ -6,26 +6,29 @@ import CustomFunction.CustomFunction as cf
 class CyberneticAvatarMotionManager:
     def __init__(self, ParticipantConfigs: dict, xArmConfigs: dict) -> None:
         self.xArmConfigs = xArmConfigs
+        self.preMotion = {}
 
         self.participantManagers = {}
         for participant in ParticipantConfigs.keys():
             self.participantManagers[participant] = ParticipantManager(ParticipantConfigs[participant])
 
+        self.sharedMotions = {}
+        for xArm in self.xArmConfigs.keys():
+            self.sharedMotions[self.xArmConfigs[xArm]['Mount']] = {'position': [0, 0, 0], 'rotation': [0, 0, 0, 1], 'gripper': 0}
+
     def GetSharedTransform(self):
         return self.IntegrationWithWeight(self.GetParticipantMotion())
 
     def IntegrationWithWeight(self, participantMotions: dict):
-        sharedMotions = {}
-        for xArm in self.xArmConfigs.keys():
-            sharedMotions[self.xArmConfigs[xArm]['Mount']] = {'position': [0, 0, 0], 'rotation': [0, 0, 0], 'gripper': 0}
-
         for participant in participantMotions.keys():
             for mount in participantMotions[participant].keys():
-                sharedMotions[mount]['position'] += np.array(participantMotions[participant][mount]['position']) * participantMotions[participant][mount]['weight']
-                sharedMotions[mount]['rotation'] += cf.Quaternion2Euler(np.dot(participantMotions[participant][mount]['rotation'][2], cf.Slerp_Quaternion(participantMotions[participant][mount]['rotation'][0], participantMotions[participant][mount]['rotation'][1], participantMotions[participant][mount]['weight'])))
-                sharedMotions[mount]['gripper'] += np.array(participantMotions[participant][mount]['gripper']) * participantMotions[participant][mount]['weight']
+                motions, premotions = participantMotions[participant][mount], self.preMotion[participant][mount]
+                self.sharedMotions[mount]['position'] += (np.array(motions['position']) - premotions['position'])  * motions['weight']
+                self.sharedMotions[mount]['rotation'] = np.dot(cf.Convert2Matrix_Quaternion(np.dot(cf.Convert2Matrix_Quaternion(premotions['rotation'], inverse = True), cf.Slerp_Quaternion(motions['rotation'], premotions['rotation'], motions['weight']))), self.sharedMotions[mount]['rotation'])
+                self.sharedMotions[mount]['gripper'] += 0
+                premotions['position'], premotions['rotation'] = motions['position'], motions['rotation']
 
-        return sharedMotions
+        return self.sharedMotions
 
     def GetParticipantMotion(self):
         motions = {}
@@ -36,8 +39,7 @@ class CyberneticAvatarMotionManager:
 
     def SetParticipantInitMotion(self):
         for participant in self.participantManagers.keys():
-            self.participantManagers[participant].SetParticipantInitPosition()
-            self.participantManagers[participant].SetParticipantInitRotation()
+            self.preMotion[participant] = self.participantManagers[participant].SetParticipantInitMotion()
 
 
 

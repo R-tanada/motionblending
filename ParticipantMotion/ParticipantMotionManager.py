@@ -21,13 +21,12 @@ class ParticipantManager:
 
         return participantMotions
     
-    def SetParticipantInitPosition(self):
+    def SetParticipantInitMotion(self):
+        initMotion = {}
         for Config in self.participantConfig:
-            self.motionManagers[Config['Mount']].SetInitPosition()
+            initMotion[Config['Mount']] = {'position': self.motionManagers[Config['Mount']].SetInitPosition(), 'rotation': self.motionManagers[Config['Mount']].SetInitRotation()}
 
-    def SetParticipantInitRotation(self):
-        for Config in self.participantConfig:
-            self.motionManagers[Config['Mount']].SetInitRotation()
+        return initMotion
 
 
 class MotionManager:
@@ -59,7 +58,7 @@ class MotionManager:
         return cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000 - self.initPosition, self.mount)
     
     def GetRotation(self):
-        return [cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount), self.initQuaternion, self.initInverseMatrix]
+        return cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
     
     def GetGripperValue(self):
         return cf.ConvertSensorToGripper(self.sensorManager.sensorValue)
@@ -69,5 +68,4 @@ class MotionManager:
 
     def SetInitRotation(self) -> None:
         self.initQuaternion = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
-        self.initInverseMatrix = cf.Convert2Matrix_Quaternion(quaternion = self.initQuaternion, inverse = True)
     
