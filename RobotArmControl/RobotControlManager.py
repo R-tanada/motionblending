@@ -10,7 +10,6 @@ from CyberneticAvatarMotion.CyberneticAvatarMotionManager import \
 # ----- Custom class ----- #
 from RobotArmControl.xArmManager import xArmManager
 
-
 class RobotControlManager:
     def __init__(self) -> None:
         with open('SettingFile/settings_dual_fusion.json', 'r') as settings_file:
@@ -19,8 +18,10 @@ class RobotControlManager:
         xArmConfigs = settings['xArmConfigs']
         ParticipantConfigs = settings['ParticipantsConfigs']
 
+        self.xarmManager = {}
         self.cyberneticManager = CyberneticAvatarMotionManager(ParticipantConfigs, xArmConfigs)
-        self.xarmManager = xArmManager(xArmConfigs)
+        for xArm in xArmConfigs.keys():
+            self.xarmManager[xArmConfigs[xArm]['Mount']] = xArmManager(xArmConfigs[xArm])
 
         self.loopTime = 0
         self.FrameList = []
@@ -38,8 +39,9 @@ class RobotControlManager:
                     loopStartTime = time.perf_counter()
 
                     if isEnablexArm:
-                        self.xarmManager.SendDataToRobot(self.cyberneticManager.GetSharedTransform())
-                        self.xarmManager.CheckError()
+                        for xArm in self.xarmManager.key():
+                            self.xarmManager[xArm].SendDataToRobot(self.cyberneticManager.GetSharedTransform())
+                            self.xarmManager[xArm].CheckError()
 
                     self.FixFrameRate(time.perf_counter() - loopStartTime)
                     if isPrintFrameRate:
