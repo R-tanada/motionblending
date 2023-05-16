@@ -4,7 +4,7 @@ import numpy as np
 # ----- Custom class ----- #
 from OptiTrack.OptiTrackStreamingManager import OptiTrackStreamingManager
 from Sensor.SensorManager import GripperSensorManager
-import CustomFunction.CustomFunction as cf
+import CustomFunction.Calculation as cf
 
 class ParticipantManager:
     def __init__(self, ParticipantConfig: dict) -> None:
