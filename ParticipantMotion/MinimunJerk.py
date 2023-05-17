@@ -93,6 +93,14 @@ class MinimumJerk:
         def CreateMotion_Liner(target, data, split):
             motionlist = np.linspace(data, target, split)
             return motionlist
+        
+        def CreateMotion_Liner_Rot(target, data, split):
+            weight_list = np.linspace(0, 1, split)
+            q_list = []
+            for weight in weight_list:
+                q_list.append(cf.Slerp_Quaternion(target, data, weight))
+            
+            return q_list
 
         def CreateMotion_Sin(target, data, split):
             flamelist = np.linspace(0, np.pi/2, split)
@@ -103,7 +111,7 @@ class MinimumJerk:
             for i in range(3):
                 diffPos.append(CreateMotion_Liner(target['position'][i], position[i], flameLength))
             for j in range(4):
-                diffRot.append(CreateMotion_Liner(target['rotation'][j], rotation[0][j], flameLength))
+                diffRot.append(CreateMotion_Liner_Rot(target['rotation'][j], rotation[0][j], flameLength))
             diffGrip = [850] * flameLength
             diffGrip = np.concatenate([diffGrip, CreateMotion_Liner(target['gripper'], gripper, 500)], 0)
 
