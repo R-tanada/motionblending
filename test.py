@@ -27,4 +27,7 @@ for weight in weight_list:
 q3 = [179.9, -32, 0]
 print(cf.Quaternion2Euler(cf.Euler2Quaternion(q3)))
 
+e1 = [0, 0, 0]
+print(cf.Euler2Quaternion(e1))
+
 
