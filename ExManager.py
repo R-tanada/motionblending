@@ -20,8 +20,6 @@ if __name__ == '__main__':
     windll.winmm.timeBeginPeriod(1)
 
     isEnablexArm = True
-    global loopTime, flameList
-    loopTime = 1/ 240
 
     try:
         while True:
@@ -30,10 +28,6 @@ if __name__ == '__main__':
 
                 if isEnablexArm:
                     robotControlManager.SendDataToRobot(cyberneticManager.GetSharedTransform())
-
-                FixFrameRate(time.perf_counter() - loopStartTime)
-                if isPrintFrameRate:
-                    CheckFrameRate(time.perf_counter() - loopStartTime)
 
             else:
                 keycode = input('Input > "s": start control \n')
@@ -54,7 +48,7 @@ if __name__ == '__main__':
 
         # ----- Disconnect ----- #
         if isEnablexArm:
-            xArmManager.DisConnect()
+            robotControlManager.DisConnect()
             print('successfully disconnected')
 
         windll.winmm.timeEndPeriod(1)
@@ -62,16 +56,3 @@ if __name__ == '__main__':
             
 
     print('\n----- End program: ExManager.py -----')
-
-def FixFrameRate(processDuration):
-    sleepTime = self.loopTime - processDuration
-    if sleepTime < 0:
-        pass
-    else:
-        time.sleep(sleepTime)
-
-def CheckFrameRate(loopTime):
-    self.FrameList.append(1/ loopTime)
-    if len(self.FrameList) == 30:
-        print(sum(self.FrameList)/ len(self.FrameList))
-        self.FrameList = []

@@ -10,14 +10,14 @@ from RobotArmControl.xArmManager import xArmManager
 
 class RobotControlManager:
     def __init__(self, xArmConfigs) -> None:
-        self.xarmManager = {}
+        self.xarmManagers = {}
         for xArm in xArmConfigs:
-            self.xarmManager[xArmConfigs[xArm]['Mount']] = xArmManager(xArmConfigs[xArm])
+            self.xarmManagers[xArmConfigs[xArm]['Mount']] = xArmManager(xArmConfigs[xArm])
 
-    def SendDataToRobot(self, sharedMotions, isSafty):
-        for mount in self.xarmManager.keys():
-            self.xarmManager[mount].SendDataToRobot(sharedMotions[mount])
+    def SendDataToRobot(self, sharedMotions):
+        for mount in self.xarmManagers.keys():
+            self.xarmManagers[mount].SendDataToRobot(sharedMotions[mount])
 
-
-
-
+    def Disconnect(self):
+        for mount in self.xarmManagers.keys():
+            self.xarmManagers[mount].DisConnect()
