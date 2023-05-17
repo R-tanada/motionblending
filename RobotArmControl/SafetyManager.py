@@ -1,5 +1,5 @@
 from math import pi
-
+import CustomFunction.CustomFunction as cf
 import numpy as np
 
 
@@ -19,6 +19,7 @@ class SafetyManager:
         return MinPos[0], MinPos[1], MinPos[2], MinRot[0], MinRot[1], MinRot[2]
 
     def CheckLimit(self, position, rotation):
+        rotation = cf.Quaternion2Euler(rotation)
         x, y, z = position[0] + self.Init_X, position[1] + self.Init_Y, position[2] + self.Init_Z
         roll, pitch, yow = rotation[0] + self.Init_Roll, rotation[1] + self.Init_Pitch, rotation[2] + self.Init_Yow
 
