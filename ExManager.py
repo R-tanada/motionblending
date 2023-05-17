@@ -37,6 +37,14 @@ if __name__ == '__main__':
                     cyberneticManager.SetParticipantInitMotion()
                     isMoving    = True
 
+    except KeyboardInterrupt:
+        print('\nKeyboardInterrupt >> Stop: RobotControlManager.SendDataToRobot()')
+        if isEnablexArm:
+            robotControlManager.DisConnect()
+            print('successfully disconnected')
+
+        windll.winmm.timeEndPeriod(1)
+
     except:
         print('----- Exception has occurred -----')
         import traceback
@@ -44,15 +52,7 @@ if __name__ == '__main__':
 
         windll.winmm.timeEndPeriod(1)
 
-    except KeyboardInterrupt:
-        print('\nKeyboardInterrupt >> Stop: RobotControlManager.SendDataToRobot()')
 
-        # ----- Disconnect ----- #
-        if isEnablexArm:
-            robotControlManager.DisConnect()
-            print('successfully disconnected')
-
-        windll.winmm.timeEndPeriod(1)
 
             
 
