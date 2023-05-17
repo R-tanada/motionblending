@@ -57,7 +57,7 @@ class MinimumJerk:
             if diff <= self.Threshold:
                 self.CreateMotionData(position, rotation, gripper, self.target[self.target_index], 'Liner')
                 self.target_index += 1
-                if self.target_index == 3:
+                if self.target_index == 2:
                     self.target_index = 0
                 isMoving = True
                 self.flag = False
