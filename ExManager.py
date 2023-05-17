@@ -20,6 +20,8 @@ if __name__ == '__main__':
     windll.winmm.timeBeginPeriod(1)
 
     isEnablexArm = True
+    global loopTime, flameList
+    loopTime = 1/ 240
 
     try:
         while True:
@@ -37,7 +39,7 @@ if __name__ == '__main__':
                 keycode = input('Input > "s": start control \n')
 
                 if keycode == 's':
-                    self.cyberneticManager.SetParticipantInitMotion()
+                    cyberneticManager.SetParticipantInitMotion()
                     isMoving    = True
 
     except:
@@ -61,3 +63,15 @@ if __name__ == '__main__':
 
     print('\n----- End program: ExManager.py -----')
 
+def FixFrameRate(processDuration):
+    sleepTime = self.loopTime - processDuration
+    if sleepTime < 0:
+        pass
+    else:
+        time.sleep(sleepTime)
+
+def CheckFrameRate(loopTime):
+    self.FrameList.append(1/ loopTime)
+    if len(self.FrameList) == 30:
+        print(sum(self.FrameList)/ len(self.FrameList))
+        self.FrameList = []
