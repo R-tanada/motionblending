@@ -88,7 +88,7 @@ class MinimumJerk:
     def CreateMotionData(self, position, rotation, gripper, target, motion):
         diffPos = []
         diffRot = []
-        flameLength = 1000
+        flameLength = 300
 
         def CreateMotion_Liner(target, data, split):
             motionlist = np.linspace(data, target, split)
@@ -121,7 +121,7 @@ class MinimumJerk:
             for j in range(4):
                 diffRot.append(CreateMotion_Sin(target['rotation'][i], rotation[0][i], flameLength))
             diffGrip = [850] * flameLength
-            diffGrip.append(CreateMotion_Sin(target['gripper'], gripper, 1000))
+            diffGrip.append(CreateMotion_Sin(target['gripper'], gripper, 100))
 
         self.predictedPosition = self.ConvertToIterator(np.transpose(np.array(diffPos)))
         self.predictedRotation = self.ConvertToIterator(np.transpose(np.array(diffRot)))
