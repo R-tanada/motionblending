@@ -5,6 +5,7 @@ from xarm.wrapper import XArmAPI
 class xArmManager:
     def __init__(self, xArmConfig: dict) -> None:
         self.arm = XArmAPI(xArmConfig['IP'])
+        self.safetyManager = SafetyManager(xArmConfig)
         self.InitializeAll(xArmConfig['InitPos'], xArmConfig['InitRot'])
 
     def DisConnect(self):
@@ -15,8 +16,8 @@ class xArmManager:
             print('[ERROR] >> xArm Error has occured.')
 
     def SendDataToRobot(self, transform):
-        self.arm.set_servo_cartesian()
-        self.arm.getset_tgpio_modbus_data(self.ConvertToModbusData())
+        self.arm.set_servo_cartesian(self.safetyManager.CheckLimit(transform['position'], transform['rotation']))
+        self.arm.getset_tgpio_modbus_data(self.ConvertToModbusData(transform['gripper']))
 
     def InitializeAll(self, InitPos, InitRot):
         self.arm.connect()
