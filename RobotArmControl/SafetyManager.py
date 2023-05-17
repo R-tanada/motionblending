@@ -22,7 +22,7 @@ class SafetyManager:
     def CheckLimit(self, position, rotation):
         rotation = cf.Quaternion2Euler(np.dot(cf.Convert2Matrix_Quaternion(self.initRot), rotation))
         x, y, z = position[0] + self.Init_X, position[1] + self.Init_Y, position[2] + self.Init_Z
-        roll, pitch, yow = rotation[0] + self.Init_Roll, rotation[1] + self.Init_Pitch, rotation[2] + self.Init_Yow
+        roll, pitch, yow = rotation[0], rotation[1], rotation[2]
 
         # pos X
         if(x > self.Max_X):
