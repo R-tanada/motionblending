@@ -20,6 +20,7 @@ if __name__ == '__main__':
     windll.winmm.timeBeginPeriod(1)
 
     isEnablexArm = True
+    isMoving = False
 
     try:
         while True:
