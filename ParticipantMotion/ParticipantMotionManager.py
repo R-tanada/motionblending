@@ -24,7 +24,7 @@ class ParticipantManager:
     def SetParticipantInitMotion(self):
         initMotion = {}
         for Config in self.participantConfig:
-            initMotion[Config['Mount']] = {'position': self.motionManagers[Config['Mount']].SetInitPosition(), 'rotation': self.motionManagers[Config['Mount']].SetInitRotation()}
+            initMotion[Config['Mount']] = {'position': self.motionManagers[Config['Mount']].GetPosition(), 'rotation': self.motionManagers[Config['Mount']].GetRotation()}
 
         return initMotion
 
