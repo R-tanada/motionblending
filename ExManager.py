@@ -8,7 +8,7 @@ from CyberneticAvatarMotion.CyberneticAvatarMotionManager import \
     CyberneticAvatarMotionManager
 
 if __name__ == '__main__':
-    with open('SettingFile/settings_dual_fusion.json', 'r') as settings_file:
+    with open('SettingFile/settings_single.json', 'r') as settings_file:
         settings = json.load(settings_file)
 
     xArmConfigs = settings['xArmConfigs']
