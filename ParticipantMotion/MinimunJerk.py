@@ -8,15 +8,12 @@ class MinimumJerk:
         self.predictedPosition = []
         self.predictedRotation = []
         self.predictedGripper = []
-        self.dataList = []
         self.Threshold = Threshold
         self.target = Target
-        q_zero = [0, 0, 0, 1]
         self.q_init = []
         for target in self.target:
             target['position'] -= np.array(initPos)
-            target['rotation'] = np.dot(cf.Convert2Matrix(cf.Euler2Quaternion(target['rotation'])), np.dot(initRot, q_zero))
-        self.dt = 1/ 240
+            target['rotation'] = np.dot(cf.Convert2Matrix(cf.Euler2Quaternion(target['rotation'])), np.dot(initRot, [0, 0, 0, 1]))
         self.target_index = 0
         self.flag = False
 
@@ -50,7 +47,6 @@ class MinimumJerk:
     def MonitoringMotion(self, position, rotation, gripper):
         isMoving = False
         diff = np.linalg.norm(self.target[self.target_index]['position'] - np.array(position))
-        # velocity, acceleration = self.CalculateMotionInfo(position)
 
         if diff > self.Threshold:
             self.flag = True
@@ -66,26 +62,6 @@ class MinimumJerk:
 
 
         return isMoving
-
-    # def CreateMinimumJerkMotion(self, position, velocity, acceleration):
-    #     pass
-
-    # def CalculateMotionInfo(self, data):
-    #     velocity = acceleration = 0
-    #     self.dataList.append(data)
-
-    #     if len(self.dataList) == 3:
-    #         velocity = self.CalculateVelocity(self.dataList)
-    #         acceleration = self.CalculateAcceleration(self.dataList)
-    #         del self.dataList[0]
-
-    #     return velocity, acceleration
-
-    # def CalculateVelocity(self, dataList):
-    #     return np.diff(dataList, n=1, axis=0)[2] / self.dt
-    
-    # def CalculateAcceleration(self, dataList):
-    #     return np.diff(dataList, n=2, axis=0)[1] / self.dt**2
 
     def CreateMotionData(self, position, rotation, gripper, target, motion):
         diffPos = []
@@ -116,14 +92,6 @@ class MinimumJerk:
                 diffRot.append(CreateMotion_Liner_Rot(target['rotation'][j], rotation[0][j], flameLength))
             diffGrip = [850] * flameLength
             diffGrip = np.concatenate([diffGrip, CreateMotion_Liner(target['gripper'], gripper, 500)], 0)
-
-        elif motion == 'Sin':
-            for i in range(3):
-                diffPos.append(CreateMotion_Sin(target['position'][i], position[i], flameLength))
-            for j in range(4):
-                diffRot.append(CreateMotion_Sin(target['rotation'][i], rotation[0][i], flameLength))
-            diffGrip = [850] * flameLength
-            diffGrip.append(CreateMotion_Sin(target['gripper'], gripper, 100))
 
         self.predictedPosition = self.ConvertToIterator(np.transpose(np.array(diffPos)))
         self.predictedRotation = self.ConvertToIterator(np.transpose(np.array(diffRot)))
