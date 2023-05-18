@@ -59,6 +59,7 @@ class MotionManager:
         self.shiftInitPosition = []
         self.shiftInitQuaternion = []
         self.shiftInitInverseMatrix = []
+        self.iter_initPos = self.iter_initRot = []
         self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = False
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
@@ -80,6 +81,12 @@ class MotionManager:
                 self.ShiftInitPosition(position)
                 self.ShiftInitRotation(rotation)
                 self.isMoving = False
+            
+            if self.isMoving == False and self.initFlag == True:
+                posFlag = self.AdjustInitPosition()
+                rotFlag = self.AdjustInitRotation()
+                if posFlag == rotFlag == False:
+                    self.initFlag = False
                 
             if self.automation.MonitoringMotion(position, rotation, gripper):
                 self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.ConvertFlag = True
@@ -122,12 +129,35 @@ class MotionManager:
 
     def ShiftInitPosition(self, position):
         self.shiftInitPosition -= (np.array(position) - self.GetPosition())
+        p_list = np.linspace(self.shiftInitPosition, self.initPosition, 100)
+        self.iter_initPos = iter(p_list)
 
     def ShiftInitRotation(self, rotation):
         q_zero = [0, 0, 0, 1]
         quaternion, initQuaternion, initInveseMatrix = self.GetRotation()
         q_inverse = np.dot(cf.Convert2InverseMatrix(quaternion), q_zero)
         self.shiftInitQuaternion = np.dot(initInveseMatrix, np.dot(cf.Convert2Matrix(rotation), q_inverse))
-        self.shiftInitInverseMatrix = cf.Convert2InverseMatrix(self.shiftInitQuaternion)
+        weight_list = np.linspace(0, 1, 100)
+        q_list = []
+        for weight in weight_list:
+            q_list.append(cf.Slerp_Quaternion(self.initQuaternion, self.shiftInitQuaternion, weight))
+
+        self.iter_initRot = iter(q_list)
+
+    def AdjustInitPosition(self):
+        try:
+            self.initPosition, flag = next(self.iter_initPos), True
+        except StopIteration:
+            flag = False
+
+        return flag
+    
+    def AdjustInitRotation(self):
+        try:
+            self.initQuaternion, flag = next(self.iter_initRot), True
+        except StopIteration:
+            flag = False
+
+        return flag
 
     

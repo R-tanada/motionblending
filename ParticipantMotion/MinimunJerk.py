@@ -15,7 +15,7 @@ class MinimumJerk:
         self.q_init = []
         for target in self.target:
             target['position'] -= np.array(initPos)
-            target['rotation'] = np.dot(cf.Convert2Matrix(target['rotation']), np.dot(initRot, q_zero))
+            target['rotation'] = np.dot(cf.Convert2Matrix(cf.Euler2Quaternion(target['rotation'])), np.dot(initRot, q_zero))
         self.dt = 1/ 240
         self.target_index = 0
         self.flag = False
