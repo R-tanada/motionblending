@@ -136,7 +136,7 @@ class MotionManager:
         q_zero = [0, 0, 0, 1]
         quaternion, initQuaternion, initInveseMatrix = self.GetRotation()
         q_inverse = np.dot(cf.Convert2InverseMatrix(quaternion), q_zero)
-        self.shiftInitQuaternion = np.dot(initInveseMatrix, np.dot(cf.Convert2Matrix(rotation), q_inverse))
+        self.shiftInitQuaternion = np.dot(initInveseMatrix, np.dot(cf.Convert2Matrix(rotation[0]), q_inverse))
         weight_list = np.linspace(0, 1, 500)
         q_list = []
         for weight in weight_list:
