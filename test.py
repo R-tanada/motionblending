@@ -44,12 +44,20 @@ def q2e(q):
 
 q_zero = [0, 0, 0, 1]
 q_init = [0, 0.2, 0, 0.8]
-print(np.dot(cf.Convert2Matrix_Quaternion(q_init, inverse = True), q_zero))
+# print(np.dot(cf.Convert2Matrix_Quaternion(q_init, inverse = True), q_zero))
 q_robot = [0.3, 0.1, 0.2, 0.4]
 # q = [0.25, 0.05, 0.25, 0.35]
 
-
-q = np.dot(cf.Convert2Matrix_Quaternion(q_init), np.dot(cf.Convert2Matrix_Quaternion(q_robot, inverse=True), q_zero))
+q1 = [0.29742345368, 0.132432784638, 0.14238732468, 0.62344279462]
+q2 = [0.11043288364, 0.223474944978, 0.11234286349, 0.62134143323]
+# q = np.dot(cf.Convert2Matrix_Quaternion(q_init), np.dot(cf.Convert2Matrix_Quaternion(q_robot, inverse=True), q_zero))
 # print(np.dot(np.dot(q_init, cf.Convert2Matrix_Quaternion(q_robot, inverse=True)), cf.Convert2Matrix_Quaternion(q_robot)))
-print(np.dot(cf.Convert2Matrix_Quaternion(q), q_robot))
-print(np.dot(q, cf.Convert2Matrix_Quaternion(q_robot)))
+# print(np.dot(cf.Convert2Matrix_Quaternion(q), q_robot))
+# print(np.dot(q, cf.Convert2Matrix_Quaternion(q_robot)))
+
+weight_list = np.linspace(0, 1, 500)
+q_list = []
+np.set_printoptions(precision=15)
+for weight in weight_list:
+    q_list.append(cf.Slerp_Quaternion(q2, q1, weight))
+    print(cf.Slerp_Quaternion(q2, q1, weight))
