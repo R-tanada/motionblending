@@ -11,9 +11,12 @@ class MinimumJerk:
         self.dataList = []
         self.Threshold = Threshold
         self.target = Target
+        q_zero = [0, 0, 0, 1]
+        self.q_init = []
         for target in self.target:
             target['position'] -= np.array(initPos)
-            target['rotation'] = np.dot(initRot, cf.Euler2Quaternion(target['rotation']))
+            np.dot(initRot, q_zero)
+            target['rotation'] = np.dot(cf.Convert2Matrix_Quaternion(target['rotation']), np.dot(initRot, q_zero))
         self.dt = 1/ 240
         self.target_index = 0
         self.flag = False
@@ -41,7 +44,7 @@ class MinimumJerk:
             gripper = self.gripRetained = next(self.predictedGripper)
             isMoving = True
         except StopIteration:
-            gripper, isMoving = self.gripRetained, False
+            gripper, isMoving = np.dot(cf.Convert2Matrix_Quaternion(self.q_init), self.gripRetained), False
 
         return gripper, isMoving
 

@@ -42,9 +42,14 @@ def q2e(q):
 # print(q2e(q1), cf.Quaternion2Euler(q1))
 # print(q2e(e2q(e1)))
 
-q_init = [0, 0.1, 0, 0.8]
+q_zero = [0, 0, 0, 1]
+q_init = [0, 0.2, 0, 0.8]
+print(np.dot(cf.Convert2Matrix_Quaternion(q_init, inverse = True), q_zero))
 q_robot = [0.3, 0.1, 0.2, 0.4]
-q = [0.25, 0.05, 0.25, 0.35]
+# q = [0.25, 0.05, 0.25, 0.35]
 
-print(np.dot(cf.Convert2Matrix_Quaternion(q_init, inverse=True), q_robot))
-print(np.dot(cf.Convert2Matrix_Quaternion(np.dot(cf.Convert2Matrix_Quaternion(np.dot(cf.Convert2Matrix_Quaternion(q_init, inverse=True), q_robot)), cf.Convert2Matrix_Quaternion(q, inverse=True))), q))
+
+q = np.dot(cf.Convert2Matrix_Quaternion(q_init), np.dot(cf.Convert2Matrix_Quaternion(q_robot, inverse=True), q_zero))
+# print(np.dot(np.dot(q_init, cf.Convert2Matrix_Quaternion(q_robot, inverse=True)), cf.Convert2Matrix_Quaternion(q_robot)))
+print(np.dot(cf.Convert2Matrix_Quaternion(q), q_robot))
+print(np.dot(q, cf.Convert2Matrix_Quaternion(q_robot)))
