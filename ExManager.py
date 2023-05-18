@@ -52,8 +52,4 @@ if __name__ == '__main__':
 
         windll.winmm.timeEndPeriod(1)
 
-
-
-            
-
     print('\n----- End program: ExManager.py -----')

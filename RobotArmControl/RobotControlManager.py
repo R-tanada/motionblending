@@ -18,6 +18,6 @@ class RobotControlManager:
         for mount in self.xarmManagers.keys():
             self.xarmManagers[mount].SendDataToRobot(sharedMotions[mount])
 
-    def Disconnect(self):
+    def DisConnect(self):
         for mount in self.xarmManagers.keys():
             self.xarmManagers[mount].DisConnect()

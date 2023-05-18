@@ -5,6 +5,7 @@ import numpy as np
 
 class xArmManager:
     def __init__(self, xArmConfig: dict) -> None:
+        self.xArmConfig = xArmConfig
         self.arm = XArmAPI(xArmConfig['IP'])
         self.safetyManager = SafetyManager(xArmConfig)
         self.InitializeAll(xArmConfig['InitPos'], xArmConfig['InitRot'])
@@ -12,10 +13,12 @@ class xArmManager:
 
     def DisConnect(self):
         self.arm.disconnect()
+        print('Disconnect > xArm[{}]', format(self.xArmConfig['IP']))
 
     def CheckError(self):
         if self.arm.has_err_warn:
-            print('[ERROR] >> xArm Error has occured.')
+            print('[ERROR] >> xArm[{}] Error has occured.', format(self.xArmConfig['IP']))
+
 
     def SendDataToRobot(self, transform):
         self.arm.set_servo_cartesian(self.safetyManager.Check(self.IncrementInitValue(transform['position'], transform['rotation'])))
