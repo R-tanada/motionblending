@@ -57,7 +57,7 @@ q2 = [0.11043288364, 0.223474944978, 0.11234286349, 0.62134143323]
 
 weight_list = np.linspace(0, 1, 500)
 q_list = []
-# np.set_printoptions(precision=15)
+# np.set_printoptions(precision=5)
 for weight in weight_list:
     q_list.append(cf.Slerp_Quaternion(q2, q1, weight))
     print(cf.Slerp_Quaternion(q2, q1, weight))

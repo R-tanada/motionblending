@@ -63,7 +63,7 @@ def Slerp_Quaternion(Quaternion, initQuaternion, weight):
         return initQuaternion
     
     else:
-        e = 10e-50
+        e = 10e-30
         dot = np.dot(initQuaternion, Quaternion)
         if dot > 1:
             dot = 1
