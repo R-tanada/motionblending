@@ -1,12 +1,14 @@
 from RobotArmControl.SafetyManager import SafetyManager
 from xarm.wrapper import XArmAPI
-
+import CustomFunction.Calculation as cf
+import numpy as np
 
 class xArmManager:
     def __init__(self, xArmConfig: dict) -> None:
         self.arm = XArmAPI(xArmConfig['IP'])
         self.safetyManager = SafetyManager(xArmConfig)
         self.InitializeAll(xArmConfig['InitPos'], xArmConfig['InitRot'])
+        self.initPosition, self.initQuaternion = xArmConfig['InitPos'], cf.Euler2Quaternion(xArmConfig['InitRot'])
 
     def DisConnect(self):
         self.arm.disconnect()
@@ -16,7 +18,7 @@ class xArmManager:
             print('[ERROR] >> xArm Error has occured.')
 
     def SendDataToRobot(self, transform):
-        self.arm.set_servo_cartesian(self.safetyManager.CheckLimit(transform['position'], transform['rotation']))
+        self.arm.set_servo_cartesian(self.safetyManager.Check(self.IncrementInitValue(transform['position'], transform['rotation'])))
         self.arm.getset_tgpio_modbus_data(self.ConvertToModbusData(transform['gripper']))
 
     def InitializeAll(self, InitPos, InitRot):
@@ -65,11 +67,11 @@ class xArmManager:
 
         return modbus_data
 
-    def AddOffset(self, position, rotation):
-        pass
+    def IncrementInitValue(self, position, rotation):
+        pos = np.array(position) - self.initPosition
+        rot = cf.Quaternion2Euler(np.dot(cf.Convert2Matrix_Quaternion(rotation), self.initQuaternion))
 
-    def CheckLimit(self):
-        pass
+        return pos[0], pos[1], pos[2], rot[0], rot[1], rot[2]
 
 
 
