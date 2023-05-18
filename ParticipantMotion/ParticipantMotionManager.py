@@ -89,7 +89,7 @@ class MotionManager:
                     self.initFlag = False
                 
             if self.automation.MonitoringMotion(position, rotation, gripper):
-                self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.ConvertFlag = True
+                self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.initFlag = True
 
         return {'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight}
 
@@ -113,10 +113,7 @@ class MotionManager:
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             gripper = cf.ConvertSensorToGripper(self.sensorManager.sensorValue)
         else:
-            gripper, isMoving = self.automation.GetGripperValue()
-            if isMoving == False:
-                self.isMoving_Grip = isMoving
-                self.initFlag = True
+            gripper, self.isMoving_Grip = self.automation.GetGripperValue()
 
         return gripper
     
@@ -161,7 +158,7 @@ class MotionManager:
                 pass
             else:
                 self.initQuaternion = self.automation.q_init
-                self.initInverseMatrix = cf.Convert2InverseMatrix(self.initQuaternion)
+                self.initInverseMatrix = cf.Convert2InverseMatrix(self.automation.q_init)
             flag = False
 
         return flag
