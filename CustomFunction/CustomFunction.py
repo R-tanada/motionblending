@@ -56,7 +56,7 @@ def Euler2Quaternion(euler):
     return rotQuat
 
 def Slerp_Quaternion(Quaternion, initQuaternion, weight):
-    e = 10e-20
+    e = 10e-30
     dot = np.dot(initQuaternion, Quaternion)
     if dot > 1:
         dot = 1

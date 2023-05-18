@@ -154,11 +154,8 @@ class MotionManager:
             rot = next(self.iter_initRot)
             self.initQuaternion, self.initInverseMatrix, flag = rot, cf.Convert2Matrix(rot), True
         except StopIteration:
-            if np.array_equal(self.initQuaternion, self.automation.q_init):
-                pass
-            else:
-                self.initQuaternion = self.automation.q_init
-                self.initInverseMatrix = cf.Convert2InverseMatrix(self.automation.q_init)
+            self.initQuaternion = self.automation.q_init
+            self.initInverseMatrix = cf.Convert2InverseMatrix(self.automation.q_init)
             flag = False
 
         return flag
