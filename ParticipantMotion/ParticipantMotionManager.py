@@ -56,9 +56,9 @@ class MotionManager:
         self.initQuaternion = []
         self.initInverseMatrix = []
         self.initFlag = False
-        self.shiftInitPosition = []
-        self.shiftInitQuaternion = []
-        self.shiftInitInverseMatrix = []
+        self.updateInitPosition = []
+        self.updateInitQuaternion = []
+        self.updateInitInverseMatrix = []
         self.iter_initPos = self.iter_initRot = []
         self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = False
 
@@ -125,19 +125,19 @@ class MotionManager:
         self.initInverseMatrix = cf.Convert2InverseMatrix(quaternion = q)
 
     def UpdateInitPosition(self, position):
-        self.shiftInitPosition = self.initPosition - (np.array(position) - self.GetPosition())
-        p_list = np.linspace(self.shiftInitPosition, self.initPosition, 500)
+        self.updateInitPosition = self.initPosition - (np.array(position) - self.GetPosition())
+        p_list = np.linspace(self.updateInitPosition, self.initPosition, 500)
         self.iter_initPos = iter(p_list)
 
     def UpdateInitRotation(self, rotation):
         q_zero = [0, 0, 0, 1]
         quaternion, initQuaternion, initInveseMatrix = self.GetRotation()
         q_inverse = np.dot(cf.Convert2InverseMatrix(quaternion), q_zero)
-        self.shiftInitQuaternion = np.dot(initInveseMatrix, np.dot(cf.Convert2Matrix(rotation[0]), q_inverse))
+        self.updateInitQuaternion = np.dot(initInveseMatrix, np.dot(cf.Convert2Matrix(rotation[0]), q_inverse))
         weight_list = np.linspace(0, 1, 500)
         q_list = []
         for weight in weight_list:
-            q_list.append(cf.Slerp_Quaternion(self.initQuaternion, self.shiftInitQuaternion, weight))
+            q_list.append(cf.Slerp_Quaternion(self.initQuaternion, self.updateInitQuaternion, weight))
 
         self.iter_initRot = iter(q_list)
 
@@ -154,8 +154,6 @@ class MotionManager:
             rot = next(self.iter_initRot)
             self.initQuaternion, self.initInverseMatrix, flag = rot, cf.Convert2Matrix(rot), True
         except StopIteration:
-            self.initQuaternion = self.automation.q_init
-            self.initInverseMatrix = cf.Convert2InverseMatrix(self.automation.q_init)
             flag = False
 
         return flag
