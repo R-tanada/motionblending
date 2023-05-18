@@ -43,7 +43,7 @@ class MinimumJerk:
             gripper = self.gripRetained = next(self.predictedGripper)
             isMoving = True
         except StopIteration:
-            gripper, isMoving = self.gripRetained
+            gripper, isMoving = self.gripRetained, False
 
         return gripper, isMoving
 
