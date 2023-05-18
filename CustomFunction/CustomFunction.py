@@ -85,15 +85,22 @@ def CnvertAxis_Rotation(rotation, axis):
 
     return rotation
 
-def Convert2Matrix_Quaternion(quaternion, inverse: bool = False):
+def Convert2Matrix(quaternion):
     qw, qx, qy, qz = quaternion[3], quaternion[1], quaternion[2], quaternion[0]
     matrix = np.array([ [qw, -qy, qx, qz],
                         [qy, qw, -qz, qx],
                         [-qx, qz, qw, qy],
                         [-qz,-qx, -qy, qw]])
 
-    if inverse:
-        matrix = np.linalg.inv(matrix)
+    return matrix
+
+def Convert2InverseMatrix(quaternion):
+    qw, qx, qy, qz = quaternion[3], quaternion[1], quaternion[2], quaternion[0]
+    matrix = np.array([ [qw, -qy, qx, qz],
+                        [qy, qw, -qz, qx],
+                        [-qx, qz, qw, qy],
+                        [-qz,-qx, -qy, qw]])
+    matrix = np.linalg.inv(matrix)
 
     return matrix
 

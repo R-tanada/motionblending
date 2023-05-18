@@ -4,7 +4,7 @@ import CustomFunction.CustomFunction as cf
 class MinimumJerk:
     def __init__(self, Target: list, xArmConfig: dict, Threshold = 100) -> None:
         initPos = xArmConfig['InitPos']
-        initRot = cf.Convert2Matrix_Quaternion(cf.Euler2Quaternion(xArmConfig['InitRot']), inverse = True)
+        initRot = cf.Convert2InverseMatrix(cf.Euler2Quaternion(xArmConfig['InitRot']))
         self.predictedPosition = []
         self.predictedRotation = []
         self.predictedGripper = []
@@ -15,7 +15,7 @@ class MinimumJerk:
         self.q_init = []
         for target in self.target:
             target['position'] -= np.array(initPos)
-            target['rotation'] = np.dot(cf.Convert2Matrix_Quaternion(target['rotation']), np.dot(initRot, q_zero))
+            target['rotation'] = np.dot(cf.Convert2Matrix(target['rotation']), np.dot(initRot, q_zero))
         self.dt = 1/ 240
         self.target_index = 0
         self.flag = False
@@ -34,7 +34,7 @@ class MinimumJerk:
             rotation = self.rotRetained = next(self.predictedRotation)
             isMoving = True
         except StopIteration:
-            rotation, isMoving = np.dot(cf.Convert2Matrix_Quaternion(self.q_init), self.rotRetained), False
+            rotation, isMoving = np.dot(cf.Convert2Matrix(self.q_init), self.rotRetained), False
 
         return rotation, isMoving
     
