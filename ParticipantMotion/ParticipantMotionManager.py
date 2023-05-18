@@ -78,13 +78,13 @@ class MotionManager:
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             if self.isMoving == True:
-                self.ShiftInitPosition(position)
-                self.ShiftInitRotation(rotation)
+                self.UpdateInitPosition(position)
+                self.UpdateInitRotation(rotation)
                 self.isMoving = False
             
             if self.isMoving == False and self.initFlag == True:
-                posFlag = self.AdjustInitPosition()
-                rotFlag = self.AdjustInitRotation()
+                posFlag = self.LerpInitPosition()
+                rotFlag = self.SlerpInitRotation()
                 if posFlag == rotFlag == False:
                     self.initFlag = False
                 
@@ -127,12 +127,12 @@ class MotionManager:
         q = self.initQuaternion = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
         self.initInverseMatrix = cf.Convert2InverseMatrix(quaternion = q)
 
-    def ShiftInitPosition(self, position):
+    def UpdateInitPosition(self, position):
         self.shiftInitPosition = self.initPosition - (np.array(position) - self.GetPosition())
         p_list = np.linspace(self.shiftInitPosition, self.initPosition, 500)
         self.iter_initPos = iter(p_list)
 
-    def ShiftInitRotation(self, rotation):
+    def UpdateInitRotation(self, rotation):
         q_zero = [0, 0, 0, 1]
         quaternion, initQuaternion, initInveseMatrix = self.GetRotation()
         q_inverse = np.dot(cf.Convert2InverseMatrix(quaternion), q_zero)
@@ -144,7 +144,7 @@ class MotionManager:
 
         self.iter_initRot = iter(q_list)
 
-    def AdjustInitPosition(self):
+    def LerpInitPosition(self):
         try:
             self.initPosition, flag = next(self.iter_initPos), True
         except StopIteration:
@@ -152,7 +152,7 @@ class MotionManager:
 
         return flag
     
-    def AdjustInitRotation(self):
+    def SlerpInitRotation(self):
         try:
             rot = next(self.iter_initRot)
             self.initQuaternion, self.initInverseMatrix, flag = rot, cf.Convert2Matrix(rot), True
