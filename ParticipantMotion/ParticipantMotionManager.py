@@ -124,7 +124,7 @@ class MotionManager:
         self.initPosition = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount)
 
     def SetInitRotation(self):
-        q = self.initQuaternion = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
+        q = self.initQuaternion = self.automation.q_init = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
         self.initInverseMatrix = cf.Convert2InverseMatrix(quaternion = q)
 
     def UpdateInitPosition(self, position):
