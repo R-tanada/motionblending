@@ -34,7 +34,7 @@ class MinimumJerk:
             rotation = self.rotRetained = next(self.predictedRotation)
             isMoving = True
         except StopIteration:
-            rotation, isMoving = self.rotRetained, False
+            rotation, isMoving = np.dot(cf.Convert2Matrix_Quaternion(self.q_init), self.rotRetained), False
 
         return rotation, isMoving
     
@@ -43,7 +43,7 @@ class MinimumJerk:
             gripper = self.gripRetained = next(self.predictedGripper)
             isMoving = True
         except StopIteration:
-            gripper, isMoving = np.dot(cf.Convert2Matrix_Quaternion(self.q_init), self.gripRetained), False
+            gripper, isMoving = self.gripRetained
 
         return gripper, isMoving
 
