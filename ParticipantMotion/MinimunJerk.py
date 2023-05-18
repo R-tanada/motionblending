@@ -31,10 +31,10 @@ class MinimumJerk:
     
     def GetRotation(self):
         try:
-            rotation = self.rotRetained = next(self.predictedRotation)
+            rotation = self.rotRetained = np.dot(cf.Convert2Matrix(self.q_init), next(self.predictedRotation))
             isMoving = True
         except StopIteration:
-            rotation, isMoving = np.dot(cf.Convert2Matrix(self.q_init), self.rotRetained), False
+            rotation, isMoving = self.rotRetained, False
 
         return rotation, isMoving
     

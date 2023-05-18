@@ -55,7 +55,7 @@ class MotionManager:
         self.initPosition = []
         self.initQuaternion = []
         self.initInverseMatrix = []
-        self.ConvertFlag = False
+        self.initFlag = False
         self.shiftInitPosition = []
         self.shiftInitQuaternion = []
         self.shiftInitInverseMatrix = []
@@ -123,13 +123,13 @@ class MotionManager:
     def SetInitPosition(self):
         self.initPosition = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount)
 
-    def SetInitRotation(self) -> None:
-        q = self.initQuaternion = self.automation.q_init = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
+    def SetInitRotation(self):
+        q = self.initQuaternion = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
         self.initInverseMatrix = cf.Convert2InverseMatrix(quaternion = q)
 
     def ShiftInitPosition(self, position):
-        self.shiftInitPosition -= (np.array(position) - self.GetPosition())
-        p_list = np.linspace(self.shiftInitPosition, self.initPosition, 100)
+        self.shiftInitPosition = self.initPosition - (np.array(position) - self.GetPosition())
+        p_list = np.linspace(self.shiftInitPosition, self.initPosition, 500)
         self.iter_initPos = iter(p_list)
 
     def ShiftInitRotation(self, rotation):
@@ -137,7 +137,7 @@ class MotionManager:
         quaternion, initQuaternion, initInveseMatrix = self.GetRotation()
         q_inverse = np.dot(cf.Convert2InverseMatrix(quaternion), q_zero)
         self.shiftInitQuaternion = np.dot(initInveseMatrix, np.dot(cf.Convert2Matrix(rotation), q_inverse))
-        weight_list = np.linspace(0, 1, 100)
+        weight_list = np.linspace(0, 1, 500)
         q_list = []
         for weight in weight_list:
             q_list.append(cf.Slerp_Quaternion(self.initQuaternion, self.shiftInitQuaternion, weight))
@@ -154,7 +154,8 @@ class MotionManager:
     
     def AdjustInitRotation(self):
         try:
-            self.initQuaternion, flag = next(self.iter_initRot), True
+            rot = next(self.iter_initRot)
+            self.initQuaternion, self.initInverseMatrix, flag = rot, cf.Convert2Matrix(rot), True
         except StopIteration:
             flag = False
 
