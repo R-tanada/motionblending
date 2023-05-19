@@ -56,14 +56,21 @@ def Euler2Quaternion(euler):
     return rotQuat
 
 def Slerp_Quaternion(Quaternion, initQuaternion, weight):
-    e = 10e-30
-    dot = np.dot(initQuaternion, Quaternion)
-    if dot > 1:
-        dot = 1
-    elif dot < -1:
-        dot = -1
-    theta = math.acos(dot)
-    return (math.sin((1 - weight) * theta)/ (math.sin(theta) + e)) * np.array(initQuaternion) + (math.sin(weight * theta)/ (math.sin(theta) + e)) * np.array(Quaternion)
+    if weight == 1:
+        return Quaternion
+    
+    elif weight == 0:
+        return initQuaternion
+    
+    else:
+        e = 10e-30
+        dot = np.dot(initQuaternion, Quaternion)
+        if dot > 1:
+            dot = 1
+        elif dot < -1:
+            dot = -1
+        theta = math.acos(dot)
+        return (math.sin((1 - weight) * theta)/ (math.sin(theta) + e)) * np.array(initQuaternion) + (math.sin(weight * theta)/ (math.sin(theta) + e)) * np.array(Quaternion)
 
 def ConvertAxis_Position(position, axis):
     if axis == 'vertical':
