@@ -8,6 +8,7 @@ from OptiTrack.OptiTrackStreamingManager import OptiTrackStreamingManager
 from Sensor.SensorManager import GripperSensorManager
 from ParticipantMotion.MinimunJerk import MinimumJerk
 import CustomFunction.CustomFunction as cf
+from VibrotactileFeedback.VIbrotactileFeedbackManager import VibrotactileFeedbackManager
 
 
 class ParticipantManager:
@@ -61,9 +62,12 @@ class MotionManager:
         self.shiftInitInverseMatrix = []
         self.iter_initPos = self.iter_initRot = []
         self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = False
+        
+        self.dt = 1/240
+        self.position_list = []
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
-        self.initRot = xArmConfig['InitRot']
+        self.vibro = VibrotactileFeedbackManager()
 
         MotionManager.optiTrackStreamingManager.position[self.rigidBody] = np.zeros(3)
         MotionManager.optiTrackStreamingManager.rotation[self.rigidBody] = np.zeros(4)
@@ -75,7 +79,7 @@ class MotionManager:
 
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
-        
+        vel = self.GetParticipantMotionInfo(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             if self.isMoving == True:
@@ -91,6 +95,9 @@ class MotionManager:
                 
             if self.automation.MonitoringMotion(position, rotation, gripper):
                 self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.initFlag = True
+
+        else:
+            self.vibro.data_out = vel
 
         return {'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight}
 
@@ -158,3 +165,15 @@ class MotionManager:
             flag = False
 
         return flag
+    
+    def GetParticipantMotionInfo(self, position):
+        self.position_list.append(position)
+
+        if len(self.position_list) == 2:
+            vel = np.gradient(self.position_list, varargs = self.dt)
+            del self.position_list[0]
+
+        else:
+            vel = 0
+
+        return vel
