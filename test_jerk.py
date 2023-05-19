@@ -2,32 +2,30 @@ import numpy as np
 from scipy.optimize import minimize
 from matplotlib import pyplot as plt
 
-# 制約条件
-def constraint(x):
-    # 経由点を通る制約式
-    c = 50 - x[50]
-    return c
+# dt = 1/200
 
-# 躍度関数
+def constraint(x):
+    c1 = 200 - x[-1]
+    c2 = 100 - x[0]
+    c3 = np.gradient(x)[0] - 6
+    c4 = np.gradient(x)[-1]
+    # c5 = np.gradient(np.gradient(x))[0] - 1
+    c6 = np.gradient(np.gradient(x))[-1]
+    return [c1, c2, c3, c4, c6]
+
 def jerk(x):
     j = np.sum(np.abs(np.gradient(np.gradient(np.gradient(x)))))
     return j
 
-# 最適化問題を設定
-def optimize_path(init_path, p1, p2, p3):
-    res = minimize(jerk, init_path, constraints = {'type': 'eq', 'fun': constraint}, method='SLSQP')
+def optimize_path(init_path):
+    res = minimize(jerk, init_path, constraints = {'type': 'eq', 'fun': constraint})
     return res.x
 
 # 例として、初期値となる軌道を与える
-init_path = np.linspace(100, 50, 100)
-
-# 3つの経由点を与える
-p1 = 2
-p2 = 4
-p3 = 19
+init_path = np.linspace(100, 200, 30)
 
 # 経由点を制約条件として、最適な軌道を求める
-result_path = optimize_path(init_path, p1, p2, p3)
+result_path = optimize_path(init_path)
 
 plt.plot(init_path, result_path)
 plt.show()

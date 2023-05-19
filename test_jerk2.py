@@ -1,35 +1,34 @@
 import numpy as np
 from scipy.optimize import minimize
-from matplotlib import pyplot as plt
 
-# 躍度最小化の目的関数
-def objective(x):
-    return np.sum(np.abs(np.gradient(np.gradient(np.gradient(x)))))
+# 目的関数（躍度）
+def jerk(x):
+    j = np.sum(np.abs(np.gradient(np.gradient(np.gradient(x)))))
+    return j
 
-# 初期値と終端地点
-initial_position = 0  # 初期位置
-final_position = 1    # 終端位置
+# 制約条件関数
+def constraint(x, *args):
+    p1, p2, p3 = args
+    c1 = np.dot(x[:3] - p1, x[3:])  # 第1の経由点
+    c2 = np.dot(x[:3] - p2, x[3:])  # 第2の経由点
+    c3 = np.dot(x[:3] - p3, x[3:])  # 第3の経由点
+    return [c1, c2, c3]
 
-def cons(x):
-    return np.sum(np.gradient(np.gradient(np.gradient(np.gradient(np.gradient(np.gradient(x)))))))
+# 躍度最小軌道の導出
+def optimize_path(init_path, p1, p2, p3):
+    bounds = [(None, None)] * 3 + [(-1, 1)] * 3
+    res = minimize(jerk, init_path, constraints={'type': 'eq', 'fun': constraint, 'args': (p1, p2, p3)}, bounds=bounds, method='SLSQP')
+    return res.x
 
-# 初期軌道の数
-num_samples = 200
+# 例として、初期値となる軌道を与える
+init_path = np.array([0, 0, 0, 1, 0, 0, 0])
 
-# 初期軌道の生成
-initial_trajectory = np.linspace(initial_position, final_position, num_samples)
+# 3つの経由点を与える
+p1 = np.array([1, 2, 3])
+p2 = np.array([4, 5, 6])
+p3 = np.array([7, 8, 9])
 
-# 制約条件
-constraints = [{'type': 'eq', 'fun': lambda x: x[0] - initial_position},   # 初期値の制約
-               {'type': 'eq', 'fun': lambda x: x[-1] - final_position},
-               {'type': 'eq', 'fun': cons}]    # 終端地点の制約
+# 躍度最小軌道を求める
+result_path = optimize_path(init_path, p1, p2, p3)
 
-# 最適化の実行
-result = minimize(objective, initial_trajectory, constraints=constraints)
-
-# 予測された手の動き
-hand_movement = result.x
-
-# 結果の表示
-plt.plot(initial_trajectory, result.x)
-plt.show()
+print(result_path)
