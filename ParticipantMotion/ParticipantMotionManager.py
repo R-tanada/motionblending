@@ -11,7 +11,7 @@ import CustomFunction.CustomFunction as cf
 
 
 class ParticipantManager:
-    with open('SettingFile/settings_single.json', 'r') as settings_file:
+    with open('SettingFile/settings_dual.json', 'r') as settings_file:
         settings = json.load(settings_file)
     xArmConfig = {}
     for xArm in settings['xArmConfigs'].keys():
