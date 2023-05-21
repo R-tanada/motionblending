@@ -155,6 +155,8 @@ class MotionManager:
             self.initQuaternion, self.initInverseMatrix, flag = rot, cf.Convert2Matrix(rot), True
         except StopIteration:
             flag = False
+            self.initQuaternion = self.automation.q_init
+            self.initInverseMatrix = cf.Convert2InverseMatrix(self.automation.q_init)
 
         return flag
 
