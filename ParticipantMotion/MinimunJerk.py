@@ -2,7 +2,7 @@ import numpy as np
 import CustomFunction.CustomFunction as cf
 
 class MinimumJerk:
-    def __init__(self, Target: list, xArmConfig: dict, Threshold = 100) -> None:
+    def __init__(self, Target: list, xArmConfig: dict, Threshold = 200) -> None:
         initPos = xArmConfig['InitPos']
         initRot = cf.Convert2InverseMatrix(cf.Euler2Quaternion(xArmConfig['InitRot']))
         self.predictedPosition = []
@@ -66,7 +66,7 @@ class MinimumJerk:
     def CreateMotionData(self, position, rotation, gripper, target, motion):
         diffPos = []
         diffRot = []
-        flameLength = 300
+        flameLength = 500
 
         def CreateMotion_Liner(target, data, split):
             motionlist = np.linspace(data, target, split)
