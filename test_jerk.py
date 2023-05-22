@@ -1,33 +1,42 @@
 import numpy as np
-from scipy.optimize import minimize
 from matplotlib import pyplot as plt
 
-# dt = 1/200
+tn = 2
+tf = 2.5
+pos_n = [30, 50, 40]
+pos_f = [50, 20, 58]
+vel_n = [3, -30, 1]
+vel_f = [0, 0, 0]
+acc_n = [0.5, -5, 0.5]
+acc_f = [0, 0, 0]
+loopCount = 100
 
-def constraint(x):
-    c1 = 200 - x[-1]
-    c2 = 100 - x[0]
-    c3 = np.gradient(x)[0] - 6
-    c4 = np.gradient(x)[-1]
-    # c5 = np.gradient(np.gradient(x))[0] - 1
-    c6 = np.gradient(np.gradient(x))[-1]
-    return [c1, c2, c3, c4, c6]
+a_matrix = [
+    [1, tn, tn**2,  tn**3,      tn**4,      tn**5       ],
+    [0, 1,  2*tn,   3*(tn**2),  4*(tn**3),  5*(tn**4)   ],
+    [0, 0,  2,      6*tn,       12*(tn**2), 20*(tn**3)  ],
+    [1, tf, tf**2,  tf**3,      tf**4,      tf**5       ],
+    [0, 1,  2*tf,   3*(tf**2),  4*(tf**3),  5*(tf**4)   ],
+    [0, 0,  2,      6*tf,       12*(tf**2), 20*(tf**3)  ]
+]
+b_matrix = [pos_n, vel_n, acc_n, pos_f, vel_f, acc_f]
+coeff = np.linalg.solve(a_matrix, b_matrix)
 
-def jerk(x):
-    j = np.sum(np.abs(np.gradient(np.gradient(np.gradient(x)))))
-    return j
+def function(coeff, x):
+    return coeff[0] + coeff[1]*x + coeff[2]*(x**2) + coeff[3]*(x**3) + coeff[4]*(x**4) + coeff[5]*(x**5)
 
-def optimize_path(init_path):
-    res = minimize(jerk, init_path, constraints = {'type': 'eq', 'fun': constraint})
-    return res.x
+flameLength = (loopCount/ tn) * (tf - tn)
+flame = np.linspace(tn, tf, int(flameLength))
 
-# 例として、初期値となる軌道を与える
-init_path = np.linspace(100, 200, 30)
+print(coeff[0])
+print(coeff[:, 0])
+y = []
+for i in range(3):
+    y.append(function(coeff[:, i], flame))
+# y = function(coeff, flame)
+# print(function(coeff[:, 0], flame))
 
-# 経由点を制約条件として、最適な軌道を求める
-result_path = optimize_path(init_path)
+print(np.transpose(y))
 
-plt.plot(init_path, result_path)
-plt.show()
-
-# print(result_path)
+# plt.plot(flame, y[1])
+# plt.show()
