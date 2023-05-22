@@ -1,9 +1,10 @@
 import numpy as np
+import time
 import CustomFunction.CustomFunction as cf
 
 class MinimumJerk:
     def __init__(self, Target: list, xArmConfig: dict, Threshold = 200) -> None:
-        initPos = xArmConfig['InitPos']
+        self.initPos = xArmConfig['InitPos']
         initRot = cf.Convert2InverseMatrix(cf.Euler2Quaternion(xArmConfig['InitRot']))
         self.predictedPosition = []
         self.predictedRotation = []
@@ -12,12 +13,16 @@ class MinimumJerk:
         self.target = Target
         self.q_init = []
         for target in self.target:
-            target['position'] -= np.array(initPos)
+            target['position'] -= np.array(self.initPos)
             target['rotation'] = np.dot(cf.Convert2Matrix(cf.Euler2Quaternion(target['rotation'])), np.dot(initRot, [0, 0, 0, 1]))
             if target['rotation'][3] < 0:
                 target['rotation'] = -target['rotation']
         self.target_index = 0
         self.flag = False
+        self.initThreshold = 50
+        self.timer = True
+        self.loopCount = 0
+        self.startTime = 0
 
     def GetPosition(self):
         try:
@@ -46,63 +51,70 @@ class MinimumJerk:
 
         return gripper, isMoving
 
-    def MonitoringMotion(self, position, rotation, gripper):
+    def MonitoringMotion(self, position, rotation, gripper, velocity, accelaration):
         isMoving = False
         diff = np.linalg.norm(self.target[self.target_index]['position'] - np.array(position))
+        diff_init = np.linalg.norm(self.initPos - np.array(position))
 
-        if diff > self.Threshold:
+        if diff_init > self.initThreshold:
             self.flag = True
 
         if self.flag == True:
-            if diff <= self.Threshold:
-                self.CreateMotionData(position, rotation, gripper, self.target[self.target_index], 'Liner')
-                self.target_index += 1
-                if self.target_index == 2:
-                    self.target_index = 0
-                isMoving = True
-                self.flag = False
+            if diff_init >= self.initThreshold:
+                if self.timer:
+                    self.startTime = time.perf_counter()
+                    self.loopCount = 0
+                    self.timer = False
+
+                self.loopCount += 1
+
+                if diff <= self.Threshold:
+                    tn = time.perf_counter() - self.startTime
+                    self.CreateMotionData(tn, self.loopCount, position, velocity, accelaration, rotation, gripper, self.target[self.target_index]['position'], self.target[self.target_index]['rotation'], self.target[self.target_index]['gripper'])
+                    self.target_index += 1
+                    if self.target_index == 2:
+                        self.target_index = 0
+                    isMoving = True
+                    self.flag = False
+                    self.timer = True
 
 
         return isMoving
+    
+    def CreateMotionData(self, tn, loopCount, pos_n, vel_n, acc_n, rot_n, grip_n, pos_f, rot_f, grip_f):
+        tf = self.Threshold/ np.linalg.norm(vel_n)
+        frameLength = (loopCount/ tn) * (tf - tn)
 
-    def CreateMotionData(self, position, rotation, gripper, target, motion):
-        diffPos = []
-        diffRot = []
-        flameLength = 500
+        self.CreateMotionMinimumJerk(tn, pos_n, vel_n, acc_n, tf, pos_f, frameLength)
+        self.CreateSlerpMotion(rot_n, rot_f, frameLength)
+        self.CreateGripMotion(grip_n, grip_f, frameLength, gripFrame = 300)
 
+    def CreateGripMotion(self, grip_n, grip_f, frameLength, gripFrame):
         def CreateMotion_Liner(target, data, split):
             motionlist = np.linspace(data, target, split)
             return motionlist
         
-        def CreateMotion_Liner_Rot(target, data, split):
-            weight_list = np.linspace(0, 1, split)
-            q_list = []
+        diffGrip = [850] * frameLength
+        diffGrip = np.concatenate([diffGrip, CreateMotion_Liner(grip_f, grip_n, gripFrame)], 0)
+
+        self.predictedGripper = iter(diffGrip)
+    
+    def CreateSlerpMotion(self, rot_n, rot_f, frameLength):
+        def SlerpMotion(self):
+            weight_list = np.linspace(0, 1, frameLength)
+            rot_list = []
             for weight in weight_list:
-                q_list.append(cf.Slerp_Quaternion(target, data, weight))
-            
-            return q_list
+                rot_list.append(cf.Slerp_Quaternion(rot_f, rot_n, weight))
 
-        def CreateMotion_Sin(target, data, split):
-            flamelist = np.linspace(0, np.pi/2, split)
-            motionlist = (target - data) * np.sin(flamelist) + data
-            return motionlist
+            return rot_list
 
-        if motion == 'Liner':
-            for i in range(3):
-                diffPos.append(CreateMotion_Liner(target['position'][i], position[i], flameLength))
-            for j in range(4):
-                diffRot.append(CreateMotion_Liner_Rot(target['rotation'][j], rotation[0][j], flameLength))
-            diffGrip = [850] * flameLength
-            diffGrip = np.concatenate([diffGrip, CreateMotion_Liner(target['gripper'], gripper, 500)], 0)
+        diffRot = []
+        for i in range(4):
+            diffRot.append(SlerpMotion(rot_f[i], rot_n[0][i], frameLength))
 
-        self.predictedPosition = self.ConvertToIterator(np.transpose(np.array(diffPos)))
-        self.predictedRotation = self.ConvertToIterator(np.transpose(np.array(diffRot)))
-        self.predictedGripper = self.ConvertToIterator(diffGrip)
+        self.predictedRotation = iter(np.transpose(np.array(diffRot)))
 
-    def ConvertToIterator(self, data):
-        return iter(data)
-
-    def CreateMotionMinimumJerk(self, tn, loopCount, pos_n, vel_n, acc_n, tf, pos_f, vel_f = [0, 0, 0], acc_f = [0, 0, 0]):
+    def CreateMotionMinimumJerk(self, tn, pos_n, vel_n, acc_n, tf, pos_f, frameLength, vel_f = [0, 0, 0], acc_f = [0, 0, 0]):
         a_matrix = [
             [1, tn, tn**2,  tn**3,      tn**4,      tn**5       ],
             [0, 1,  2*tn,   3*(tn**2),  4*(tn**3),  5*(tn**4)   ],
@@ -116,12 +128,11 @@ class MinimumJerk:
 
         def function(coeff, x):
             return coeff[0] + coeff[1]*x + coeff[2]*(x**2) + coeff[3]*(x**3) + coeff[4]*(x**4) + coeff[5]*(x**5)
-        
-        flameLength = (loopCount/ tn) * (tf - tn)
-        flame = np.linspace(tn, tf, int(flameLength))
+
+        flame = np.linspace(tn, tf, int(frameLength))
 
         position = []
         for i in range(3):
             position.append(function(coeff[:, i], flame))
 
-        self.predictedPosition = iter(np.transpose(position))
+        self.predictedPosition = iter(np.transpose(np.array(position)))

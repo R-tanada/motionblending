@@ -61,6 +61,8 @@ class MotionManager:
         self.updateInitInverseMatrix = []
         self.iter_initPos = self.iter_initRot = []
         self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = False
+        self.pos_list = []
+        self.dt = 200
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
         self.initRot = xArmConfig['InitRot']
@@ -75,6 +77,7 @@ class MotionManager:
 
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
+        velocity, accelaration = self.GetParticipnatMotionInfo(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             if self.isMoving == True:
@@ -88,7 +91,7 @@ class MotionManager:
                 if posFlag == rotFlag == False:
                     self.initFlag = False
                 
-            if self.automation.MonitoringMotion(position, rotation, gripper):
+            if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration):
                 self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.initFlag = True
 
         return {'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight}
@@ -160,4 +163,16 @@ class MotionManager:
 
         return flag
 
-    
+    def GetParticipnatMotionInfo(self, position):
+        self.pos_list.append(position)
+
+        if len(self.pos_list) == 3:
+            vel = (np.diff(self.pos_list, n=1, axis=0) / self.dt)[0]
+            acc = np.diff(self.pos_list, n=2, axis=0) / self.dt**2
+            
+            del self.pos_list[0]
+
+        else:
+            vel = acc =0
+
+        return vel, acc
