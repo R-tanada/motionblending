@@ -100,7 +100,7 @@ class MinimumJerk:
         self.predictedGripper = iter(diffGrip)
     
     def CreateSlerpMotion(self, rot_n, rot_f, frameLength):
-        def SlerpMotion(self):
+        def SlerpMotion(rot_f, rot_n, frameLength):
             weight_list = np.linspace(0, 1, frameLength)
             rot_list = []
             for weight in weight_list:
