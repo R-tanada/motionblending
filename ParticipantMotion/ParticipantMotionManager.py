@@ -89,9 +89,10 @@ class MotionManager:
                 rotFlag = self.SlerpInitRotation()
                 if posFlag == rotFlag == False:
                     self.initFlag = False
-                
-            if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration):
-                self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.initFlag = True
+                    
+            if self.initFlag == False:
+                if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration):
+                    self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.initFlag = True
 
         return {'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight}
 
