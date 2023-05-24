@@ -102,7 +102,7 @@ class MinimumJerk:
         self.predictedGripper = iter(diffGrip)
     
     def CreateSlerpMotion(self, rot_n, rot_f, frameLength):
-        weight_list = np.linspace(0, 1, frameLength*0.7)
+        weight_list = np.linspace(0, 1, int(frameLength*0.7))
         rot_list = []
         for weight in weight_list:
             rot_list.append(cf.Slerp_Quaternion(rot_f, rot_n[0], weight))
@@ -135,7 +135,7 @@ class MinimumJerk:
         def function(coeff, x):
             return coeff[0] + coeff[1]*x + coeff[2]*(x**2) + coeff[3]*(x**3) + coeff[4]*(x**4) + coeff[5]*(x**5)
 
-        flame = np.linspace(tn, tf, int(frameLength))
+        flame = np.linspace(tn, tf, frameLength)
 
         position = []
         for i in range(3):
