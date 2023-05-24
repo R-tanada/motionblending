@@ -106,7 +106,10 @@ class MotionManager:
     
     def GetRotation(self):
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
-            self.rotation = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
+            quaternion = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
+            if quaternion[3] < 0:
+                quaternion = -np.array(quaternion)
+            self.rotation = quaternion
         else:
             self.rotation, self.isMoving_Rot = self.automation.GetRotation()
 
@@ -124,8 +127,11 @@ class MotionManager:
         self.initPosition = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount)
 
     def SetInitRotation(self):
-        q = self.initQuaternion = self.automation.q_init = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
-        self.initInverseMatrix = cf.Convert2InverseMatrix(quaternion = q)
+        quaternion = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
+        if quaternion[3] < 0:
+            quaternion = -np.array(quaternion)
+        self.initQuaternion = self.automation.q_init = quaternion
+        self.initInverseMatrix = cf.Convert2InverseMatrix(quaternion)
 
     def UpdateInitPosition(self, position):
         self.updateInitPosition = self.initPosition - (np.array(position) - self.GetPosition())
