@@ -61,7 +61,7 @@ class MotionManager:
         self.iter_initPos = self.iter_initRot = []
         self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = False
         self.pos_list = []
-        self.dt = 200
+        self.dt = 1/ 200
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
         self.initRot = xArmConfig['InitRot']
@@ -173,6 +173,6 @@ class MotionManager:
             del self.pos_list[0]
 
         else:
-            vel = acc =0
+            vel = acc = [0, 0, 0]
 
         return vel, acc
