@@ -168,7 +168,7 @@ class MotionManager:
 
         if len(self.pos_list) == 3:
             vel = (np.diff(self.pos_list, n=1, axis=0) / self.dt)[0]
-            acc = np.diff(self.pos_list, n=2, axis=0) / self.dt**2
+            acc = (np.diff(self.pos_list, n=2, axis=0) / self.dt**2)[0]
             
             del self.pos_list[0]
 

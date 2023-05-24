@@ -23,6 +23,7 @@ class MinimumJerk:
         self.timer = True
         self.loopCount = 0
         self.startTime = 0
+        self.startPos = []
 
     def GetPosition(self):
         try:
@@ -54,7 +55,7 @@ class MinimumJerk:
     def MonitoringMotion(self, position, rotation, gripper, velocity, accelaration):
         isMoving = False
         diff = np.linalg.norm(self.target[self.target_index]['position'] - np.array(position))
-        diff_init = np.linalg.norm(self.initPos - np.array(position))
+        diff_init = np.linalg.norm(np.array(position))
 
         if diff_init > self.initThreshold:
             self.flag = True
@@ -64,13 +65,14 @@ class MinimumJerk:
                 if self.timer:
                     self.startTime = time.perf_counter()
                     self.loopCount = 0
+                    self.startPos = position
                     self.timer = False
 
                 self.loopCount += 1
 
                 if diff <= self.Threshold:
                     tn = time.perf_counter() - self.startTime
-                    self.CreateMotionData(tn, self.loopCount, position, velocity, accelaration, rotation, gripper, self.target[self.target_index]['position'], self.target[self.target_index]['rotation'], self.target[self.target_index]['gripper'])
+                    self.CreateMotionData(tn, self.loopCount, position, velocity, self.startPos, rotation, gripper, self.target[self.target_index]['position'], self.target[self.target_index]['rotation'], self.target[self.target_index]['gripper'])
                     self.target_index += 1
                     if self.target_index == 2:
                         self.target_index = 0
@@ -81,11 +83,11 @@ class MinimumJerk:
 
         return isMoving
     
-    def CreateMotionData(self, tn, loopCount, pos_n, vel_n, acc_n, rot_n, grip_n, pos_f, rot_f, grip_f):
+    def CreateMotionData(self, tn, loopCount, pos_n, vel_n, pos_s, rot_n, grip_n, pos_f, rot_f, grip_f):
         tf = self.Threshold/ np.linalg.norm(vel_n)
-        frameLength = (loopCount/ tn) * (tf - tn)
+        frameLength = int((loopCount/ tn) * (tf - tn))
 
-        self.CreateMotionMinimumJerk(tn, pos_n, vel_n, acc_n, tf, pos_f, frameLength)
+        self.CreateMotionMinimumJerk(tn, pos_n, vel_n, pos_s, tf, pos_f, frameLength)
         self.CreateSlerpMotion(rot_n, rot_f, frameLength)
         self.CreateGripMotion(grip_n, grip_f, frameLength, gripFrame = 300)
 
@@ -105,18 +107,29 @@ class MinimumJerk:
         for weight in weight_list:
             rot_list.append(cf.Slerp_Quaternion(rot_f, rot_n, weight))
 
-        self.predictedRotation = iter(np.transpose(np.array(rot_list)))
+        self.predictedRotation = iter(np.array(rot_list))
 
-    def CreateMotionMinimumJerk(self, tn, pos_n, vel_n, acc_n, tf, pos_f, frameLength, vel_f = [0, 0, 0], acc_f = [0, 0, 0]):
+    def CreateMotionMinimumJerk(self, tn, pos_n, vel_n, pos_s, tf, pos_f, frameLength, vel_f = [0, 0, 0], acc_f = [0, 0, 0]):
+        # a_matrix = [
+        #     [1, tn, tn**2,  tn**3,      tn**4,      tn**5       ],
+        #     [0, 1,  2*tn,   3*(tn**2),  4*(tn**3),  5*(tn**4)   ],
+        #     [0, 0,  2,      6*tn,       12*(tn**2), 20*(tn**3)  ],
+        #     [1, tf, tf**2,  tf**3,      tf**4,      tf**5       ],
+        #     [0, 1,  2*tf,   3*(tf**2),  4*(tf**3),  5*(tf**4)   ],
+        #     [0, 0,  2,      6*tf,       12*(tf**2), 20*(tf**3)  ]
+        # ]
+        # b_matrix = [pos_n, vel_n, acc_n, pos_f, vel_f, acc_f]
+
         a_matrix = [
             [1, tn, tn**2,  tn**3,      tn**4,      tn**5       ],
             [0, 1,  2*tn,   3*(tn**2),  4*(tn**3),  5*(tn**4)   ],
-            [0, 0,  2,      6*tn,       12*(tn**2), 20*(tn**3)  ],
+            [1, 0,  0,      0,          0,          0           ],
             [1, tf, tf**2,  tf**3,      tf**4,      tf**5       ],
             [0, 1,  2*tf,   3*(tf**2),  4*(tf**3),  5*(tf**4)   ],
             [0, 0,  2,      6*tf,       12*(tf**2), 20*(tf**3)  ]
         ]
-        b_matrix = [pos_n, vel_n, acc_n, pos_f, vel_f, acc_f]
+        b_matrix = [pos_n, vel_n, pos_s, pos_f, vel_f, acc_f]
+
         coeff = np.linalg.solve(a_matrix, b_matrix)
 
         def function(coeff, x):
