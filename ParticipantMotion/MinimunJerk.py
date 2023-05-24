@@ -105,7 +105,7 @@ class MinimumJerk:
         weight_list = np.linspace(0, 1, frameLength)
         rot_list = []
         for weight in weight_list:
-            rot_list.append(cf.Slerp_Quaternion(rot_f, rot_n, weight))
+            rot_list.append(cf.Slerp_Quaternion(rot_f, rot_n[0], weight))
 
         self.predictedRotation = iter(np.array(rot_list))
 
