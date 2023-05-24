@@ -13,7 +13,7 @@ from RobotArmControl.xArmManager import xArmManager
 
 class RobotControlManager:
     def __init__(self) -> None:
-        with open('SettingFile/settings_dual.json', 'r') as settings_file:
+        with open('SettingFile/settings_single.json', 'r') as settings_file:
             settings = json.load(settings_file)
 
         xArmConfigs = settings['xArmConfigs']
