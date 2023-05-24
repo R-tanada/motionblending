@@ -74,7 +74,7 @@ class MinimumJerk:
                     tn = time.perf_counter() - self.startTime
                     self.CreateMotionData(tn, self.loopCount, position, velocity, self.startPos, rotation, gripper, self.target[self.target_index]['position'], self.target[self.target_index]['rotation'], self.target[self.target_index]['gripper'])
                     self.target_index += 1
-                    if self.target_index == 2:
+                    if self.target_index == 3:
                         self.target_index = 0
                     isMoving = True
                     self.flag = False
