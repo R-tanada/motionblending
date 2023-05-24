@@ -105,7 +105,7 @@ class MotionManager:
     def GetRotation(self):
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             quaternion = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
-            if quaternion < 0:
+            if quaternion[3] < 0:
                 quaternion = -np.array(quaternion)
             self.rotation = quaternion
         else:
