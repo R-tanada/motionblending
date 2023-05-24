@@ -84,7 +84,7 @@ class MinimumJerk:
         return isMoving
     
     def CreateMotionData(self, tn, loopCount, pos_n, vel_n, pos_s, rot_n, grip_n, pos_f, rot_f, grip_f):
-        tf = self.Threshold/ np.linalg.norm(vel_n)
+        tf = self.Threshold/ np.linalg.norm(vel_n) + tn
         frameLength = int((loopCount/ tn) * (tf - tn))
 
         self.CreateMotionMinimumJerk(tn, pos_n, vel_n, pos_s, tf, pos_f, frameLength)
