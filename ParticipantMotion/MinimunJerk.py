@@ -3,7 +3,7 @@ import time
 import CustomFunction.CustomFunction as cf
 
 class MinimumJerk:
-    def __init__(self, Target: list, xArmConfig: dict, Threshold = 350) -> None:
+    def __init__(self, Target: list, xArmConfig: dict, Threshold = 300) -> None:
         self.initPos = xArmConfig['InitPos']
         initRot = cf.Convert2InverseMatrix(cf.Euler2Quaternion(xArmConfig['InitRot']))
         self.predictedPosition = []
