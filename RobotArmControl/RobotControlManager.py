@@ -38,8 +38,9 @@ class RobotControlManager:
                     loopStartTime = time.perf_counter()
 
                     if isEnablexArm:
-                        self.xarmManager.SendDataToRobot(self.cyberneticManager.GetSharedTransform())
-                        self.xarmManager.CheckError()
+                        self.cyberneticManager.GetSharedTransform()
+                        # self.xarmManager.SendDataToRobot(self.cyberneticManager.GetSharedTransform())
+                        # self.xarmManager.CheckError()
 
                     self.FixFrameRate(time.perf_counter() - loopStartTime)
                     if isPrintFrameRate:
