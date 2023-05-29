@@ -22,9 +22,6 @@ class MinimumJerk:
         self.target_iter = iter_cycle(self.target)
         self.flag = False
         self.initThreshold = 50
-        self.timer = True
-        self.loopCount = 0
-        self.startPos = []
         self.startTime = time.perf_counter()
         self.wayPoint = []
         self.freq = 200
@@ -68,13 +65,25 @@ class MinimumJerk:
 
         if self.flag == True:
             if diff_init >= self.initThreshold:
-                if abs(accelaration) < 0.01:
+                if self.acc_flag == 1:
                     self.wayPoint.append({'time': timeMoving, 'position': position, 'velocity': velocity})
+                    self.acc_flag = 2
+
+                elif self.acc_flag == 2:
+                    if abs(accelaration) < 0.01:
+                        self.wayPoint.append({'time': timeMoving, 'position': position, 'velocity': velocity})
+                        self.acc_flag = 3
+
+                elif self.acc_flag == 3:
+                    if abs(accelaration) < 0.01:
+                        self.wayPoint.append({'time': timeMoving, 'position': position, 'velocity': velocity})
+                        self.acc_flag = 1
 
                 if len(self.wayPoint) == 3:
                     self.CreateMotionData(self.wayPoint, rotation, gripper, self.target_iter['position'], self.target_iter['rotation'], self.target_iter['gripper'])
                     isMoving = True
                     self.flag = False
+                    self.wayPoint = []
 
         return isMoving
     
