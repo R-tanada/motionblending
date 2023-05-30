@@ -75,7 +75,7 @@ class MinimumJerk:
                         self.acc_flag = 3
 
                 elif self.acc_flag == 3:
-                    if abs(accelaration) < 0.01:
+                    if abs(accelaration) > 1:
                         self.wayPoint.append({'time': timeMoving, 'position': position, 'velocity': velocity})
                         self.acc_flag = 1
 
