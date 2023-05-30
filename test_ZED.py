@@ -2,41 +2,42 @@ import pyzed.sl as sl
 import cv2
 
 def main():
-    # ZEDの初期化
+    # ZEDカメラの初期化
     init_params = sl.InitParameters()
-    init_params.depth_mode = sl.DEPTH_MODE.PERFORMANCE  # 深度モードの設定
+    init_params.camera_resolution = sl.RESOLUTION.HD1080
+    init_params.camera_fps = 30
+
     zed = sl.Camera()
-    if not zed.open(init_params) == sl.ERROR_CODE.SUCCESS:
-        print("ZEDの初期化に失敗しました。")
+    if not zed.is_opened():
+        print("ZEDカメラをオープン中...")
+    status = zed.open(init_params)
+    if status != sl.ERROR_CODE.SUCCESS:
+        print("ZEDカメラをオープンできませんでした")
         exit()
 
-    # カメラパラメータの取得
-    camera_info = zed.get_camera_information()
-    image_size = camera_info.camera_resolution
+    runtime_parameters = sl.RuntimeParameters()
+    mat_left = sl.Mat()
+    mat_right = sl.Mat()
 
-    # 深度マップの設定
-    depth_map = sl.Mat(image_size.width, image_size.height, sl.MAT_TYPE.F32_C1)
+    # メインループ
+    key = ''
+    while key != 113:  # 'q'キーで終了
+        # ZEDカメラからフレームを取得
+        if zed.grab(runtime_parameters) == sl.ERROR_CODE.SUCCESS:
+            # 左目の映像を取得
+            zed.retrieve_image(mat_left, sl.VIEW.LEFT)
+            left_image = mat_left.get_data()
+            cv2.imshow("Left Image", left_image)
 
-    # ウィンドウの作成
-    cv2.namedWindow("ZED Depth Map", cv2.WINDOW_NORMAL)
+            # 右目の映像を取得
+            zed.retrieve_image(mat_right, sl.VIEW.RIGHT)
+            right_image = mat_right.get_data()
+            cv2.imshow("Right Image", right_image)
 
-    while True:
-        if zed.grab() == sl.ERROR_CODE.SUCCESS:
-            # 深度マップの取得
-            zed.retrieve_measure(depth_map, sl.MEASURE.DEPTH)
-
-            # 深度マップの表示
-            depth_data = depth_map.get_data()
-            depth_image = cv2.normalize(depth_data, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8UC1)
-            cv2.imshow("ZED Depth Map", depth_image)
-
-        # キー入力の受け付け
+        # キー入力をチェック
         key = cv2.waitKey(1)
-        if key == ord('q'):
-            break
 
-    # 終了処理
-    cv2.destroyAllWindows()
+    # ZEDカメラを閉じる
     zed.close()
 
 if __name__ == "__main__":
