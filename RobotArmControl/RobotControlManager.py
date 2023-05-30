@@ -12,7 +12,7 @@ from RobotArmControl.xArmManager import xArmManager
 
 
 class RobotControlManager:
-    def __init__(self) -> None:
+    def __init__(self, isDebug: bool == True) -> None:
         with open('SettingFile/settings_single.json', 'r') as settings_file:
             settings = json.load(settings_file)
 
@@ -20,12 +20,14 @@ class RobotControlManager:
         ParticipantConfigs = settings['ParticipantsConfigs']
 
         self.cyberneticManager = CyberneticAvatarMotionManager(ParticipantConfigs, xArmConfigs)
-        self.xarmManager = xArmManager(xArmConfigs)
+        if isDebug == False:
+            self.xarmManager = xArmManager(xArmConfigs)
 
         self.loopTime = 0
         self.FrameList = []
+        self.isDebug = isDebug
 
-    def SendDataToRobot(self, isEnablexArm: bool = False, FrameRate = 240, isPrintFrameRate = True):
+    def SendDataToRobot(self, FrameRate = 240, isPrintFrameRate = True):
         windll.winmm.timeBeginPeriod(1)
         self.loopTime = 1/ FrameRate
 
@@ -37,10 +39,11 @@ class RobotControlManager:
                 if isMoving:
                     loopStartTime = time.perf_counter()
 
-                    if isEnablexArm:
+                    if self.isDebug:
                         self.cyberneticManager.GetSharedTransform()
-                        # self.xarmManager.SendDataToRobot(self.cyberneticManager.GetSharedTransform())
-                        # self.xarmManager.CheckError()
+                    else:
+                        self.xarmManager.SendDataToRobot(self.cyberneticManager.GetSharedTransform())
+                        self.xarmManager.CheckError()
 
                     self.FixFrameRate(time.perf_counter() - loopStartTime)
                     if isPrintFrameRate:
@@ -57,7 +60,7 @@ class RobotControlManager:
             print('\nKeyboardInterrupt >> Stop: RobotControlManager.SendDataToRobot()')
 
             # ----- Disconnect ----- #
-            if isEnablexArm:
+            if self.isDebug == False:
                 xArmManager.DisConnect()
                 print('successfully disconnected')
 
