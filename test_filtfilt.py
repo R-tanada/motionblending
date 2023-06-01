@@ -4,7 +4,7 @@ import time
 from matplotlib import pyplot as plt
 
 # ローパスフィルタの設計
-def butter_lowpass(cutoff_freq, fs, order=5):
+def butter_lowpass(cutoff_freq, fs, order=1):
     nyquist_freq = 0.5 * fs
     normalized_cutoff_freq = cutoff_freq / nyquist_freq
     b, a = butter(order, normalized_cutoff_freq, btype='low', analog=False)
@@ -26,9 +26,6 @@ freq = 200
 target_time = 1/freq
 data_before = 0
 
-# フィルタ状態の初期化
-zi = filtfilt(b, a, [0.0], padlen=0)  # 初期状態を取得
-
 # リアルタイムでデータにフィルタを適用する
 try:
     while True:
@@ -40,7 +37,7 @@ try:
         before_data.append(data)
 
         # リアルタイムでフィルタを適用
-        filtered_data = filtfilt(b, a, [data, data_before], padlen=0, )
+        filtered_data = filtfilt(b, a, [data, data_before])
         filterd_data.append(filtered_data[0])
         print(filtered_data[0])
         data_before = data

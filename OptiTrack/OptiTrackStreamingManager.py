@@ -7,6 +7,7 @@
 from threading import local
 import numpy as np
 from . import NatNetClient
+from CustomFunction.FilterManager import RealTimeLowpassFilter
 
 serverAddress = ''
 localAddress = ''
@@ -25,6 +26,8 @@ class OptiTrackStreamingManager:
 		self.position = {}
 		self.rotation = {}
 
+		self.filter = RealTimeLowpassFilter
+
 	# This is a callback function that gets connected to the NatNet client and called once per mocap frame.
 	def receive_new_frame(self, data_dict):
 		order_list=[ "frameNumber", "markerSetCount", "unlabeledMarkersCount", "rigidBodyCount", "skeletonCount",
@@ -42,8 +45,8 @@ class OptiTrackStreamingManager:
 	# This is a callback function that gets connected to the NatNet client. It is called once per rigid body per frame
 	def receive_rigid_body_frame( self, new_id, position, rotation):
 		if str(new_id) in self.position.keys():
-			self.position[str(new_id)] = np.array(position)
-			self.rotation[str(new_id)] = np.array(rotation)
+			self.position[str(new_id)] = self.filter.apply(np.array(position))
+			self.rotation[str(new_id)] = self.filter.apply(np.array(rotation))
 
 	def stream_run(self):
 		streamingClient = NatNetClient.NatNetClient(serverIP=serverAddress, localIP=localAddress)
