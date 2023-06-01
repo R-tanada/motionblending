@@ -19,7 +19,6 @@ class MinimumJerk:
             target['rotation'] = np.dot(cf.Convert2Matrix(cf.Euler2Quaternion(target['rotation'])), np.dot(initRot, [0, 0, 0, 1]))
             if target['rotation'][3] < 0:
                 target['rotation'] = -target['rotation']
-        self.target_iter = iter_cycle(self.target)
         self.flag = False
         self.initThreshold = 50
         self.startTime = time.perf_counter()
@@ -80,12 +79,20 @@ class MinimumJerk:
                         self.acc_flag = 1
 
                 if len(self.wayPoint) == 3:
-                    self.CreateMotionData(self.wayPoint, rotation, gripper, next(self.target_iter['position']), next(self.target_iter['rotation']), next(self.target_iter['gripper']))
+                    target_index = self.DetermineTarget(self.target, position)
+                    self.CreateMotionData(self.wayPoint, rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'])
                     isMoving = True
                     self.flag = False
                     self.wayPoint = []
 
         return isMoving
+    
+    def DetermineTarget(self, target_list, position):
+        diffList = []
+        for target in target_list:
+            diffList.append(np.linalg.norm(np.array(position) - target['position']))
+
+        return diffList.index(min(diffList))
     
     def CreateMotionData(self, wayPoint, rot_n, grip_n, pos_f, rot_f, grip_f):
         t3, tf, x0 = self.GetMinimumJerkParams(wayPoint[0]['time'], wayPoint[1]['time'], wayPoint[2]['time'], wayPoint[0]['velocity'], wayPoint[1]['velocity'], wayPoint[2]['velocity'], wayPoint[2]['position'], pos_f)

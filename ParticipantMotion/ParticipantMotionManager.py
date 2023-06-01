@@ -1,6 +1,6 @@
 import json
 import threading
-
+import time
 import numpy as np
 
 # # ----- Custom class ----- #
@@ -62,6 +62,8 @@ class MotionManager:
         self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = False
         self.pos_list = []
         self.dt = 1/ 200
+        self.startTime = time.perf_counter()
+        self.before_time = 0
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
         self.initRot = xArmConfig['InitRot']
@@ -171,10 +173,13 @@ class MotionManager:
 
     def GetParticipnatMotionInfo(self, position):
         self.pos_list.append(position)
-
+        currentTime = time.perf_counter() - self.startTime
+        dt = currentTime - self.before_time
+        self.before_time = currentTime
+        
         if len(self.pos_list) == 3:
-            vel = (np.diff(self.pos_list, n=1, axis=0) / self.dt)[0]
-            acc = (np.diff(self.pos_list, n=2, axis=0) / self.dt**2)[0]
+            vel = (np.diff(self.pos_list, n=1, axis=0) / dt)[0]
+            acc = (np.diff(self.pos_list, n=2, axis=0) / dt**2)[0]
             
             del self.pos_list[0]
 
