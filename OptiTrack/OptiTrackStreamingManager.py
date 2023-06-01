@@ -26,7 +26,7 @@ class OptiTrackStreamingManager:
 		self.position = {}
 		self.rotation = {}
 
-		self.filter = RealTimeLowpassFilter
+		self.filter = RealTimeLowpassFilter(cutoff_freq = 5, fs = 200, order = 1)
 
 	# This is a callback function that gets connected to the NatNet client and called once per mocap frame.
 	def receive_new_frame(self, data_dict):
