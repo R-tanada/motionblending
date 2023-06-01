@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 import time
 
 # ローパスフィルタの設計
-def butter_lowpass(cutoff_freq, fs, order = 5):
+def butter_lowpass(cutoff_freq, fs, order = 1):
     nyquist_freq = 0.5 * fs
     normalized_cutoff_freq = cutoff_freq / nyquist_freq
     b, a = butter(order, normalized_cutoff_freq, btype='low', analog=False)
@@ -14,12 +14,12 @@ def butter_lowpass(cutoff_freq, fs, order = 5):
 class RealTimeLowpassFilter:
     def __init__(self, cutoff_freq, fs, order=5):
         self.b, self.a = butter_lowpass(cutoff_freq, fs, order=order)
-        self.z = np.zeros((max(len(self.a), len(self.b))-1, len(self.b)))
+        self.z = np.zeros((max(len(self.a), len(self.b))-1, 3))
 
     def apply(self, data):
-        filtered_data = np.zeros_like(data)
-        for i in range(len(data)):
-            filtered_data[i], self.z[:, i] = lfilter(self.b, self.a, data[i], zi=self.z[:, i])
+        filtered_data = np.zeros_like(data)  # フィルタリングされたデータの配列を用意
+        for i, x in enumerate(data):
+            filtered_data[i], self.z[:,i] = lfilter(self.b, self.a, [x], zi=self.z[:,i])
         return filtered_data
 
 # サンプリング周波数とカットオフ周波数の設定
@@ -45,7 +45,7 @@ try:
         # データの取得（仮想的な例としてランダムデータを生成）
         time_list.append(t)
         data = np.random.randn(1)  # サンプルデータの取得
-        data = [data, data]
+        data = [data[0], data[0]]
         before_data.append(data)
         # ローパスフィルタの適用
         filterd_data.append(rt_filter.apply(data))
@@ -56,7 +56,7 @@ try:
 
         freq_time = t - before_time
         before_time = t
-        print(freq_time)
+        # print(freq_time)
 
 except KeyboardInterrupt:
 

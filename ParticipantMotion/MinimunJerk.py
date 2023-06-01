@@ -57,7 +57,7 @@ class MinimumJerk:
         timeMoving = time.perf_counter() - self.startTime
         diff_target = np.linalg.norm(np.array(position))
         diff_init = np.linalg.norm(np.array(position))
-        velocity = np.linalg(np.array(velocity))
+        velocity = np.linalg.norm(np.array(velocity))
 
         if diff_init > self.initThreshold:
             self.flag = True
