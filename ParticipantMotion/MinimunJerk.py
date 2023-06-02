@@ -55,7 +55,6 @@ class MinimumJerk:
     def MonitoringMotion(self, position, rotation, gripper, velocity, accelaration):
         isMoving = False
         timeMoving = time.perf_counter() - self.startTime
-        diff_target = np.linalg.norm(np.array(position))
         diff_init = np.linalg.norm(np.array(position))
         velocity = np.linalg.norm(np.array(velocity))
 
@@ -69,12 +68,12 @@ class MinimumJerk:
                     self.acc_flag = 2
 
                 elif self.acc_flag == 2:
-                    if abs(accelaration) < 0.01:
+                    if abs(accelaration) < 0.1:
                         self.wayPoint.append({'time': timeMoving, 'position': position, 'velocity': velocity})
                         self.acc_flag = 3
 
                 elif self.acc_flag == 3:
-                    if abs(accelaration) > 1:
+                    if timeMoving >= 1.5 * self.wayPoint[1]['time'] - 0.5 * self.wayPoint[0]['time']:
                         self.wayPoint.append({'time': timeMoving, 'position': position, 'velocity': velocity})
                         self.acc_flag = 1
 

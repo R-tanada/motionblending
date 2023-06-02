@@ -173,13 +173,10 @@ class MotionManager:
 
     def GetParticipnatMotionInfo(self, position):
         self.pos_list.append(position)
-        currentTime = time.perf_counter() - self.startTime
-        dt = currentTime - self.before_time
-        self.before_time = currentTime
         
-        if len(self.pos_list) == 3:
-            vel = (np.diff(self.pos_list, n=1, axis=0) / dt)[0]
-            acc = (np.diff(self.pos_list, n=2, axis=0) / dt**2)[0]
+        if len(self.pos_list) == 21:
+            vel = (self.pos_list[10] - self.pos_list[0])/ (self.dt * 10)
+            acc = ((self.pos_list[20] - self.pos_list[10]) - (self.pos_list[10] - self.pos_list[0]))/ (self.dt * 10)**2
             
             del self.pos_list[0]
 
