@@ -1,53 +1,54 @@
-import sys
-import random
-from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
-from PySide6.QtCore import Qt, QTimer
-from matplotlib.backends.backend_qt6agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.figure import Figure
+"""
+This example demonstrates many of the 2D plotting capabilities
+in pyqtgraph. All of the plots may be panned/scaled by dragging with 
+the left/right mouse buttons. Right click on any plot to show a context menu.
+"""
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
+import numpy as np
 
-        # ウィンドウの設定
-        self.setWindowTitle("Real-time Graph")
-        self.setGeometry(100, 100, 800, 600)
+import pyqtgraph as pg
+from pyqtgraph.Qt import QtCore
+import time
+import threading
 
-        # レイアウトとウィジェットの作成
-        layout = QVBoxLayout()
-        self.widget = QWidget()
-        self.widget.setLayout(layout)
-        self.setCentralWidget(self.widget)
+app = pg.mkQApp("Plotting Example")
+#mw = QtWidgets.QMainWindow()
+#mw.resize(800,800)
 
-        # Matplotlibのフィギュアとキャンバスの作成
-        self.figure = Figure()
-        self.canvas = FigureCanvas(self.figure)
-        layout.addWidget(self.canvas)
+win = pg.GraphicsLayoutWidget(show=True, title="Basic plotting examples")
+win.resize(1000,600)
+win.setWindowTitle('pyqtgraph example: Plotting')
 
-        # グラフデータの初期化
-        self.x_data = []
-        self.y_data = []
+# Enable antialiasing for prettier plots
+pg.setConfigOptions(antialias=True)
 
-        # タイマーの作成とスロットの設定
-        self.timer = QTimer()
-        self.timer.timeout.connect(self.update_plot)
-        self.timer.start(1000)  # 1秒ごとに更新
+p6 = win.addPlot(title="Updating plot")
+curve = p6.plot(pen='y')
+data = []
+ptr = 0
+def update():
+    global curve, data, ptr, p6
+    curve.setData(data)
+    if ptr == 0:
+        p6.enableAutoRange('xy', False)  ## stop auto-scaling after the first data set is plotted
+    ptr += 1
+timer = QtCore.QTimer()
+timer.timeout.connect(update)
+timer.start(50)
 
-    def update_plot(self):
-        # データの更新
-        self.x_data.append(len(self.x_data) + 1)
-        self.y_data.append(random.randint(0, 100))
+startTime = time.perf_counter()
 
-        # グラフの描画
-        self.figure.clear()
-        ax = self.figure.add_subplot(111)
-        ax.plot(self.x_data, self.y_data)
+if __name__ == '__main__':
+    def startApp():
+        pg.exec()
+        
+    app_thread = threading.Thread(target=startApp)
 
-        # グラフを再描画
-        self.canvas.draw()
+    try:
+        while True:
+            data.append(np.sin(2 * np.pi * 5 * time.perf_counter() - startTime))
+            print(data)
+            time.sleep(0.01)
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
+    except KeyboardInterrupt:
+        print('finish')
