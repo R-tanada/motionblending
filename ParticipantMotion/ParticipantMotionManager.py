@@ -8,6 +8,7 @@ from OptiTrack.OptiTrackStreamingManager import OptiTrackStreamingManager
 from Sensor.SensorManager import GripperSensorManager
 from ParticipantMotion.MinimunJerk import MinimumJerk
 import CustomFunction.CustomFunction as cf
+from Recorder.DataRecordManager import DataRecordManager
 
 
 class ParticipantManager:
@@ -75,6 +76,8 @@ class MotionManager:
         sensorThread = threading.Thread(target = self.sensorManager.StartReceiving)
         sensorThread.setDaemon(True)
         sensorThread.start()
+
+        self.recorder = DataRecordManager()
 
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
@@ -174,13 +177,18 @@ class MotionManager:
     def GetParticipnatMotionInfo(self, position):
         self.pos_list.append(position)
         
-        if len(self.pos_list) == 21:
-            vel = (self.pos_list[10] - self.pos_list[0])/ (self.dt * 10)
-            acc = ((self.pos_list[20] - self.pos_list[10]) - (self.pos_list[10] - self.pos_list[0]))/ (self.dt * 10)**2
-            
-            del self.pos_list[0]
+        try:
+            if len(self.pos_list) == 21:
+                vel = (self.pos_list[10] - self.pos_list[0])/ (self.dt * 10)
+                acc = ((self.pos_list[20] - self.pos_list[10]) - (self.pos_list[10] - self.pos_list[0]))/ (self.dt * 10)**2
+                self.recorder.Record(np.linalg.norm(vel))
+                
+                del self.pos_list[0]
 
-        else:
-            vel = acc = [0, 0, 0]
+            else:
+                vel = acc = [0, 0, 0]
+
+        except KeyboardInterrupt:
+            self.recorder.PlotGraph()
 
         return vel, acc

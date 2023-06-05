@@ -5,50 +5,46 @@ the left/right mouse buttons. Right click on any plot to show a context menu.
 """
 
 import numpy as np
-
+import threading
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore
-import time
-import threading
 
-app = pg.mkQApp("Plotting Example")
-#mw = QtWidgets.QMainWindow()
-#mw.resize(800,800)
+class RealTimeGraph():
+    def __init__(self) -> None:
+        self.ptr = 0
+        self.data = []
+        app_thread = threading.Thread(target=self.SetWindow)
+        # app_thread.setDaemon(True)
+        app_thread.start()
+        # self.SetWindow()
 
-win = pg.GraphicsLayoutWidget(show=True, title="Basic plotting examples")
-win.resize(1000,600)
-win.setWindowTitle('pyqtgraph example: Plotting')
+    def SetWindow(self):
+        app = pg.mkQApp("Plotting Example")
+        #mw = QtWidgets.QMainWindow()
+        #mw.resize(800,800)
 
-# Enable antialiasing for prettier plots
-pg.setConfigOptions(antialias=True)
+        win = pg.GraphicsLayoutWidget(show=True, title="Basic plotting examples")
+        win.resize(1000,600)
+        win.setWindowTitle('pyqtgraph example: Plotting')
 
-p6 = win.addPlot(title="Updating plot")
-curve = p6.plot(pen='y')
-data = []
-ptr = 0
-def update():
-    global curve, data, ptr, p6
-    curve.setData(data)
-    if ptr == 0:
-        p6.enableAutoRange('xy', False)  ## stop auto-scaling after the first data set is plotted
-    ptr += 1
-timer = QtCore.QTimer()
-timer.timeout.connect(update)
-timer.start(50)
+        # Enable antialiasing for prettier plots
+        pg.setConfigOptions(antialias=True)
 
-startTime = time.perf_counter()
+        p6 = win.addPlot(title="Updating plot")
+        curve = p6.plot(pen='y')
+        data = np.random.normal(size=(10,1000))
+        self.ptr = 0
+        def update():
+            curve.setData(data[self.ptr%10])
+            if self.ptr == 0:
+                p6.enableAutoRange('xy', False)  ## stop auto-scaling after the first data set is plotted
+            self.ptr += 1
+        timer = QtCore.QTimer()
+        timer.timeout.connect(update)
+        timer.start(50)
+
+        pg.exec()
 
 if __name__ == '__main__':
-    def startApp():
-        pg.exec()
-        
-    app_thread = threading.Thread(target=startApp)
-
-    try:
-        while True:
-            data.append(np.sin(2 * np.pi * 5 * time.perf_counter() - startTime))
-            print(data)
-            time.sleep(0.01)
-
-    except KeyboardInterrupt:
-        print('finish')
+    graph = RealTimeGraph()
+    print('hello')
