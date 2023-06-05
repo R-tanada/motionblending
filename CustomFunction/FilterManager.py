@@ -1,12 +1,14 @@
-import numpy as np
-from scipy.signal import butter, lfilter
-from matplotlib import pyplot as plt
 import time
 
+import numpy as np
+from matplotlib import pyplot as plt
+from scipy.signal import butter, lfilter
+
+
 class RealTimeLowpassFilter:
-    def __init__(self, cutoff_freq, fs, order=5):
+    def __init__(self, cutoff_freq, fs, order=5, listNum = 3):
         self.b, self.a = self.butter_lowpass(cutoff_freq, fs, order=order)
-        self.z = np.zeros((max(len(self.a), len(self.b))-1, 3))
+        self.z = np.zeros((max(len(self.a), len(self.b))-1, listNum))
 
     def butter_lowpass(self, cutoff_freq, fs, order = 1):
         nyquist_freq = 0.5 * fs

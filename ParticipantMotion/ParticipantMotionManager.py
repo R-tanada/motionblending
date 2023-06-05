@@ -9,6 +9,7 @@ from Sensor.SensorManager import GripperSensorManager
 from ParticipantMotion.MinimunJerk import MinimumJerk
 import CustomFunction.CustomFunction as cf
 from Recorder.DataRecordManager import DataRecordManager
+from CustomFunction.FilterManager import RealTimeLowpassFilter
 
 
 class ParticipantManager:
@@ -72,6 +73,9 @@ class MotionManager:
         MotionManager.optiTrackStreamingManager.position[self.rigidBody] = np.zeros(3)
         MotionManager.optiTrackStreamingManager.rotation[self.rigidBody] = np.zeros(4)
 
+        self.filter_pos = RealTimeLowpassFilter(cutoff_freq=5, fs=200, order=2, listNum=3)
+        self.filter_rot = RealTimeLowpassFilter(cutoff_freq=5, fs=200, order=2, listNum=4)
+
         self.sensorManager = GripperSensorManager(Config['SerialCOM'], BandRate = 9600)
         sensorThread = threading.Thread(target = self.sensorManager.StartReceiving)
         sensorThread.setDaemon(True)
@@ -103,7 +107,7 @@ class MotionManager:
 
     def GetPosition(self):
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
-            self.position = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount) - np.array(self.initPosition)
+            self.position = cf.ConvertAxis_Position(self.filter_pos.apply(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000), self.mount) - np.array(self.initPosition)
         else:
             self.position, self.isMoving_Pos = self.automation.GetPosition()
 
@@ -111,7 +115,7 @@ class MotionManager:
     
     def GetRotation(self):
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
-            quaternion = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
+            quaternion = cf.CnvertAxis_Rotation(self.filter_rot.apply(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody]), self.mount)
             if quaternion[3] < 0:
                 quaternion = -np.array(quaternion)
             self.rotation = quaternion
