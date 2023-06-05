@@ -178,9 +178,14 @@ class MotionManager:
         self.pos_list.append(position)
         
         try:
-            if len(self.pos_list) == 21:
-                vel = (self.pos_list[10] - self.pos_list[0])/ (self.dt * 10)
-                acc = ((self.pos_list[20] - self.pos_list[10]) - (self.pos_list[10] - self.pos_list[0]))/ (self.dt * 10)**2
+            # if len(self.pos_list) == 21:
+            #     vel = (self.pos_list[10] - self.pos_list[0])/ (self.dt * 10)
+            #     acc = ((self.pos_list[20] - self.pos_list[10]) - (self.pos_list[10] - self.pos_list[0]))/ (self.dt * 10)**2
+
+            if len(self.pos_list) == 7:
+                vel = (self.pos_list[6] - self.pos_list[3])/ (self.dt * 3)
+                acc = (vel - ((self.pos_list[3] - self.pos_list[0])/ (self.dt * 3)))/ (self.dt * 3)
+
                 self.recorder.Record(np.linalg.norm(vel))
                 
                 del self.pos_list[0]
