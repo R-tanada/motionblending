@@ -18,17 +18,43 @@ class RealTimeLowpassFilter:
         b, a = butter(order, normalized_cutoff_freq, btype='low', analog=False)
         return b, a
 
-    def apply(self, data):
+    def apply(self, data, init):
         filtered_data = np.zeros_like(data)  # フィルタリングされたデータの配列を用意
         for i, x in enumerate(data):
             filtered_data[i], self.z[:,i] = lfilter(self.b, self.a, [x], zi=self.z[:,i])
+            print(self.init_flag)
 
             if self.init_flag == True:
                 pass
 
             if self.init_flag[i] == False:
                 filtered_data[i] = 0
-                if filtered_data[i] < 3:
+                if(filtered_data[i] - init[i]) < 1:
                     self.init_flag[i] == True
 
         return filtered_data
+    
+if __name__ == '__main__':
+    freq = 200
+    loopTime = 1/200
+
+    filter = RealTimeLowpassFilter(cutoff_freq=3, fs=200, order=2, listNum=1)
+    filtbox = []
+    timebox = []
+    startTime = time.perf_counter()
+    init_data = [np.random.rand()]
+
+    try:
+        while True:
+            loopstartTime = time.perf_counter()
+            data = np.random.rand()
+
+            filtbox.append(filter.apply([data], init_data))
+            timebox.append(time.perf_counter() - startTime)
+            print(time.perf_counter() - startTime)
+            
+            time.sleep(loopTime - (time.perf_counter() - loopstartTime))
+
+    except KeyboardInterrupt:
+        plt.plot(timebox, filtbox)
+        plt.show()

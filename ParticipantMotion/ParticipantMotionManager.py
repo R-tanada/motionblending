@@ -191,7 +191,9 @@ class MotionManager:
                 vel = (self.pos_list[6] - self.pos_list[3])/ (self.dt * 3)
                 acc = (vel - ((self.pos_list[3] - self.pos_list[0])/ (self.dt * 3)))/ (self.dt * 3)
 
-                # self.recorder.Record(np.linalg.norm(vel))
+                self.recorder.Record([self.pos_list[6], vel, acc])
+                if len(self.recorder.dataRecorded['data']) == 500:
+                    self.recorder.PlotGraph()
                 
                 del self.pos_list[0]
 
