@@ -5,55 +5,65 @@ import pyqtgraph as pg
 import time
 import threading
 
+class RealTimePlot():
+    plot_data = 0
+    def __init__(self, framerate = 200, seconds = 5) -> None:
+        self.n_samples = int(framerate * seconds)
+        self.iter = 0
+        RealTimePlot.plot_data = 0
+        self.data = np.zeros(self.n_samples)
+        self.setWindow(framerate)
+        # self.startWindow()
 
-#　PyQtのウィンドウ表示
-app = pg.mkQApp("Plotting Example")
-# PyQtのウィンドウ関連
-win = pg.GraphicsLayoutWidget(show=True, title="Basic plotting examples")
-win.resize(1000,600)
-win.setWindowTitle('pyqtgraph example: Plotting')
-pg.setConfigOptions(antialias=True)
+    def setWindow(self, framerate):
+        def update():
+            print(111)
+            idx = self.iter % self.n_samples
+            self.data[idx] = self.plot_data
+            
+            pos = idx + 1 if idx < self.n_samples else 0
+            self.curve.setData(np.r_[self.data[pos:self.n_samples], self.data[0:pos]])
+            self.iter += 1      
 
-# プロット画面の準備
-p = win.addPlot(title="real-time line plot")
-curve = p.plot(pen='c') # 引数penで線の色や描画方法を指定
+        # PyQtのウィンドウ表示
+        app = pg.mkQApp("Plotting Example")
+        # PyQtのウィンドウ関連
+        win = pg.GraphicsLayoutWidget(show=True, title="Basic plotting examples")
+        win.resize(1000, 600)
+        win.setWindowTitle('pyqtgraph example: Plotting')
+        pg.setConfigOptions(antialias=True)
 
-# foがスイープするサイン波のプロット
-fps = 200
-n_samples = 500
-fo = 1
-data = np.zeros(n_samples)
+        # プロット画面の準備
+        p = win.addPlot(title="real-time line plot")
+        self.curve = p.plot(pen='c')  # 引数penで線の色や描画方法を指定
 
-iter = 0
-def update():
-    global curve, data, iter, fps, fo, n_samples, data_sin
+        timer = QtCore.QTimer()
+        timer.timeout.connect(update)
+        timer.start(1 / framerate * 1000)
+        pg.exec()
+
+  
+
+    # def startWindow(self):
+        
+
     
-    fo = 0.1 + iter / n_samples
-    t = (1.0 / fps) * iter
-    idx = iter % n_samples
-    data[idx] = data_sin
-    
-    #print(iter, t, data[idx])
-    pos = idx + 1 if idx < n_samples else 0
-    curve.setData(np.r_[data[pos:n_samples], data[0:pos]])
-    iter += 1
-    
-timer = QtCore.QTimer()
-timer.timeout.connect(update)
-timer.start(1/fps * 1000)
+class DataManager():
+    def __init__(self) -> None:
+        self.data_sin = 0
+        data_thread = threading.Thread(target=self.get_data)
+        data_thread.setDaemon(True)
+        data_thread.start()
+
+    def get_data(self):
+        startTime = time.perf_counter()
+        
+        while True:
+            self.data_sin = RealTimePlot.plot_data = np.sin(2 * np.pi * 1 * (time.perf_counter() - startTime))
+            time.sleep(0.004)
+
 
 if __name__ == '__main__':
-
-    def get_data():
-        global data_sin
-        startTime = time.perf_counter()
-
-        while True:
-            data_sin = np.sin(2 * np.pi * 3 * (time.perf_counter() - startTime))
-            time.sleep(0.005)
-
-    data_thread = threading.Thread(target=get_data)
-    data_thread.setDaemon(True)
-    data_thread.start()
-
-    pg.exec()
+    datamanager = DataManager()
+            
+    plot = RealTimePlot(datamanager.data_sin)
