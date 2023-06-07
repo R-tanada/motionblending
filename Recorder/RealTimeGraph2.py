@@ -1,41 +1,57 @@
-import pyqtgraph as pg
-from pyqtgraph.Qt import QtCore, QtGui
+import sys
 import numpy as np
+import pyqtgraph as pg
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QWidget
+from PyQt5.QtCore import Qt, QTimer
 
-# アプリケーションを作成
-app = QtGui.QApplication([])
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
 
-# ウィンドウを作成
-win = pg.GraphicsWindow(title="Real-time Plot")
-win.resize(800, 600)
+        # ウィンドウの設定
+        self.setWindowTitle("Real-time Graph")
+        self.setGeometry(100, 100, 800, 600)
 
-# プロットウィジェットを作成
-plot = win.addPlot(title="Real-time Data")
-curve = plot.plot(pen='y')
+        # グラフウィジェットの作成
+        self.graphWidget = pg.PlotWidget()
+        layout = QVBoxLayout()
+        layout.addWidget(self.graphWidget)
 
-# データを保持するリストを作成
-data = []
+        # レイアウトとウィジェットの設定
+        widget = QWidget()
+        widget.setLayout(layout)
+        self.setCentralWidget(widget)
 
-# データ更新のための関数
-def update():
-    # 最新の100個のデータを表示
-    curve.setData(data[-100:])
+        # グラフの設定
+        self.graphWidget.setBackground("w")
+        self.graphWidget.showGrid(x=True, y=True)
+        self.graphWidget.setLabel("left", "Value")
+        self.graphWidget.setLabel("bottom", "Time")
 
-# タイマーを作成して定期的にupdate関数を呼び出す
-timer = QtCore.QTimer()
-timer.timeout.connect(update)
-timer.start(100)  # 100ミリ秒ごとに更新
+        # グラフのカーブを作成
+        self.curve = self.graphWidget.plot()
 
-# メインループでデータを受け取り
-while True:
-    # データを受け取る処理
-    new_data = np.random.rand()
-    
-    # データリストに追加
-    data.append(new_data)
-    
-    # アプリケーションのイベントを処理
-    QtGui.QApplication.processEvents()
+        # タイマーの作成とスロットの設定
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update_plot)
+        self.timer.start(33)  # 30fps（約33ミリ秒ごと）に更新
 
-# アプリケーションを実行
-app.exec_()
+    def update_plot(self):
+        # データの取得
+        x_data, y_data = self.get_data()
+
+        # グラフの描画
+        self.curve.setData(x_data, y_data)
+
+    def get_data(self):
+        # データの取得処理を実装
+        # ここでは仮のデータを生成して返す
+        x_data = np.arange(0, 10, 0.1)
+        y_data = np.sin(x_data)
+        return x_data, y_data
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec_())

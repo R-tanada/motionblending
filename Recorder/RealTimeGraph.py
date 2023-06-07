@@ -8,15 +8,13 @@ import numpy as np
 import threading
 import pyqtgraph as pg
 from pyqtgraph.Qt import QtCore
+import time
 
 class RealTimeGraph():
     def __init__(self) -> None:
         self.ptr = 0
         self.data = []
-        app_thread = threading.Thread(target=self.SetWindow)
-        # app_thread.setDaemon(True)
-        app_thread.start()
-        # self.SetWindow()
+        self.SetWindow()
 
     def SetWindow(self):
         app = pg.mkQApp("Plotting Example")
@@ -32,19 +30,38 @@ class RealTimeGraph():
 
         p6 = win.addPlot(title="Updating plot")
         curve = p6.plot(pen='y')
-        data = np.random.normal(size=(10,1000))
-        self.ptr = 0
         def update():
-            curve.setData(data[self.ptr%10])
-            if self.ptr == 0:
-                p6.enableAutoRange('xy', False)  ## stop auto-scaling after the first data set is plotted
-            self.ptr += 1
+            self.data = get_data()
+            curve.setData(self.data)
+
+        def get_data():
+            global data
+            print(len(data))
+            return data
         timer = QtCore.QTimer()
         timer.timeout.connect(update)
-        timer.start(50)
+        timer.start(30)
 
         pg.exec()
 
 if __name__ == '__main__':
+    data = []
+    def data_input():
+        startTime = time.perf_counter()
+
+        try:
+            while True:
+                data.append(np.sin(2 * np.pi * 50 * (time.perf_counter() - startTime)))
+                if len(data) == 100:
+                    del data[0]
+
+                time.sleep(0.005)
+
+        except KeyboardInterrupt:
+            print('finish')
+
+    data_thread = threading.Thread(target=data_input)
+    data_thread.setDaemon(True)
+    data_thread.start()
+
     graph = RealTimeGraph()
-    print('hello')

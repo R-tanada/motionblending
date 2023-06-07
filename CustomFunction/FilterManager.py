@@ -10,6 +10,8 @@ class RealTimeLowpassFilter:
         self.b, self.a = self.butter_lowpass(cutoff_freq, fs, order=order)
         self.z = np.zeros((max(len(self.a), len(self.b))-1, listNum))
 
+        self.init_flag = [False] * listNum
+
     def butter_lowpass(self, cutoff_freq, fs, order = 1):
         nyquist_freq = 0.5 * fs
         normalized_cutoff_freq = cutoff_freq / nyquist_freq
@@ -20,4 +22,13 @@ class RealTimeLowpassFilter:
         filtered_data = np.zeros_like(data)  # フィルタリングされたデータの配列を用意
         for i, x in enumerate(data):
             filtered_data[i], self.z[:,i] = lfilter(self.b, self.a, [x], zi=self.z[:,i])
+
+            if self.init_flag == True:
+                pass
+
+            if self.init_flag[i] == False:
+                filtered_data[i] = 0
+                if filtered_data[i] < 3:
+                    self.init_flag[i] == True
+
         return filtered_data

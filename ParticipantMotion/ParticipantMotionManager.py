@@ -63,6 +63,7 @@ class MotionManager:
         self.iter_initPos = self.iter_initRot = []
         self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = False
         self.pos_list = []
+        self.pos_norm_list = []
         self.dt = 1/ 200
         self.startTime = time.perf_counter()
         self.before_time = 0
@@ -179,7 +180,7 @@ class MotionManager:
         return flag
 
     def GetParticipnatMotionInfo(self, position):
-        self.pos_list.append(position)
+        self.pos_list.append(np.linalg.norm(position))
         
         try:
             # if len(self.pos_list) == 21:
@@ -190,12 +191,12 @@ class MotionManager:
                 vel = (self.pos_list[6] - self.pos_list[3])/ (self.dt * 3)
                 acc = (vel - ((self.pos_list[3] - self.pos_list[0])/ (self.dt * 3)))/ (self.dt * 3)
 
-                self.recorder.Record(np.linalg.norm(vel))
+                # self.recorder.Record(np.linalg.norm(vel))
                 
                 del self.pos_list[0]
 
             else:
-                vel = acc = [0, 0, 0]
+                vel = acc = 0
 
         except KeyboardInterrupt:
             self.recorder.PlotGraph()
