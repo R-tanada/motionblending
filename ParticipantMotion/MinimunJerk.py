@@ -90,8 +90,8 @@ class MinimumJerk:
 
                 if len(self.wayPoint) == 3:
                     print('currentPosition: {}'.format(position))
-                    target_index = self.DetermineTarget(self.target, position)
-                    self.CreateMotionData(self.wayPoint, rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'])
+                    target_index = self.DetermineTarget(self.target, position[0])
+                    self.CreateMotionData(self.wayPoint, rotation, gripper, self.target[target_index]['position'][0], self.target[target_index]['rotation'], self.target[target_index]['gripper'])
                     isMoving = True
                     self.flag = False
                     self.wayPoint = []

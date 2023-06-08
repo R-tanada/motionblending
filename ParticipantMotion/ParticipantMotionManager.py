@@ -182,7 +182,7 @@ class MotionManager:
         return flag
 
     def GetParticipnatMotionInfo(self, position):
-        self.pos_list.append(np.linalg.norm(position))
+        self.pos_list.append(position[0])
         
         try:
             # if len(self.pos_list) == 21:
