@@ -109,10 +109,6 @@ class MinimumJerk:
         self.CreateGripMotion(grip_n, grip_f, frameLength, gripFrame = 300)
 
     def GetMinimumJerkParams(self, t1, t2, t3, v1, v2, v3, pf):
-        t0 = CalculateInitialTime(t1, t2, t3, v1, v2, v3)
-        tf = CalculateReachingTime(t0, t1, t2, v1, v2)
-        x0 = CalculateInitialPosition(t0, t3, tf, v3, pf)
-
         def CalculateInitialTime(t1, t2, t3, v1, v2, v3):
             v12, v23 = np.sqrt(v1/ v2), np.sqrt(v2/ v3)
             return ((t1* (t1- t2))- v12* v23* t3* (t2- t3))/ ((t1- t2)- v12* v23* (t2- t3))
@@ -123,7 +119,11 @@ class MinimumJerk:
     
         def CalculateInitialPosition(t0, t3, tf, v3, xf):
             return xf- (v3* tf** 4)/ (30* ((t3- t0)* (t3- t0- tf))** 2)
-        
+
+        t0 = CalculateInitialTime(t1, t2, t3, v1, v2, v3)
+        tf = CalculateReachingTime(t0, t1, t2, v1, v2)
+        x0 = CalculateInitialPosition(t0, t3, tf, v3, pf)
+
         return t3- t0, tf, x0
 
     def CreateGripMotion(self, grip_n, grip_f, frameLength, gripFrame):
