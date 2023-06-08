@@ -26,6 +26,8 @@ class MinimumJerk:
         self.freq = 200
         self.acc_flag = True
         self.before_acc = 0
+        self.posBox = []
+        self.timeBox = []
         
     def GetPosition(self):
         try:
@@ -66,6 +68,8 @@ class MinimumJerk:
 
         if self.flag == True:
             if diff_init >= self.initThreshold:
+                self.posBox.append(position[0])
+                self.timeBox.append(time.perf_counter() - self.startTime)
                 if self.acc_flag == 1:
                     self.wayPoint.append({'time': timeMoving, 'position': position, 'velocity': velocity})
                     self.acc_flag = 2
@@ -76,6 +80,7 @@ class MinimumJerk:
                         self.wayPoint.append({'time': timeMoving, 'position': position, 'velocity': velocity})
                         self.acc_flag = 3
                         print('2nd')
+                    self.before_acc = accelaration
 
                 elif self.acc_flag == 3:
                     if timeMoving >= 1.5 * self.wayPoint[1]['time'] - 0.5 * self.wayPoint[0]['time']:
@@ -101,10 +106,10 @@ class MinimumJerk:
         return diffList.index(min(diffList))
     
     def CreateMotionData(self, wayPoint, rot_n, grip_n, pos_f, rot_f, grip_f):
-        t3, tf, x0 = self.GetMinimumJerkParams(wayPoint[0]['time'], wayPoint[1]['time'], wayPoint[2]['time'], wayPoint[0]['velocity'], wayPoint[1]['velocity'], wayPoint[2]['velocity'], pos_f)
+        t3, tf, x0, t0 = self.GetMinimumJerkParams(wayPoint[0]['time'], wayPoint[1]['time'], wayPoint[2]['time'], wayPoint[0]['velocity'], wayPoint[1]['velocity'], wayPoint[2]['velocity'], pos_f)
         frameLength = int((tf- t3)* self.freq)
 
-        self.CreateMotionMinimumJerk(t3, tf, x0, pos_f, frameLength)
+        self.CreateMotionMinimumJerk(t3, tf, x0, pos_f, frameLength, t0)
         self.CreateSlerpMotion(rot_n, rot_f, frameLength)
         self.CreateGripMotion(grip_n, grip_f, frameLength, gripFrame = 300)
 
@@ -124,7 +129,7 @@ class MinimumJerk:
         tf = CalculateReachingTime(t0, t1, t2, v1, v2)
         x0 = CalculateInitialPosition(t0, t3, tf, v3, pf)
 
-        return t3- t0, tf, x0
+        return t3- t0, tf, x0, t0
 
     def CreateGripMotion(self, grip_n, grip_f, frameLength, gripFrame):
         def CreateMotion_Liner(target, data, split):
@@ -144,7 +149,7 @@ class MinimumJerk:
 
         self.predictedRotation = iter(np.array(rot_list))
 
-    def CreateMotionMinimumJerk(self, t3, tf, x0, xf, frameLength):
+    def CreateMotionMinimumJerk(self, t3, tf, x0, xf, frameLength, t0):
 
         def function(x0, xf, flame):
             return x0 + (xf- x0)* (6* flame** 5- 15* flame** 4+ 10* flame** 3)
@@ -156,6 +161,7 @@ class MinimumJerk:
             position.append(function(x0[i], xf[i], flame))
 
         plt.plot(flame, position[0])
+        plt.plot(self.timeBox - t0, self.posBox)
         plt.show()
 
         self.predictedPosition = iter(np.transpose(np.array(position)))
