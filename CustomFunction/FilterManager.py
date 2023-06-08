@@ -11,7 +11,8 @@ class RealTimeLowpassFilter:
         self.z = np.zeros((max(len(self.a), len(self.b))-1, listNum))
 
         self.init_time = time.perf_counter()
-        self.start_time = 5
+        self.start_time = 10
+        self.finish = True
 
     def butter_lowpass(self, cutoff_freq, fs, order = 1):
         nyquist_freq = 0.5 * fs
@@ -26,6 +27,9 @@ class RealTimeLowpassFilter:
             filtered_data[i], self.z[:,i] = lfilter(self.b, self.a, [x], zi=self.z[:,i])
 
         if timer > self.start_time:
+            if self.finish == True:
+                print('filtered')
+                self.finish = False
             return filtered_data
 
         else:

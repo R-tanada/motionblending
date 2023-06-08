@@ -25,6 +25,7 @@ class MinimumJerk:
         self.wayPoint = []
         self.freq = 200
         self.acc_flag = True
+        self.before_acc = 0
         
     def GetPosition(self):
         try:
@@ -68,16 +69,19 @@ class MinimumJerk:
                 if self.acc_flag == 1:
                     self.wayPoint.append({'time': timeMoving, 'position': position, 'velocity': velocity})
                     self.acc_flag = 2
+                    print('1st')
 
                 elif self.acc_flag == 2:
-                    if abs(accelaration) < 0.1:
+                    if self.before_acc * accelaration < 0:
                         self.wayPoint.append({'time': timeMoving, 'position': position, 'velocity': velocity})
                         self.acc_flag = 3
+                        print('2nd')
 
                 elif self.acc_flag == 3:
                     if timeMoving >= 1.5 * self.wayPoint[1]['time'] - 0.5 * self.wayPoint[0]['time']:
                         self.wayPoint.append({'time': timeMoving, 'position': position, 'velocity': velocity})
                         self.acc_flag = 1
+                        print('3rd')
 
                 if len(self.wayPoint) == 3:
                     target_index = self.DetermineTarget(self.target, position)
@@ -96,7 +100,7 @@ class MinimumJerk:
         return diffList.index(min(diffList))
     
     def CreateMotionData(self, wayPoint, rot_n, grip_n, pos_f, rot_f, grip_f):
-        t3, tf, x0 = self.GetMinimumJerkParams(wayPoint[0]['time'], wayPoint[1]['time'], wayPoint[2]['time'], wayPoint[0]['velocity'], wayPoint[1]['velocity'], wayPoint[2]['velocity'], wayPoint[2]['position'], pos_f)
+        t3, tf, x0 = self.GetMinimumJerkParams(wayPoint[0]['time'], wayPoint[1]['time'], wayPoint[2]['time'], wayPoint[0]['velocity'], wayPoint[1]['velocity'], wayPoint[2]['velocity'], pos_f)
         frameLength = int((tf- t3)* self.freq)
 
         self.CreateMotionMinimumJerk(t3, tf, x0, pos_f, frameLength)
@@ -114,7 +118,7 @@ class MinimumJerk:
     
         def CalculateReachingTime(t0, t1, t2, v1, v2):
             v12 = np.sqrt(v1/ v2)
-            return ((t0- t1)** 2- v12* (t0- t2)** 2)/ ((t0- t1)- v12* (t0- t2))
+            return -((t0- t1)** 2- v12* (t0- t2)** 2)/ ((t0- t1)- v12* (t0- t2))
     
         def CalculateInitialPosition(t0, t3, tf, v3, xf):
             return xf- (v3* tf** 4)/ (30* ((t3- t0)* (t3- t0- tf))** 2)
