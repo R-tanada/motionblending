@@ -74,8 +74,8 @@ class MotionManager:
         MotionManager.optiTrackStreamingManager.position[self.rigidBody] = np.zeros(3)
         MotionManager.optiTrackStreamingManager.rotation[self.rigidBody] = np.zeros(4)
 
-        self.filter_pos = RealTimeLowpassFilter(cutoff_freq=5, fs=200, order=2, listNum=3)
-        self.filter_rot = RealTimeLowpassFilter(cutoff_freq=5, fs=200, order=2, listNum=4)
+        self.filter_pos = RealTimeLowpassFilter(cutoff_freq=3, fs=200, order=2, listNum=3)
+        self.filter_rot = RealTimeLowpassFilter(cutoff_freq=3, fs=200, order=2, listNum=4)
 
         self.sensorManager = GripperSensorManager(Config['SerialCOM'], BandRate = 9600)
         sensorThread = threading.Thread(target = self.sensorManager.StartReceiving)
