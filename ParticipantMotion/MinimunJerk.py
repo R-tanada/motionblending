@@ -84,6 +84,7 @@ class MinimumJerk:
                         print('3rd')
 
                 if len(self.wayPoint) == 3:
+                    print('currentPosition: {}'.format(position))
                     target_index = self.DetermineTarget(self.target, position)
                     self.CreateMotionData(self.wayPoint, rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'])
                     isMoving = True
