@@ -132,6 +132,8 @@ class MinimumJerk:
         tf = CalculateReachingTime(t0, t1, t2, v1, v2)
         x0 = CalculateInitialPosition(t0, t3, tf, v3, pf)
 
+        print(t0, tf, x0)
+
         return t3- t0, tf, x0, t0
 
     def CreateGripMotion(self, grip_n, grip_f, frameLength, gripFrame):
