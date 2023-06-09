@@ -195,7 +195,7 @@ class MotionManager:
 
                 self.recorder.Record([self.pos_list[6], vel, acc])
                 if len(self.recorder.dataRecorded['data']) == 500:
-                    self.recorder.PlotGraph()
+                    self.recorder.ExportAsCSV('Recorder/RecordedData/mocap_raw_data.csv')
                 
                 del self.pos_list[0]
 
