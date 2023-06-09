@@ -116,7 +116,7 @@ class MinimumJerk:
     def GetMinimumJerkParams(self, t1, t2, t3, v1, v2, v3, pf):
         def CalculateInitialTime(t1, t2, t3, v1, v2, v3):
             v1, v2 = np.sqrt(v1/ v2), np.sqrt(v2/ v3)
-            a = t1 - t2 - t1*v2 + t3*v2 + t2*v2 + t2*v1*v2 -t3*v1*v2
+            a = t1 - t2 - t1*v2 + t3*v2 + t2*v1*v2 -t3*v1*v2
             b = -(t1**2 - t2**2 - (t1**2)*v2 + (t3**2)*v2 + (t2**2)*v1*v2 -(t3**2)*v1*v2)
             c = (t1**2)*t2 - t1*(t2**2) - (t1**2)*t3*v2 + t1*(t3**2)*v2 + (t2**2)*t3*v1*v2 - t2*(t3**2)*v1*v2
             return (-b + np.sqrt(b**2 - 4*a*c)) / (2*a)
