@@ -19,9 +19,9 @@ class DataRecordManager():
             writer.writerow(self.header)
             writer.writerows(self.data)
 
-    # def PlotGraph(self):
-    #     plt.plot(self.dataRecorded['time'], self.dataRecorded['data'])
-    #     plt.show()
+    def PlotGraph(self):
+        plt.plot(self.dataRecorded['time'], self.dataRecorded['data'])
+        plt.show()
 
 if __name__ == '__main__':
     recorder = DataRecordManager(['x', 'y', 'z'])
