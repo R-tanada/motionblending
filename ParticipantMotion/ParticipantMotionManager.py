@@ -108,8 +108,8 @@ class MotionManager:
 
     def GetPosition(self):
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
-            self.position = cf.ConvertAxis_Position(self.filter_pos.apply(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000), self.mount) - np.array(self.initPosition)
-            # self.position = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount) - np.array(self.initPosition)
+            # self.position = cf.ConvertAxis_Position(self.filter_pos.apply(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000), self.mount) - np.array(self.initPosition)
+            self.position = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount) - np.array(self.initPosition)
         else:
             self.position, self.isMoving_Pos = self.automation.GetPosition()
 
@@ -117,8 +117,8 @@ class MotionManager:
     
     def GetRotation(self):
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
-            quaternion = cf.CnvertAxis_Rotation(self.filter_rot.apply(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody]), self.mount)
-            # quaternion = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
+            # quaternion = cf.CnvertAxis_Rotation(self.filter_rot.apply(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody]), self.mount)
+            quaternion = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
             if quaternion[3] < 0:
                 quaternion = -np.array(quaternion)
             self.rotation = quaternion
@@ -193,9 +193,9 @@ class MotionManager:
                 vel = (self.pos_list[6] - self.pos_list[3])/ (self.dt * 3)
                 acc = (vel - ((self.pos_list[3] - self.pos_list[0])/ (self.dt * 3)))/ (self.dt * 3)
 
-                # self.recorder.Record([self.pos_list[6], vel, acc])
-                # if len(self.recorder.dataRecorded['data']) == 500:
-                #     self.recorder.PlotGraph()
+                self.recorder.Record([self.pos_list[6], vel, acc])
+                if len(self.recorder.dataRecorded['data']) == 500:
+                    self.recorder.PlotGraph()
                 
                 del self.pos_list[0]
 
