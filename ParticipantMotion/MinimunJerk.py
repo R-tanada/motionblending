@@ -30,7 +30,7 @@ class MinimumJerk:
         self.posBox = []
         self.timeBox = []
 
-        self.recorder = DataRecordManager(header = ['x', 'y', 'z'])
+        self.recorder = DataRecordManager(header = ['t0', 't3', 'x0', 'T', 'xf'])
         
     def GetPosition(self):
         try:
@@ -137,6 +137,9 @@ class MinimumJerk:
 
         print(t0, tf, x0, t3)
 
+        self.recorder.Record(t0, t3, x0, tf, pf)
+        self.recorder.ExportAsCSV('Recorder/RecordedData/predicted/data1.csv')
+
         return t3- t0, tf, x0, t0
 
     def CreateGripMotion(self, grip_n, grip_f, frameLength, gripFrame):
@@ -167,8 +170,5 @@ class MinimumJerk:
         position = []
         for i in range(3):
             position.append(function(x0[i], xf[i], flame))
-
-        self.recorder.data = position
-        self.recorder.ExportAsCSV('Recorder/RecordedData/predicted/data1.csv')
 
         self.predictedPosition = iter(np.transpose(np.array(position)))
