@@ -82,10 +82,13 @@ class MotionManager:
         sensorThread.setDaemon(True)
         sensorThread.start()
 
-        self.recorder = DataRecordManager()
+        self.recorder = DataRecordManager(header=['x', 'y', 'z'])
 
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
+        self.recorder.Record(position)
+        if len(self.recorder.data) == 600:
+            self.recorder.ExportAsCSV('Recorder/RecordedData/real/data1.scv')
         velocity, accelaration = self.GetParticipnatMotionInfo(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:

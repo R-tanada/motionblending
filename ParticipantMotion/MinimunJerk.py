@@ -3,6 +3,7 @@ import time
 import CustomFunction.CustomFunction as cf
 from itertools import cycle as iter_cycle
 from matplotlib import pyplot as plt
+from Recorder.DataRecordManager import DataRecordManager
 
 class MinimumJerk:
     def __init__(self, Target: list, xArmConfig: dict, Threshold = 300) -> None:
@@ -28,6 +29,8 @@ class MinimumJerk:
         self.before_acc = 0
         self.posBox = []
         self.timeBox = []
+
+        self.recorder = DataRecordManager(header = ['x', 'y', 'z'])
         
     def GetPosition(self):
         try:
@@ -132,7 +135,7 @@ class MinimumJerk:
         tf = CalculateReachingTime(t0, t1, t2, v1, v2)
         x0 = CalculateInitialPosition(t0, t3, tf, v3, pf)
 
-        print(t0, tf, x0)
+        print(t0, tf, x0, t3)
 
         return t3- t0, tf, x0, t0
 
@@ -158,15 +161,14 @@ class MinimumJerk:
 
         def function(x0, xf, flame):
             return x0 + (xf- x0)* (6* flame** 5- 15* flame** 4+ 10* flame** 3)
-
-        flame = np.linspace(t3, tf, frameLength)
+ 
+        flame = np.linspace(0, tf, frameLength)
 
         position = []
         for i in range(3):
             position.append(function(x0[i], xf[i], flame))
 
-        plt.plot(flame, position[0])
-        plt.plot(self.timeBox - t0, self.posBox)
-        plt.show()
+        self.recorder.data = position
+        self.recorder.ExportAsCSV('Recorder/RecordedData/predicted/data1.csv')
 
         self.predictedPosition = iter(np.transpose(np.array(position)))
