@@ -122,7 +122,7 @@ class MinimumJerk:
             a = t1 - t2 - t1*v2 + t3*v2 + t2*v1*v2 -t3*v1*v2
             b = -(t1**2 - t2**2 - (t1**2)*v2 + (t3**2)*v2 + (t2**2)*v1*v2 -(t3**2)*v1*v2)
             c = (t1**2)*t2 - t1*(t2**2) - (t1**2)*t3*v2 + t1*(t3**2)*v2 + (t2**2)*t3*v1*v2 - t2*(t3**2)*v1*v2
-            return (-b + np.sqrt(b**2 - 4*a*c)) / (2*a)
+            return (-b - np.sqrt(b**2 - 4*a*c)) / (2*a)
     
         def CalculateReachingTime(t0, t1, t2, v1, v2):
             v1 = np.sqrt(v1/ v2)
