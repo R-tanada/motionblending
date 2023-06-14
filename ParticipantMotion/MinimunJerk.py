@@ -137,7 +137,7 @@ class MinimumJerk:
 
         print(t0, tf, x0, t3)
 
-        self.recorder.Record(t0, t3, tf)
+        self.recorder.Record([t0, t3, tf])
         self.recorder.Record(x0)
         self.recorder.Record(pf)
         self.recorder.ExportAsCSV('Recorder/RecordedData/predicted/data1.csv')

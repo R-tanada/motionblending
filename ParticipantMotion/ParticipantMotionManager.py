@@ -44,7 +44,7 @@ class ParticipantManager:
             self.motionManagers[Config['Mount']].SetInitRotation()
 
 class MotionManager:
-    optiTrackStreamingManager = OptiTrackStreamingManager(mocapServer = "133.68.35.155", mocapLocal = "133.68.35.155")
+    optiTrackStreamingManager = OptiTrackStreamingManager(mocapServer = "133.68.108.109", mocapLocal = "133.68.108.109")
     streamingThread = threading.Thread(target = optiTrackStreamingManager.stream_run)
     streamingThread.setDaemon(True)
     streamingThread.start()
