@@ -14,7 +14,7 @@ class DataRecordManager():
         self.data.append(np.hstack((data, time.perf_counter() - self.startTime)))
 
     def ExportAsCSV(self, exportPath):
-        with open(exportPath, 'w') as exportFile:
+        with open(exportPath, 'w', newline='') as exportFile:
             writer = csv.writer(exportFile)
             writer.writerow(self.header)
             writer.writerows(self.data)
