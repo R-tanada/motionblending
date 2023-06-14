@@ -30,7 +30,7 @@ class MinimumJerk:
         self.posBox = []
         self.timeBox = []
 
-        self.recorder = DataRecordManager(header = ['t0', 't3', 'x0', 'T', 'xf'])
+        self.recorder = DataRecordManager()
         
     def GetPosition(self):
         try:
@@ -137,7 +137,9 @@ class MinimumJerk:
 
         print(t0, tf, x0, t3)
 
-        self.recorder.Record(t0, t3, x0, tf, pf)
+        self.recorder.Record(t0, t3, tf)
+        self.recorder.Record(x0)
+        self.recorder.Record(pf)
         self.recorder.ExportAsCSV('Recorder/RecordedData/predicted/data1.csv')
 
         return t3- t0, tf, x0, t0

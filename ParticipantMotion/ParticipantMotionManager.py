@@ -87,7 +87,7 @@ class MotionManager:
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
         self.recorder.Record(position)
-        if len(self.recorder.data) == 600:
+        if len(self.recorder.data) == 1500:
             self.recorder.ExportAsCSV('Recorder/RecordedData/real/data1.scv')
         velocity, accelaration = self.GetParticipnatMotionInfo(position)
 

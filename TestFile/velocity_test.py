@@ -63,7 +63,7 @@ def GetParticipantMotionInfo2(position):
         vellist.append(velocity)
 
         if len(vellist) == space:
-            if np.linalg.norm(poslist[space - 1]) - np.linalg.norm(poslist[0]) >= 0:
+            if np.dot(poslist[space - 1], poslist[0]) >= 0:
                 vel = np.linalg.norm(vellist[space - 1])
 
             else:
@@ -100,7 +100,7 @@ def GetParticipantMotionInfo2(position):
 # vel = [0, 0, 0]
 # acc = [0, 0, 0]
 
-filter = RealTimeLowpassFilter(cutoff_freq=1, fs=200, order=2, listNum=3)
+filter = RealTimeLowpassFilter(cutoff_freq=2, fs=200, order=2, listNum=3)
 
 try:
     while True:
@@ -112,10 +112,10 @@ try:
         # print(acc)
 
         # pos_list.append(pos)
-        # vel_list.append(vel)
-        # vel_list2.append(vel2)
-        acc_list.append(acc)
-        acc_list2.append(acc2)
+        vel_list.append(vel)
+        vel_list2.append(vel2)
+        # acc_list.append(acc)
+        # acc_list2.append(acc2)
         time_list.append(inputdata[3])
 
         time.sleep(0.005)
@@ -125,8 +125,8 @@ except StopIteration:
     plot = fig.add_subplot()
     plot.set_xlabel('time')
     plot.set_ylabel('velocity')
-    plot.plot(time_list, acc_list, label = 'siraki')
-    plot.plot(time_list, acc_list2, label = 'honnrai')
+    plot.plot(time_list, vel_list, label = 'norm_diff')
+    plot.plot(time_list, vel_list2, label = 'element_diff')
     plot.legend()
     plt.show()
 
