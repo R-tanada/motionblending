@@ -10,7 +10,6 @@ from CyberneticAvatarMotion.CyberneticAvatarMotionManager import \
 # ----- Custom class ----- #
 from RobotArmControl.xArmManager import xArmManager
 
-
 class RobotControlManager:
     def __init__(self, isDebug: bool == True) -> None:
         with open('SettingFile/settings_single.json', 'r') as settings_file:
