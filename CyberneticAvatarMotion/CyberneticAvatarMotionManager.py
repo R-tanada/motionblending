@@ -40,3 +40,7 @@ class CyberneticAvatarMotionManager:
             self.participantManagers[participant].SetParticipantInitPosition()
             self.participantManagers[participant].SetParticipantInitRotation()
 
+    def ExportCSV(self):
+        for participant in self.participantManagers.keys():
+            self.participantManagers[participant].ExportCSV()
+

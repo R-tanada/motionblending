@@ -1,6 +1,6 @@
 import json
 import time
-from ctypes import windll
+# from ctypes import windll
 
 import numpy as np
 from matplotlib.pyplot import flag
@@ -28,7 +28,7 @@ class RobotControlManager:
         self.isDebug = isDebug
 
     def SendDataToRobot(self, FrameRate = 240, isPrintFrameRate = True):
-        windll.winmm.timeBeginPeriod(1)
+        # windll.winmm.timeBeginPeriod(1)
         self.loopTime = 1/ FrameRate
 
         # ----- Control flags ----- #
@@ -64,14 +64,16 @@ class RobotControlManager:
                 xArmManager.DisConnect()
                 print('successfully disconnected')
 
-            windll.winmm.timeEndPeriod(1)
+            self.cyberneticManager.ExportCSV()
+
+            # windll.winmm.timeEndPeriod(1)
 
         except:
             print('----- Exception has occurred -----')
             import traceback
             traceback.print_exc()
 
-            windll.winmm.timeEndPeriod(1)
+            # windll.winmm.timeEndPeriod(1)
 
     def FixFrameRate(self, processDuration):
         sleepTime = self.loopTime - processDuration

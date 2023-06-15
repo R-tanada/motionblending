@@ -3,7 +3,7 @@ import time
 import CustomFunction.CustomFunction as cf
 from itertools import cycle as iter_cycle
 from matplotlib import pyplot as plt
-from Recorder.DataRecordManager import DataRecordManager
+from Recorder.DataManager import DataRecordManager
 
 class MinimumJerk:
     def __init__(self, Target: list, xArmConfig: dict, Threshold = 300) -> None:
@@ -136,11 +136,6 @@ class MinimumJerk:
         x0 = CalculateInitialPosition(t0, t3, tf, v3, pf)
 
         print(t0, tf, x0, t3)
-
-        self.recorder.Record([t0, t3, tf])
-        self.recorder.Record(x0)
-        self.recorder.Record(pf)
-        self.recorder.ExportAsCSV('Recorder/RecordedData/predicted/data1.csv')
 
         return t3- t0, tf, x0, t0
 

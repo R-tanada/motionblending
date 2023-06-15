@@ -8,7 +8,7 @@ from OptiTrack.OptiTrackStreamingManager import OptiTrackStreamingManager
 from Sensor.SensorManager import GripperSensorManager
 from ParticipantMotion.MinimunJerk import MinimumJerk
 import CustomFunction.CustomFunction as cf
-from Recorder.DataRecordManager import DataRecordManager
+from Data.DataManager import DataRecordManager, DataLoadManager
 from CustomFunction.FilterManager import RealTimeLowpassFilter
 
 
@@ -43,6 +43,10 @@ class ParticipantManager:
         for Config in self.participantConfig:
             self.motionManagers[Config['Mount']].SetInitRotation()
 
+    def ExportCSV(self):
+        for Config in self.participantConfig:
+            self.motionManagers[Config['Mount']].ExportCSV()
+
 class MotionManager:
     optiTrackStreamingManager = OptiTrackStreamingManager(mocapServer = "133.68.108.109", mocapLocal = "133.68.108.109")
     streamingThread = threading.Thread(target = optiTrackStreamingManager.stream_run)
@@ -67,7 +71,11 @@ class MotionManager:
         self.dt = 1/ 200
         self.startTime = time.perf_counter()
         self.before_time = 0
-        self.recorded = True
+        self.recording = True
+        self.Simulation = True
+        path_pos = ''
+        path_rot = ''
+        path_grip = ''
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
         self.initRot = xArmConfig['InitRot']
@@ -75,22 +83,23 @@ class MotionManager:
         MotionManager.optiTrackStreamingManager.position[self.rigidBody] = np.zeros(3)
         MotionManager.optiTrackStreamingManager.rotation[self.rigidBody] = np.zeros(4)
 
-        self.filter_pos = RealTimeLowpassFilter(cutoff_freq=3, fs=200, order=2, listNum=3)
-        self.filter_rot = RealTimeLowpassFilter(cutoff_freq=3, fs=200, order=2, listNum=4)
-
         self.sensorManager = GripperSensorManager(Config['SerialCOM'], BandRate = 9600)
         sensorThread = threading.Thread(target = self.sensorManager.StartReceiving)
         sensorThread.setDaemon(True)
         sensorThread.start()
 
-        self.recorder = DataRecordManager(header=['x', 'y', 'z'])
+        if self.recording:
+            self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'])
+            self.recorder_rot = DataRecordManager(header = ['x', 'y', 'z', 'w'])
+            self.recorder_grip = DataRecordManager(header = ['grip'])
+
+        if self.Simulation:
+            self.data_pos = DataLoadManager(path_pos)
+            self.data_rot = DataLoadManager(path_rot)
+            self.data_grip = DataLoadManager(path_grip)
 
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
-        self.recorder.Record(position)
-        if len(self.recorder.data) == 2500:
-            self.recorder.ExportAsCSV('Recorder/RecordedData/real/data1.csv')
-        velocity, accelaration = self.GetParticipnatMotionInfo(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             if self.isMoving == True:
@@ -111,17 +120,30 @@ class MotionManager:
         return {'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight}
 
     def GetPosition(self):
+        if self.Simulation:
+            position = self.data_pos.getdata()
+        else:
+            position = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount) - np.array(self.initPosition)
+            if self.recording:
+                self.recorder_pos.record(position)
+
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
-            self.position = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount) - np.array(self.initPosition)
+            self.position = position
         else:
             self.position, self.isMoving_Pos = self.automation.GetPosition()
 
         return self.position
     
     def GetRotation(self):
+        if self.Simulation:
+            rotation = self.data_rot.getdata()
+        else:
+            rotation = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
+            if self.recording:
+                self.recorder_rot.record(rotation)
+
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
-            quaternion = cf.CnvertAxis_Rotation(self.filter_rot.apply(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody]), self.mount)
-            # quaternion = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
+            quaternion = rotation
             if quaternion[3] < 0:
                 quaternion = -np.array(quaternion)
             self.rotation = quaternion
@@ -131,8 +153,15 @@ class MotionManager:
         return [self.rotation, self.initQuaternion, self.initInverseMatrix]
     
     def GetGripperValue(self):
+        if self.Simulation:
+            grip = self.data_grip.getdata()
+        else:
+            grip = cf.ConvertSensorToGripper(self.sensorManager.sensorValue)
+            if self.recording:
+                self.recorder_grip.record(grip)
+
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
-            gripper = cf.ConvertSensorToGripper(self.sensorManager.sensorValue)
+            gripper = grip
         else:
             gripper, self.isMoving_Grip = self.automation.GetGripperValue()
 
@@ -183,29 +212,8 @@ class MotionManager:
             self.initInverseMatrix = cf.Convert2InverseMatrix(self.automation.q_init)
 
         return flag
-
-    def GetParticipnatMotionInfo(self, position):
-        self.pos_list.append(np.linalg.norm(position))
-        
-        try:
-            # if len(self.pos_list) == 21:
-            #     vel = (self.pos_list[10] - self.pos_list[0])/ (self.dt * 10)
-            #     acc = ((self.pos_list[20] - self.pos_list[10]) - (self.pos_list[10] - self.pos_list[0]))/ (self.dt * 10)**2
-
-            if len(self.pos_list) == 7:
-                vel = (self.pos_list[6] - self.pos_list[3])/ (self.dt * 3)
-                acc = (vel - ((self.pos_list[3] - self.pos_list[0])/ (self.dt * 3)))/ (self.dt * 3)
-
-                # self.recorder.Record([self.pos_list[6], vel, acc])
-                # if len(self.recorder.dataRecorded['data']) == 500:
-                #     self.recorder.ExportAsCSV('Recorder/RecordedData/mocap_raw_data.csv')
-                
-                del self.pos_list[0]
-
-            else:
-                vel = acc = 0
-
-        except KeyboardInterrupt:
-            self.recorder.PlotGraph()
-
-        return vel, acc
+    
+    def ExportCSV(self):
+        self.recorder_pos.exportAsCSV()
+        self.recorder_rot.exportAsCSV()
+        self.recorder_grip.exportAsCSV()
