@@ -29,7 +29,8 @@ class DataLoadManager:
             reader = csv.reader(file)
             data = [row for row in reader][1:]
             data = [[float(v) for v in row] for row in data]
-            self.data_iter = iter(data)
+            data = np.array(data)
+            self.data_iter = iter(data[:, 0:-1])
 
     def getdata(self):
         try:

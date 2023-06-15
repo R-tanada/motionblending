@@ -3,7 +3,6 @@ import time
 import CustomFunction.CustomFunction as cf
 from itertools import cycle as iter_cycle
 from matplotlib import pyplot as plt
-from Recorder.DataManager import DataRecordManager
 
 class MinimumJerk:
     def __init__(self, Target: list, xArmConfig: dict, Threshold = 300) -> None:
@@ -30,7 +29,7 @@ class MinimumJerk:
         self.posBox = []
         self.timeBox = []
 
-        self.recorder = DataRecordManager()
+        # self.recorder = DataRecordManager()
         
     def GetPosition(self):
         try:
@@ -66,7 +65,7 @@ class MinimumJerk:
         # velocity = np.linalg.norm(np.array(velocity))
         # accelaration = np.linalg.norm(np.array(accelaration))
 
-        if diff_init > self.initThreshold:
+        if diff_init < self.initThreshold:
             self.flag = True
 
         if self.flag == True:
