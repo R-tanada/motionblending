@@ -100,6 +100,7 @@ class MotionManager:
 
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
+        velocity, accelaration = self.GetParticipnatMotionInfo(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             if self.isMoving == True:
@@ -212,6 +213,28 @@ class MotionManager:
             self.initInverseMatrix = cf.Convert2InverseMatrix(self.automation.q_init)
 
         return flag
+
+    def GetParticipnatMotionInfo(self, position):
+        self.pos_list.append(np.linalg.norm(position))
+
+        # if len(self.pos_list) == 21:
+        #     vel = (self.pos_list[10] - self.pos_list[0])/ (self.dt * 10)
+        #     acc = ((self.pos_list[20] - self.pos_list[10]) - (self.pos_list[10] - self.pos_list[0]))/ (self.dt * 10)**2
+
+        if len(self.pos_list) == 7:
+            vel = (self.pos_list[6] - self.pos_list[3])/ (self.dt * 3)
+            acc = (vel - ((self.pos_list[3] - self.pos_list[0])/ (self.dt * 3)))/ (self.dt * 3)
+
+            # self.recorder.Record([self.pos_list[6], vel, acc])
+            # if len(self.recorder.dataRecorded['data']) == 500:
+            #     self.recorder.ExportAsCSV('Recorder/RecordedData/mocap_raw_data.csv')
+            
+            del self.pos_list[0]
+
+        else:
+            vel = acc = 0
+
+        return vel, acc
     
     def ExportCSV(self):
         self.recorder_pos.exportAsCSV()
