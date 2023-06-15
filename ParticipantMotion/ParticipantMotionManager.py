@@ -67,6 +67,7 @@ class MotionManager:
         self.dt = 1/ 200
         self.startTime = time.perf_counter()
         self.before_time = 0
+        self.recorded = True
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
         self.initRot = xArmConfig['InitRot']
@@ -111,8 +112,7 @@ class MotionManager:
 
     def GetPosition(self):
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
-            self.position = cf.ConvertAxis_Position(self.filter_pos.apply(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000), self.mount) - np.array(self.initPosition)
-            # self.position = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount) - np.array(self.initPosition)
+            self.position = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount) - np.array(self.initPosition)
         else:
             self.position, self.isMoving_Pos = self.automation.GetPosition()
 
