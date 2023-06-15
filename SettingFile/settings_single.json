@@ -42,6 +42,11 @@
                 "RigidBody": 1,
                 "SerialCOM": "None",
                 "Weight": 1,
+                "DataPath": {
+                    "position": "jhgjhg",
+                    "rotation": "fafafa",
+                    "gripper": "fsffdsf"
+                },
                 "Target": [
                     {
                         "position": [

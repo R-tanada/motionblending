@@ -71,15 +71,9 @@ class MotionManager:
         self.before_time = 0
         self.recording = False
         self.Simulation = True
-        path_pos = 'Data/data/mocap_raw_data.csv'
-        path_rot = ''
-        path_grip = ''
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
         self.initRot = xArmConfig['InitRot']
-
-        # MotionManager.optiTrackStreamingManager.position[self.rigidBody] = np.zeros(3)
-        # MotionManager.optiTrackStreamingManager.rotation[self.rigidBody] = np.zeros(4)
 
         self.sensorManager = GripperSensorManager(Config['SerialCOM'], BandRate = 9600)
         sensorThread = threading.Thread(target = self.sensorManager.StartReceiving)
@@ -92,9 +86,12 @@ class MotionManager:
             self.recorder_grip = DataRecordManager(header = ['grip'])
 
         if self.Simulation:
-            self.data_pos = DataLoadManager(path_pos)
-            self.data_rot = DataLoadManager(path_rot)
-            self.data_grip = DataLoadManager(path_grip)
+            self.data_pos = DataLoadManager(Config['DataPath']['position'])
+            self.data_rot = DataLoadManager(Config['DataPath']['rotation'])
+            self.data_grip = DataLoadManager(Config['DataPath']['gripper'])
+        else:
+            MotionManager.optiTrackStreamingManager.position[self.rigidBody] = np.zeros(3)
+            MotionManager.optiTrackStreamingManager.rotation[self.rigidBody] = np.zeros(4)
 
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
@@ -169,7 +166,6 @@ class MotionManager:
     def SetInitPosition(self):
         if self.Simulation:
             initPosition = self.data_pos.getdata()
-
         else:
             initPosition = MotionManager.optiTrackStreamingManager.position[self.rigidBody]
             if self.recording:
@@ -180,9 +176,10 @@ class MotionManager:
     def SetInitRotation(self):
         if self.Simulation:
             initQuaternion = self.data_rot.getdata()
-
         else:
             initQuaternion = MotionManager.optiTrackStreamingManager.rotation[self.rigidBody]
+            if self.recording:
+                self.recorder_rot(initQuaternion)
 
         quaternion = cf.CnvertAxis_Rotation(initQuaternion, self.mount)
         if quaternion[3] < 0:
