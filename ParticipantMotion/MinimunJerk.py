@@ -108,14 +108,14 @@ class MinimumJerk:
         return diffList.index(min(diffList))
     
     def CreateMotionData(self, wayPoint, rot_n, grip_n, pos_f, rot_f, grip_f):
-        t3, tf, x0, t0 = self.GetMinimumJerkParams(wayPoint[0]['time'], wayPoint[1]['time'], wayPoint[2]['time'], wayPoint[0]['velocity'], wayPoint[1]['velocity'], wayPoint[2]['velocity'], pos_f)
+        t3, tf, x0, t0 = self.GetMinimumJerkParams(wayPoint[0]['time'], wayPoint[1]['time'], wayPoint[2]['time'], wayPoint[0]['velocity'], wayPoint[1]['velocity'], wayPoint[2]['velocity'], pos_f, wayPoint[2]['position'])
         frameLength = int((tf- t3)* self.freq)
 
         self.CreateMotionMinimumJerk(t3, tf, x0, pos_f, frameLength, t0)
         self.CreateSlerpMotion(rot_n, rot_f, frameLength)
         self.CreateGripMotion(grip_n, grip_f, frameLength, gripFrame = 300)
 
-    def GetMinimumJerkParams(self, t1, t2, t3, v1, v2, v3, pf):
+    def GetMinimumJerkParams(self, t1, t2, t3, v1, v2, v3, pf, x3):
         def CalculateInitialTime(t1, t2, t3, v1, v2, v3):
             v1, v2 = np.sqrt(v1/ v2), np.sqrt(v2/ v3)
             a = t1 - t2 - t1*v2 + t3*v2 + t2*v1*v2 -t3*v1*v2
@@ -127,12 +127,14 @@ class MinimumJerk:
             v1 = np.sqrt(v1/ v2)
             return ((t1 - t0)**2 - v1*(t2 - t0)**2) / ((t1 - t0) - v1*(t2 - t0))
     
-        def CalculateInitialPosition(t0, t3, tf, v3, xf):
-            return xf- (v3* tf** 4)/ (30* ((t3- t0)* (t3- t0- tf))** 2)
+        def CalculateInitialPosition(t0, t3, tf, xf, x3):
+            t = (t3 - t0)/ tf
+            s = 6*(t**5) - 15*(t**4) + 10*(t**3)
+            return (x3 - xf*s)/ (1 - s)
 
         t0 = CalculateInitialTime(t1, t2, t3, v1, v2, v3)
         tf = CalculateReachingTime(t0, t1, t2, v1, v2)
-        x0 = CalculateInitialPosition(t0, t3, tf, v3, pf)
+        x0 = CalculateInitialPosition(t0, t3, tf, pf, x3)
 
         print(t0, tf, x0, t3)
 
@@ -159,12 +161,14 @@ class MinimumJerk:
     def CreateMotionMinimumJerk(self, t3, tf, x0, xf, frameLength, t0):
 
         def function(x0, xf, flame):
-            return x0 + (xf- x0)* (6* flame** 5- 15* flame** 4+ 10* flame** 3)
+            return x0 + (xf- x0)* (6* (flame** 5)- 15* (flame** 4)+ 10* (flame** 3))
  
-        flame = np.linspace(0, tf, frameLength)
+        flame = np.linspace((t3-t0)/tf, 1, frameLength)
 
         position = []
         for i in range(3):
             position.append(function(x0[i], xf[i], flame))
+
+        print(np.transpose(position))
 
         self.predictedPosition = iter(np.transpose(np.array(position)))

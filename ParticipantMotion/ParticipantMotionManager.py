@@ -69,7 +69,7 @@ class MotionManager:
         self.iter_initPos = self.iter_initRot = []
         self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = False
         self.pos_list = []
-        self.pos_norm_list = []
+        self.vel_list = []
         self.dt = 1/ 200
         self.startTime = time.perf_counter()
         self.before_time = 0
@@ -100,7 +100,7 @@ class MotionManager:
 
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
-        velocity, accelaration = self.GetParticipnatMotionInfo(position)
+        velocity, accelaration = self.GetParticipnatMotionInfo2(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             if self.isMoving == True:
@@ -114,9 +114,9 @@ class MotionManager:
                 if posFlag == rotFlag == False:
                     self.initFlag = False
                     
-            # if self.initFlag == False:
-            #     if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration):
-            #         self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.initFlag = True
+            if self.initFlag == False:
+                if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration):
+                    self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.initFlag = True
 
         return {'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight}
 
@@ -229,26 +229,51 @@ class MotionManager:
 
         return flag
 
-    def GetParticipnatMotionInfo(self, position):
-        self.pos_list.append(np.linalg.norm(position))
-        # if len(self.pos_list) == 21:
-        #     vel = (self.pos_list[10] - self.pos_list[0])/ (self.dt * 10)
-        #     acc = ((self.pos_list[20] - self.pos_list[10]) - (self.pos_list[10] - self.pos_list[0]))/ (self.dt * 10)**2
+    def GetParticipnatMotionInfo(self, position, interval = 10):
+        pos = np.linalg.norm(position)
+        self.pos_list.append(pos)
 
-        if len(self.pos_list) == 7:
-            vel = (self.pos_list[6] - self.pos_list[3])/ (self.dt * 3)
-            acc = (vel - ((self.pos_list[3] - self.pos_list[0])/ (self.dt * 3)))/ (self.dt * 3)
+        if len(self.pos_list) == interval + 1:
+            vel = (self.pos_list[interval] - self.pos_list[0])/ (self.dt * interval)
+            self.vel_list.append(vel)
 
-            # self.recorder.Record([self.pos_list[6], vel, acc])
-            # if len(self.recorder.dataRecorded['data']) == 500:
-            #     self.recorder.ExportAsCSV('Recorder/RecordedData/mocap_raw_data.csv')
+            if len(self.vel_list) == interval + 1:
+                acc = (self.vel_list[interval] - self.vel_list[0])/ (self.dt * interval)
+                del self.vel_list[0]
+
+            else:
+                acc = 0
             
             del self.pos_list[0]
 
         else:
             vel = acc = 0
 
-        self.recorder_vel.record([vel, acc])
+        # self.recorder_vel.record([pos, vel, acc])
+
+        return vel, acc
+    
+    def GetParticipnatMotionInfo2(self, position, interval = 10):
+        pos = np.linalg.norm(position)
+        self.pos_list.append(pos)
+
+        if len(self.pos_list) == interval:
+            vel = np.polyfit(np.linspace(0, self.dt * interval, interval), self.pos_list, 1)[0]
+            self.vel_list.append(vel)
+
+            if len(self.vel_list) == interval:
+                acc = np.polyfit(np.linspace(- self.dt * interval, 0, interval), self.vel_list, 1)[0]
+                del self.vel_list[0]
+
+            else:
+                acc = 0
+            
+            del self.pos_list[0]
+
+        else:
+            vel = acc = 0
+
+        # self.recorder_vel.record([pos, vel, acc])
 
         return vel, acc
     
