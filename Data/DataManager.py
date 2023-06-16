@@ -20,6 +20,11 @@ class DataRecordManager():
             writer.writerow(self.header)
             writer.writerows(self.data)
 
+    def plotGraph(self):
+        data = np.array(self.data)
+        plt.plot(data[:, -1], data[:, 0:-1])
+        plt.show()
+
 class DataLoadManager:
     def __init__(self, path) -> None:
         self.data = 0

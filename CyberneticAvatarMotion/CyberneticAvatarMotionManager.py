@@ -44,3 +44,7 @@ class CyberneticAvatarMotionManager:
         for participant in self.participantManagers.keys():
             self.participantManagers[participant].ExportCSV()
 
+    def PlotGraph(self):
+        for participant in self.participantManagers.keys():
+            self.participantManagers[participant].PlotGraph()
+

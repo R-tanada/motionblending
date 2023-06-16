@@ -45,6 +45,10 @@ class ParticipantManager:
         for Config in self.participantConfig:
             self.motionManagers[Config['Mount']].ExportCSV()
 
+    def PlotGraph(self):
+        for Config in self.participantConfig:
+            self.motionManagers[Config['Mount']].PlotGraph()
+
 class MotionManager:
     optiTrackStreamingManager = OptiTrackStreamingManager(mocapServer = "133.68.108.109", mocapLocal = "133.68.108.109")
     streamingThread = threading.Thread(target = optiTrackStreamingManager.stream_run)
@@ -89,13 +93,13 @@ class MotionManager:
             self.data_pos = DataLoadManager(Config['DataPath']['position'])
             self.data_rot = DataLoadManager(Config['DataPath']['rotation'])
             self.data_grip = DataLoadManager(Config['DataPath']['gripper'])
+            self.recorder_vel = DataRecordManager(header='vel')
         else:
             MotionManager.optiTrackStreamingManager.position[self.rigidBody] = np.zeros(3)
             MotionManager.optiTrackStreamingManager.rotation[self.rigidBody] = np.zeros(4)
 
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
-        print(gripper)
         velocity, accelaration = self.GetParticipnatMotionInfo(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
@@ -110,16 +114,16 @@ class MotionManager:
                 if posFlag == rotFlag == False:
                     self.initFlag = False
                     
-            if self.initFlag == False:
-                if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration):
-                    self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.initFlag = True
+            # if self.initFlag == False:
+            #     if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration):
+            #         self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.initFlag = True
 
-        # print({'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight})
         return {'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight}
 
     def GetPosition(self):
         if self.Simulation:
             position = self.data_pos.getdata()
+
         else:
             position = MotionManager.optiTrackStreamingManager.position[self.rigidBody]
             if self.recording:
@@ -227,7 +231,6 @@ class MotionManager:
 
     def GetParticipnatMotionInfo(self, position):
         self.pos_list.append(np.linalg.norm(position))
-
         # if len(self.pos_list) == 21:
         #     vel = (self.pos_list[10] - self.pos_list[0])/ (self.dt * 10)
         #     acc = ((self.pos_list[20] - self.pos_list[10]) - (self.pos_list[10] - self.pos_list[0]))/ (self.dt * 10)**2
@@ -245,9 +248,14 @@ class MotionManager:
         else:
             vel = acc = 0
 
+        self.recorder_vel.record([vel, acc])
+
         return vel, acc
     
     def ExportCSV(self):
         self.recorder_pos.exportAsCSV()
         self.recorder_rot.exportAsCSV()
         self.recorder_grip.exportAsCSV()
+
+    def PlotGraph(self):
+        self.recorder_vel.plotGraph()
