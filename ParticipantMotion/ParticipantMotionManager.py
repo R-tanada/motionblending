@@ -46,10 +46,10 @@ class ParticipantManager:
             self.motionManagers[Config['Mount']].ExportCSV()
 
 class MotionManager:
-    # optiTrackStreamingManager = OptiTrackStreamingManager(mocapServer = "133.68.108.109", mocapLocal = "133.68.108.109")
-    # streamingThread = threading.Thread(target = optiTrackStreamingManager.stream_run)
-    # streamingThread.setDaemon(True)
-    # streamingThread.start()
+    optiTrackStreamingManager = OptiTrackStreamingManager(mocapServer = "133.68.108.109", mocapLocal = "133.68.108.109")
+    streamingThread = threading.Thread(target = optiTrackStreamingManager.stream_run)
+    streamingThread.setDaemon(True)
+    streamingThread.start()
 
     def __init__(self, Config, xArmConfig) -> None:
         self.mount = Config['Mount']
