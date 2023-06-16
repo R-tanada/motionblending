@@ -4,17 +4,18 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 class DataRecordManager():
-    def __init__(self, header: list = None, filename: str = None) -> None:
+    def __init__(self, header: list = None, exportPath: str = None) -> None:
         self.data = []
         self.header = []
         self.header = np.hstack((header, 'time'))
         self.startTime = time.perf_counter()
+        self.exportPath = exportPath
 
     def record(self, data):
         self.data.append(np.hstack((data, time.perf_counter() - self.startTime)))
 
-    def exportAsCSV(self, exportPath):
-        with open(exportPath, 'w', newline='') as exportFile:
+    def exportAsCSV(self):
+        with open(self.exportPath, 'w', newline='') as exportFile:
             writer = csv.writer(exportFile)
             writer.writerow(self.header)
             writer.writerows(self.data)

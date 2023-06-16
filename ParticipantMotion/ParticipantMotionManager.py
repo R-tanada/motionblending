@@ -70,7 +70,7 @@ class MotionManager:
         self.startTime = time.perf_counter()
         self.before_time = 0
         self.recording = False
-        self.Simulation = False
+        self.Simulation = True
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
         self.initRot = xArmConfig['InitRot']
@@ -81,9 +81,9 @@ class MotionManager:
         sensorThread.start()
 
         if self.recording:
-            self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'])
-            self.recorder_rot = DataRecordManager(header = ['x', 'y', 'z', 'w'])
-            self.recorder_grip = DataRecordManager(header = ['grip'])
+            self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'], exportPath=Config['DataPath']['position'])
+            self.recorder_rot = DataRecordManager(header = ['x', 'y', 'z', 'w'], exportPath=Config['DataPath']['rotation'])
+            self.recorder_grip = DataRecordManager(header = ['grip'], exportPath=Config['DataPath']['gripper'])
 
         if self.Simulation:
             self.data_pos = DataLoadManager(Config['DataPath']['position'])
@@ -95,6 +95,7 @@ class MotionManager:
 
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
+        print(gripper)
         velocity, accelaration = self.GetParticipnatMotionInfo(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
@@ -113,7 +114,7 @@ class MotionManager:
                 if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration):
                     self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.initFlag = True
 
-        print({'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight})
+        # print({'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight})
         return {'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight}
 
     def GetPosition(self):
@@ -151,7 +152,7 @@ class MotionManager:
     
     def GetGripperValue(self):
         if self.Simulation:
-            grip = self.data_grip.getdata()
+            grip = self.data_grip.getdata()[0]
         else:
             grip = cf.ConvertSensorToGripper(self.sensorManager.sensorValue)
             if self.recording:
@@ -180,7 +181,7 @@ class MotionManager:
         else:
             initQuaternion = MotionManager.optiTrackStreamingManager.rotation[self.rigidBody]
             if self.recording:
-                self.recorder_rot(initQuaternion)
+                self.recorder_rot.record(initQuaternion)
 
         quaternion = cf.CnvertAxis_Rotation(initQuaternion, self.mount)
         if quaternion[3] < 0:
