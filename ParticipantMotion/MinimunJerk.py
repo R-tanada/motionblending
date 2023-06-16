@@ -91,7 +91,7 @@ class MinimumJerk:
                         print('3rd')
 
                 if len(self.wayPoint) == 3:
-                    print('currentPosition: {}'.format(position))
+                    print('currentPosition: {}'.format(position), self.wayPoint[2]['position'])
                     target_index = self.DetermineTarget(self.target, position)
                     self.CreateMotionData(self.wayPoint, rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'])
                     isMoving = True
@@ -128,6 +128,7 @@ class MinimumJerk:
             return ((t1 - t0)**2 - v1*(t2 - t0)**2) / ((t1 - t0) - v1*(t2 - t0))
     
         def CalculateInitialPosition(t0, t3, tf, xf, x3):
+            print(x3,111111)
             t = (t3 - t0)/ tf
             s = 6*(t**5) - 15*(t**4) + 10*(t**3)
             return (x3 - xf*s)/ (1 - s)
