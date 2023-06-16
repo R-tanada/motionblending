@@ -14,7 +14,6 @@ class RobotControlManager:
     def __init__(self, isDebug: bool == True) -> None:
         with open('SettingFile/settings_single.json', 'r') as settings_file:
             settings = json.load(settings_file)
-            print(settings)
 
         xArmConfigs = settings['xArmConfigs']
         ParticipantConfigs = settings['ParticipantsConfigs']
