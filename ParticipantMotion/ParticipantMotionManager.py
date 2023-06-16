@@ -69,7 +69,7 @@ class MotionManager:
         self.dt = 1/ 200
         self.startTime = time.perf_counter()
         self.before_time = 0
-        self.recording = True
+        self.recording = False
         self.Simulation = False
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
@@ -113,6 +113,7 @@ class MotionManager:
                 if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration):
                     self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.initFlag = True
 
+        print({'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight})
         return {'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight}
 
     def GetPosition(self):
