@@ -40,6 +40,7 @@ class RobotControlManager:
 
                     if self.isDebug:
                         self.cyberneticManager.GetSharedTransform()
+                        # print(self.cyberneticManager.GetSharedTransform())
                     else:
                         self.xarmManager.SendDataToRobot(self.cyberneticManager.GetSharedTransform())
                         self.xarmManager.CheckError()

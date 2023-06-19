@@ -67,6 +67,7 @@ class MinimumJerk:
 
         if diff_init < self.initThreshold:
             self.flag = True
+            # print('hello')
 
         if self.flag == True:
             if diff_init >= self.initThreshold:
@@ -91,8 +92,8 @@ class MinimumJerk:
                         print('3rd')
 
                 if len(self.wayPoint) == 3:
-                    print('currentPosition: {}'.format(position), self.wayPoint[2]['position'])
                     target_index = self.DetermineTarget(self.target, position)
+                    print('currentPosition: {}, target: {}'.format(position, self.target[target_index]['position']))
                     self.CreateMotionData(self.wayPoint, rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'])
                     isMoving = True
                     self.flag = False
@@ -108,8 +109,10 @@ class MinimumJerk:
         return diffList.index(min(diffList))
     
     def CreateMotionData(self, wayPoint, rot_n, grip_n, pos_f, rot_f, grip_f):
-        t3, tf, x0, t0 = self.GetMinimumJerkParams(wayPoint[0]['time'], wayPoint[1]['time'], wayPoint[2]['time'], wayPoint[0]['velocity'], wayPoint[1]['velocity'], wayPoint[2]['velocity'], pos_f, wayPoint[2]['position'])
-        frameLength = int((tf- t3)* self.freq)
+        t1, t2, t3 = wayPoint[0]['time'], wayPoint[1]['time'], wayPoint[2]['time']
+        v1, v2, v3 = wayPoint[0]['velocity'], wayPoint[1]['velocity'], wayPoint[2]['velocity']
+        t0, tf, x0 = self.GetMinimumJerkParams(t1, t2, t3, v1, v2, v3, pos_f, wayPoint[2]['position'])
+        frameLength = int((tf-(t3 - t0))* self.freq)
 
         self.CreateMotionMinimumJerk(t3, tf, x0, pos_f, frameLength, t0)
         self.CreateSlerpMotion(rot_n, rot_f, frameLength)
@@ -128,8 +131,8 @@ class MinimumJerk:
             return ((t1 - t0)**2 - v1*(t2 - t0)**2) / ((t1 - t0) - v1*(t2 - t0))
     
         def CalculateInitialPosition(t0, t3, tf, xf, x3):
-            print(x3,111111)
             t = (t3 - t0)/ tf
+            print(t)
             s = 6*(t**5) - 15*(t**4) + 10*(t**3)
             return (x3 - xf*s)/ (1 - s)
 
@@ -137,9 +140,9 @@ class MinimumJerk:
         tf = CalculateReachingTime(t0, t1, t2, v1, v2)
         x0 = CalculateInitialPosition(t0, t3, tf, pf, x3)
 
-        print(t0, tf, x0, t3)
+        print(t0, tf, x0)
 
-        return t3- t0, tf, x0, t0
+        return t0, tf, x0
 
     def CreateGripMotion(self, grip_n, grip_f, frameLength, gripFrame):
         def CreateMotion_Liner(target, data, split):
