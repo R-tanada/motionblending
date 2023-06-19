@@ -4,7 +4,7 @@ import pybullet_data as pd
 import numpy as np
 import json
 import math
-import CustomFunction as cf
+import CustomFunction.CustomFunction as cf
 
 class SimulationManager():
     def __init__(self, configs: dict) -> None:
@@ -50,13 +50,28 @@ class SimulationManager():
 
     def SendDataToRobot(self, motions: dict):
         for mount in motions.keys():
-            self.robotManager[mount].SendDataToRobot(motions[mount])
-
-        # p.stepSimulation()
+            self.robotManager[mount].SendDataToRobot(motions[mount]['position'], motions[mount]['rotation'], motions[mount]['gripper'])
 
     def SetInitTransform(self):
         for mount in self.robotManager.keys():
             self.robotManager[mount].SetInitTransform()
+
+    def MonitorKeyEvent(self):
+        prev_key_state = {}
+        while True:
+            keys = p.getKeyboardEvents()
+            if len(keys) > 0:
+                for key, state in keys.items():
+                    if state & p.KEY_IS_DOWN and key not in prev_key_state:
+                        # キーが押された瞬間の処理
+                        print("キーが押されました:", key)
+                        prev_key_state[key] = state
+                    elif state == 0 and key in prev_key_state:
+                        # キーが離された瞬間の処理
+                        del prev_key_state[key]
+
+            print(prev_key_state[65309])
+            time.sleep(0.1)
 
 class RobotManager():
     def __init__(self, config) -> None:
@@ -95,7 +110,7 @@ class RobotManager():
         return basePosition, baseRotation
     
     def SendDataToRobot(self, position, rotation, gripper):
-        position = np.dot(self.homoMatrix, np.hstack((position, 1)))[0:3]
+        position = np.dot(self.homoMatrix, np.hstack((position + self.initPos, 1)))[0:3]
         rotation = (np.dot(self.InverseMatrix, rotation))
         gripper = gripper
 
