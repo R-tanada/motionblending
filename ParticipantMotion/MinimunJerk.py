@@ -135,6 +135,11 @@ class MinimumJerk:
             print(t)
             s = 6*(t**5) - 15*(t**4) + 10*(t**3)
             return (x3 - xf*s)/ (1 - s)
+        
+        # def CalculateInitialPosition(t0, t3, tf, xf, v3):
+        #     a = v3 * (tf**5)
+        #     b = 30* ((t3 - t0)**2)*((t3 - t0 - tf)**2)
+        #     return xf - a/b
 
         t0 = CalculateInitialTime(t1, t2, t3, v1, v2, v3)
         tf = CalculateReachingTime(t0, t1, t2, v1, v2)

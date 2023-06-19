@@ -100,6 +100,7 @@ class MotionManager:
 
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
+        self.recorder_vel.record(position)
         velocity, accelaration = self.GetParticipnatMotionInfo2(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
@@ -123,7 +124,6 @@ class MotionManager:
     def GetPosition(self):
         if self.Simulation:
             position = self.data_pos.getdata()
-
         else:
             position = MotionManager.optiTrackStreamingManager.position[self.rigidBody]
             if self.recording:
