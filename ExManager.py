@@ -39,11 +39,11 @@ class ExManager:
 
                     robotManager.SendDataToRobot(cyberneticManager.GetSharedTransform())
 
-                    self.FixFrameRate(time.perf_counter() - loopStartTime, 1/50)
+                    self.FixFrameRate(time.perf_counter() - loopStartTime, 1/100)
                     self.CheckFrameRate(time.perf_counter() - loopStartTime)
 
                 else:
-                    self.MonitorKeyEvent(True, robotManager)
+                    keycode = self.MonitorKeyEvent(is_Simulation = True, robotManager=robotManager)
 
                     if keycode == 's':
                         cyberneticManager.SetParticipantInitMotion()
@@ -79,12 +79,12 @@ class ExManager:
 
     def MonitorKeyEvent(self, is_Simulation, robotManager):
         if is_Simulation == True:
-            robotManager.MonitorKeyEvent()
+            keycode = robotManager.MonitorKeyEvent()
 
         else:
             keycode = input('Input > "s": start control \n')
 
-        return 's'
+        return keycode
     
 if __name__ == '__main__':
     exManager = ExManager()

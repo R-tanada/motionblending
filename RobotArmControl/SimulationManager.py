@@ -58,20 +58,29 @@ class SimulationManager():
 
     def MonitorKeyEvent(self):
         prev_key_state = {}
-        while True:
+        enter = 0
+        flag = True
+        while flag:
+            # print(flag)
             keys = p.getKeyboardEvents()
             if len(keys) > 0:
                 for key, state in keys.items():
                     if state & p.KEY_IS_DOWN and key not in prev_key_state:
                         # キーが押された瞬間の処理
-                        print("キーが押されました:", key)
+                        enter = key
                         prev_key_state[key] = state
                     elif state == 0 and key in prev_key_state:
                         # キーが離された瞬間の処理
                         del prev_key_state[key]
 
-            print(prev_key_state[65309])
-            time.sleep(0.1)
+            if enter == 65309:
+                print('hello')
+                flag = False
+            time.sleep(0.01)
+
+            flag = True
+
+        return enter
 
 class RobotManager():
     def __init__(self, config) -> None:
@@ -110,7 +119,7 @@ class RobotManager():
         return basePosition, baseRotation
     
     def SendDataToRobot(self, position, rotation, gripper):
-        position = np.dot(self.homoMatrix, np.hstack((position + self.initPos, 1)))[0:3]
+        position = np.dot(self.homoMatrix, np.hstack((position/1000 + self.initPos, 1)))[0:3]
         rotation = (np.dot(self.InverseMatrix, rotation))
         gripper = gripper
 
