@@ -40,6 +40,10 @@ class CyberneticAvatarMotionManager:
             self.participantManagers[participant].SetParticipantInitPosition()
             self.participantManagers[participant].SetParticipantInitRotation()
 
+    def SetElaspedTime(self, elaspedTtime):
+        for participant in self.participantManagers.keys():
+            self.participantManagers[participant].SetElaspedTime(elaspedTtime)
+
     def ExportCSV(self):
         for participant in self.participantManagers.keys():
             self.participantManagers[participant].ExportCSV()

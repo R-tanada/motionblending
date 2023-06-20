@@ -41,6 +41,10 @@ class ParticipantManager:
         for Config in self.participantConfig:
             self.motionManagers[Config['Mount']].SetInitRotation()
 
+    def SetElaspedTime(self, elaspedTime):
+        for Config in self.participantConfig:
+                    self.motionManagers[Config['Mount']].SetElaspedTime(elaspedTime)
+
     def ExportCSV(self):
         for Config in self.participantConfig:
             self.motionManagers[Config['Mount']].ExportCSV()
@@ -71,10 +75,9 @@ class MotionManager:
         self.pos_list = []
         self.vel_list = []
         self.dt = 1/ 200
-        self.startTime = time.perf_counter()
         self.before_time = 0
         self.recording = False
-        self.Simulation = True
+        self.Simulation = False
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
         self.initRot = xArmConfig['InitRot']
@@ -88,19 +91,20 @@ class MotionManager:
             self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'], exportPath=Config['DataPath']['position'])
             self.recorder_rot = DataRecordManager(header = ['x', 'y', 'z', 'w'], exportPath=Config['DataPath']['rotation'])
             self.recorder_grip = DataRecordManager(header = ['grip'], exportPath=Config['DataPath']['gripper'])
+            self.recorder_time = DataRecordManager(header = ['time'], exportPath = Config['DataPath']['time'])
 
         if self.Simulation:
             self.data_pos = DataLoadManager(Config['DataPath']['position'])
             self.data_rot = DataLoadManager(Config['DataPath']['rotation'])
             self.data_grip = DataLoadManager(Config['DataPath']['gripper'])
-            self.recorder_vel = DataRecordManager(header='vel')
+            self.data_time = DataLoadManager(Config['DataPath']['time'])
+
         else:
             MotionManager.optiTrackStreamingManager.position[self.rigidBody] = np.zeros(3)
             MotionManager.optiTrackStreamingManager.rotation[self.rigidBody] = np.zeros(4)
 
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
-        self.recorder_vel.record(position)
         velocity, accelaration = self.GetParticipnatMotionInfo2(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
@@ -116,7 +120,7 @@ class MotionManager:
                     self.initFlag = False
                     
             if self.initFlag == False:
-                if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration):
+                if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration, self.elaspedTime):
                     self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.initFlag = True
 
         return {'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight}
@@ -281,6 +285,17 @@ class MotionManager:
         self.recorder_pos.exportAsCSV()
         self.recorder_rot.exportAsCSV()
         self.recorder_grip.exportAsCSV()
+        self.recorder_time.exportAsCSV()
 
     def PlotGraph(self):
-        self.recorder_vel.plotGraph()
+        # self.recorder_vel.plotGraph()
+        pass
+
+    def SetElaspedTime(self, elaspedTime):
+        if self.Simulation == True:
+            self.elaspedTime = self.data_time.getdata()[0]
+            
+        else:
+            self.elaspedTime = elaspedTime
+            if self.recording == True:
+                self.recorder_time.record(self.elaspedTime)

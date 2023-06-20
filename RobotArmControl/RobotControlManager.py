@@ -29,6 +29,7 @@ class RobotControlManager:
     def SendDataToRobot(self, FrameRate = 240, isPrintFrameRate = True):
         # windll.winmm.timeBeginPeriod(1)
         self.loopTime = 1/ FrameRate
+        initTime = 0
 
         # ----- Control flags ----- #
         isMoving    = False
@@ -39,6 +40,7 @@ class RobotControlManager:
                     loopStartTime = time.perf_counter()
 
                     if self.isDebug:
+                        self.cyberneticManager.SetElaspedTime(time.perf_counter() - initTime)
                         self.cyberneticManager.GetSharedTransform()
                         # print(self.cyberneticManager.GetSharedTransform())
                     else:
@@ -54,6 +56,7 @@ class RobotControlManager:
 
                     if keycode == 's':
                         self.cyberneticManager.SetParticipantInitMotion()
+                        initTime = time.perf_counter()
                         isMoving    = True
 
         except KeyboardInterrupt:
@@ -64,8 +67,8 @@ class RobotControlManager:
                 xArmManager.DisConnect()
                 print('successfully disconnected')
 
-            # self.cyberneticManager.ExportCSV()
-            self.cyberneticManager.PlotGraph()
+            self.cyberneticManager.ExportCSV()
+            # self.cyberneticManager.PlotGraph()
 
             # windll.winmm.timeEndPeriod(1)
 

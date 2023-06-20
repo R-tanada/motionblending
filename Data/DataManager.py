@@ -6,13 +6,11 @@ import numpy as np
 class DataRecordManager():
     def __init__(self, header: list = None, exportPath: str = None) -> None:
         self.data = []
-        self.header = []
-        self.header = np.hstack((header, 'time'))
-        self.startTime = time.perf_counter()
+        self.header = header
         self.exportPath = exportPath
 
     def record(self, data):
-        self.data.append(np.hstack((data, time.perf_counter() - self.startTime)))
+        self.data.append(data)
 
     def exportAsCSV(self):
         with open(self.exportPath, 'w', newline='') as exportFile:

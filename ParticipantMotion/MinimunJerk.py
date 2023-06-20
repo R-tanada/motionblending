@@ -21,13 +21,10 @@ class MinimumJerk:
                 target['rotation'] = -target['rotation']
         self.flag = False
         self.initThreshold = 50
-        self.startTime = time.perf_counter()
         self.wayPoint = []
         self.freq = 200
         self.acc_flag = True
         self.before_acc = 0
-        self.posBox = []
-        self.timeBox = []
 
         # self.recorder = DataRecordManager()
         
@@ -58,12 +55,9 @@ class MinimumJerk:
 
         return gripper, isMoving
 
-    def MonitoringMotion(self, position, rotation, gripper, velocity, accelaration):
+    def MonitoringMotion(self, position, rotation, gripper, velocity, accelaration, elaspedTime):
         isMoving = False
-        timeMoving = time.perf_counter() - self.startTime
         diff_init = np.linalg.norm(np.array(position))
-        # velocity = np.linalg.norm(np.array(velocity))
-        # accelaration = np.linalg.norm(np.array(accelaration))
 
         if diff_init < self.initThreshold:
             self.flag = True
@@ -71,23 +65,21 @@ class MinimumJerk:
 
         if self.flag == True:
             if diff_init >= self.initThreshold:
-                self.posBox.append(position[0])
-                self.timeBox.append(time.perf_counter() - self.startTime)
                 if self.acc_flag == 1:
-                    self.wayPoint.append({'time': timeMoving, 'position': position, 'velocity': velocity})
+                    self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
                     self.acc_flag = 2
                     print('1st')
 
                 elif self.acc_flag == 2:
                     if self.before_acc * accelaration < 0:
-                        self.wayPoint.append({'time': timeMoving, 'position': position, 'velocity': velocity})
+                        self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
                         self.acc_flag = 3
                         print('2nd')
                     self.before_acc = accelaration
 
                 elif self.acc_flag == 3:
-                    if timeMoving >= 1.5 * self.wayPoint[1]['time'] - 0.5 * self.wayPoint[0]['time']:
-                        self.wayPoint.append({'time': timeMoving, 'position': position, 'velocity': velocity})
+                    if elaspedTime >= 1.5 * self.wayPoint[1]['time'] - 0.5 * self.wayPoint[0]['time']:
+                        self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
                         self.acc_flag = 1
                         print('3rd')
 
@@ -130,20 +122,20 @@ class MinimumJerk:
             v1 = np.sqrt(v1/ v2)
             return ((t1 - t0)**2 - v1*(t2 - t0)**2) / ((t1 - t0) - v1*(t2 - t0))
     
-        def CalculateInitialPosition(t0, t3, tf, xf, x3):
-            t = (t3 - t0)/ tf
-            print(t)
-            s = 6*(t**5) - 15*(t**4) + 10*(t**3)
-            return (x3 - xf*s)/ (1 - s)
+        # def CalculateInitialPosition(t0, t3, tf, xf, x3):
+        #     t = (t3 - t0)/ tf
+        #     print(t)
+        #     s = 6*(t**5) - 15*(t**4) + 10*(t**3)
+        #     return (x3 - xf*s)/ (1 - s)
         
-        # def CalculateInitialPosition(t0, t3, tf, xf, v3):
-        #     a = v3 * (tf**5)
-        #     b = 30* ((t3 - t0)**2)*((t3 - t0 - tf)**2)
-        #     return xf - a/b
+        def CalculateInitialPosition(t0, t3, tf, xf, v3):
+            a = v3 * (tf**5)
+            b = 30* ((t3 - t0)**2)*((t3 - t0 - tf)**2)
+            return xf - a/b
 
         t0 = CalculateInitialTime(t1, t2, t3, v1, v2, v3)
         tf = CalculateReachingTime(t0, t1, t2, v1, v2)
-        x0 = CalculateInitialPosition(t0, t3, tf, pf, x3)
+        x0 = CalculateInitialPosition(t0, t3, tf, pf, v3)
 
         print(t0, tf, x0)
 
@@ -173,6 +165,7 @@ class MinimumJerk:
             return x0 + (xf- x0)* (6* (flame** 5)- 15* (flame** 4)+ 10* (flame** 3))
  
         flame = np.linspace((t3-t0)/tf, 1, frameLength)
+        # flame = np.linspace(0, 1, frameLength)
 
         position = []
         for i in range(3):

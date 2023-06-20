@@ -43,9 +43,10 @@
                 "SerialCOM": "None",
                 "Weight": 1,
                 "DataPath": {
-                    "position": "Data/data/reaching/pos.csv",
-                    "rotation": "Data/data/reaching/rot.csv",
-                    "gripper": "Data/data/reaching/grip.csv"
+                    "position": "Data/data/reaching/sample1/pos.csv",
+                    "rotation": "Data/data/reaching/sample1/rot.csv",
+                    "gripper": "Data/data/reaching/sample1/grip.csv",
+                    "time": "Data/data/reaching/sample1/time.csv"
                 },
                 "Target": [
                     {
