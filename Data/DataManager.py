@@ -18,11 +18,6 @@ class DataRecordManager():
             writer.writerow(self.header)
             writer.writerows(self.data)
 
-    def plotGraph(self):
-        data = np.array(self.data)
-        plt.plot(data[:, -1], data[:, 0:-1])
-        plt.show()
-
 class DataLoadManager:
     def __init__(self, path) -> None:
         self.data = 0
@@ -34,7 +29,7 @@ class DataLoadManager:
             data = [row for row in reader][1:]
             data = [[float(v) for v in row] for row in data]
             data = np.array(data)
-            self.data_iter = iter(data[:, 0:-1])
+            self.data_iter = iter(data)
 
     def getdata(self):
         try:
@@ -43,6 +38,28 @@ class DataLoadManager:
             pass
 
         return self.data
+    
+class DataPlotManager:
+    def __init__(self, legend: list = None, xlabel: str = None, ylabel: str = None) -> None:
+        self.data = []
+        self.legend = legend
+        self.xlabel = xlabel
+        self.ylabel = ylabel
+
+    def record(self, data):
+        self.data.append(data)
+
+    def plotGraph(self):
+        data = np.array(self.data)
+        for i in range(len(self.legend)):
+            plt.plot(data[:, -1], data[:, i], label = self.legend[i])
+        if self.xlabel:
+            plt.xlabel(self.xlabel)
+        if self.ylabel:
+            plt.ylabel(self.ylabel)
+        plt.vlines(x = 5.4481084, ymax=400, ymin=-400, linestyles='dotted', colors=[0, 0, 0])
+        plt.legend()
+        plt.show()
 
 if __name__ == '__main__':
     recorder = DataRecordManager(['x', 'y', 'z'])

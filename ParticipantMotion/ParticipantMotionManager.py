@@ -8,7 +8,7 @@ from OptiTrack.OptiTrackStreamingManager import OptiTrackStreamingManager
 from Sensor.SensorManager import GripperSensorManager
 from ParticipantMotion.MinimunJerk import MinimumJerk
 import CustomFunction.CustomFunction as cf
-from Data.DataManager import DataRecordManager, DataLoadManager
+from Data.DataManager import DataRecordManager, DataLoadManager, DataPlotManager
 
 class ParticipantManager:
     with open('SettingFile/settings_single.json', 'r') as settings_file:
@@ -77,7 +77,7 @@ class MotionManager:
         self.dt = 1/ 200
         self.before_time = 0
         self.recording = False
-        self.Simulation = False
+        self.Simulation = True
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
         self.initRot = xArmConfig['InitRot']
@@ -86,6 +86,8 @@ class MotionManager:
         sensorThread = threading.Thread(target = self.sensorManager.StartReceiving)
         sensorThread.setDaemon(True)
         sensorThread.start()
+
+        self.recorder = DataPlotManager(legend = ['x', 'y', 'z'], xlabel='time[s]', ylabel='position')
 
         if self.recording:
             self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'], exportPath=Config['DataPath']['position'])
@@ -105,6 +107,7 @@ class MotionManager:
 
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
+        self.recorder.record(np.hstack((position, self.elaspedTime)))
         velocity, accelaration = self.GetParticipnatMotionInfo2(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
@@ -284,8 +287,8 @@ class MotionManager:
         self.recorder_time.exportAsCSV()
 
     def PlotGraph(self):
-        # self.recorder_vel.plotGraph()
-        pass
+        self.recorder.plotGraph()
+        # pass
 
     def SetElaspedTime(self, elaspedTime):
         if self.Simulation == True:

@@ -122,20 +122,20 @@ class MinimumJerk:
             v1 = np.sqrt(v1/ v2)
             return ((t1 - t0)**2 - v1*(t2 - t0)**2) / ((t1 - t0) - v1*(t2 - t0))
     
-        # def CalculateInitialPosition(t0, t3, tf, xf, x3):
-        #     t = (t3 - t0)/ tf
-        #     print(t)
-        #     s = 6*(t**5) - 15*(t**4) + 10*(t**3)
-        #     return (x3 - xf*s)/ (1 - s)
+        def CalculateInitialPosition(t0, t3, tf, xf, x3):
+            t = (t3 - t0)/ tf
+            print(t)
+            s = 6*(t**5) - 15*(t**4) + 10*(t**3)
+            return (x3 - xf*s)/ (1 - s)
         
-        def CalculateInitialPosition(t0, t3, tf, xf, v3):
-            a = v3 * (tf**5)
-            b = 30* ((t3 - t0)**2)*((t3 - t0 - tf)**2)
-            return xf - a/b
+        # def CalculateInitialPosition(t0, t3, tf, xf, v3):
+        #     a = v3 * (tf**5)
+        #     b = 30* ((t3 - t0)**2)*((t3 - t0 - tf)**2)
+        #     return xf - a/b
 
         t0 = CalculateInitialTime(t1, t2, t3, v1, v2, v3)
         tf = CalculateReachingTime(t0, t1, t2, v1, v2)
-        x0 = CalculateInitialPosition(t0, t3, tf, pf, v3)
+        x0 = CalculateInitialPosition(t0, t3, tf, pf, x3)
 
         print(t0, tf, x0)
 
@@ -170,7 +170,8 @@ class MinimumJerk:
         position = []
         for i in range(3):
             position.append(function(x0[i], xf[i], flame))
+        print('t3: {}'.format(t3))
 
         print(np.transpose(position))
 
-        self.predictedPosition = iter(np.transpose(np.array(position)))
+        self.predictedPosition = iter(np.transpose(np.array(position))[1:])
