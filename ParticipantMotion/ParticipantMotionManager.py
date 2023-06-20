@@ -253,8 +253,6 @@ class MotionManager:
         else:
             vel = acc = 0
 
-        # self.recorder_vel.record([pos, vel, acc])
-
         return vel, acc
     
     def GetParticipnatMotionInfo2(self, position, interval = 10):
@@ -276,8 +274,6 @@ class MotionManager:
 
         else:
             vel = acc = 0
-
-        # self.recorder_vel.record([pos, vel, acc])
 
         return vel, acc
     
