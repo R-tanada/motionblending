@@ -68,20 +68,20 @@ class MinimumJerk:
         if self.flag == True:
             if diff_init >= self.initThreshold:
                 if self.acc_flag == 1:
-                    self.wayPoint.append({'time': self.time_list[-20], 'position': position, 'velocity': velocity})
+                    self.wayPoint.append({'time': self.time_list[-21], 'position': position, 'velocity': velocity})
                     self.acc_flag = 2
                     print('1st')
 
                 elif self.acc_flag == 2:
                     if self.before_acc * accelaration < 0:
-                        self.wayPoint.append({'time': self.time_list[-20], 'position': position, 'velocity': velocity})
+                        self.wayPoint.append({'time': self.time_list[-21], 'position': position, 'velocity': velocity})
                         self.acc_flag = 3
                         print('2nd')
                     self.before_acc = accelaration
 
                 elif self.acc_flag == 3:
                     if elaspedTime >= 1.5 * self.wayPoint[1]['time'] - 0.5 * self.wayPoint[0]['time']:
-                        self.wayPoint.append({'time': self.time_list[-20], 'position': position, 'velocity': velocity})
+                        self.wayPoint.append({'time': self.time_list[-21], 'position': position, 'velocity': velocity})
                         self.acc_flag = 1
                         print('3rd')
 
@@ -175,6 +175,6 @@ class MinimumJerk:
             position.append(function(x0[i], xf[i], flame))
         print('t3: {}'.format(t3))
 
-        print(np.transpose(position))
+        print(np.transpose(position)[1:])
 
         self.predictedPosition = iter(np.transpose(np.array(position))[1:])
