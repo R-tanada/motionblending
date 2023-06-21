@@ -25,6 +25,7 @@ class MinimumJerk:
         self.freq = 200
         self.acc_flag = True
         self.before_acc = 0
+        self.time_list = []
 
         # self.recorder = DataRecordManager()
         
@@ -58,6 +59,7 @@ class MinimumJerk:
     def MonitoringMotion(self, position, rotation, gripper, velocity, accelaration, elaspedTime):
         isMoving = False
         diff_init = np.linalg.norm(np.array(position))
+        self.time_list.append(elaspedTime)
 
         if diff_init < self.initThreshold:
             self.flag = True
@@ -66,25 +68,26 @@ class MinimumJerk:
         if self.flag == True:
             if diff_init >= self.initThreshold:
                 if self.acc_flag == 1:
-                    self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
+                    self.wayPoint.append({'time': self.time_list[-20], 'position': position, 'velocity': velocity})
                     self.acc_flag = 2
                     print('1st')
 
                 elif self.acc_flag == 2:
                     if self.before_acc * accelaration < 0:
-                        self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
+                        self.wayPoint.append({'time': self.time_list[-20], 'position': position, 'velocity': velocity})
                         self.acc_flag = 3
                         print('2nd')
                     self.before_acc = accelaration
 
                 elif self.acc_flag == 3:
                     if elaspedTime >= 1.5 * self.wayPoint[1]['time'] - 0.5 * self.wayPoint[0]['time']:
-                        self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
+                        self.wayPoint.append({'time': self.time_list[-20], 'position': position, 'velocity': velocity})
                         self.acc_flag = 1
                         print('3rd')
 
                 if len(self.wayPoint) == 3:
                     target_index = self.DetermineTarget(self.target, position)
+                    print(self.wayPoint)
                     print('currentPosition: {}, target: {}'.format(position, self.target[target_index]['position']))
                     self.CreateMotionData(self.wayPoint, rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'])
                     isMoving = True

@@ -88,6 +88,7 @@ class MotionManager:
         sensorThread.start()
 
         self.recorder = DataPlotManager(legend = ['x', 'y', 'z'], xlabel='time[s]', ylabel='position')
+        self.recorder2 = DataPlotManager(legend = ['pos', 'vel', 'acc'], xlabel='time[s]', ylabel='')
 
         if self.recording:
             self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'], exportPath=Config['DataPath']['position'])
@@ -236,7 +237,7 @@ class MotionManager:
 
         return flag
 
-    def GetParticipnatMotionInfo(self, position, interval = 10):
+    def GetParticipnatMotionInfo(self, position, interval = 20):
         pos = np.linalg.norm(position)
         self.pos_list.append(pos)
 
@@ -258,7 +259,7 @@ class MotionManager:
 
         return vel, acc
     
-    def GetParticipnatMotionInfo2(self, position, interval = 10):
+    def GetParticipnatMotionInfo2(self, position, interval = 25):
         pos = np.linalg.norm(position)
         self.pos_list.append(pos)
 
@@ -278,6 +279,8 @@ class MotionManager:
         else:
             vel = acc = 0
 
+        self.recorder2.record(np.hstack(([pos, vel, acc], self.elaspedTime)))
+
         return vel, acc
     
     def ExportCSV(self):
@@ -288,6 +291,7 @@ class MotionManager:
 
     def PlotGraph(self):
         self.recorder.plotGraph()
+        self.recorder2.plotGraph()
         # pass
 
     def SetElaspedTime(self, elaspedTime):
