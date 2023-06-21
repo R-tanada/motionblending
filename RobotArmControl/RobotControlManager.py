@@ -68,7 +68,7 @@ class RobotControlManager:
                 print('successfully disconnected')
 
             # self.cyberneticManager.ExportCSV()
-            self.cyberneticManager.PlotGraph()
+            # self.cyberneticManager.PlotGraph()
 
             # windll.winmm.timeEndPeriod(1)
 
