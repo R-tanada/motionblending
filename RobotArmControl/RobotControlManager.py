@@ -43,7 +43,7 @@ class RobotControlManager:
 
                     self.cyberneticManager.SetElaspedTime(time.perf_counter() - initTime)
 
-                    if self.isDebug:
+                    if self.is_Debug:
                         self.cyberneticManager.GetSharedTransform()
                     else:
                         self.xarmManager.SendDataToRobot(self.cyberneticManager.GetSharedTransform())
