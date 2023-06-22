@@ -211,7 +211,7 @@ class MotionManager:
         quaternion, initQuaternion, initInveseMatrix = self.GetRotation()
         q_inverse = np.dot(cf.Convert2InverseMatrix(quaternion), q_zero)
         self.updateInitQuaternion = np.dot(initInveseMatrix, np.dot(cf.Convert2Matrix(rotation[0]), q_inverse))
-        weight_list = np.linspace(0, 1, 500)
+        weight_list = np.linspace(0, 1, 300)
         q_list = []
         for weight in weight_list:
             q_list.append(cf.Slerp_Quaternion(self.initQuaternion, self.updateInitQuaternion, weight))
@@ -229,7 +229,7 @@ class MotionManager:
     def SlerpInitRotation(self):
         try:
             rot = next(self.iter_initRot)
-            self.initQuaternion, self.initInverseMatrix, flag = rot, cf.Convert2Matrix(rot), True
+            self.initQuaternion, self.initInverseMatrix, flag = rot, cf.Convert2InverseMatrix(rot), True
         except StopIteration:
             flag = False
             self.initQuaternion = self.automation.q_init
