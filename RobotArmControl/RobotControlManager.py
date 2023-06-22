@@ -11,7 +11,7 @@ from CyberneticAvatarMotion.CyberneticAvatarMotionManager import \
 from RobotArmControl.xArmManager import xArmManager
 
 class RobotControlManager:
-    def __init__(self, isDebug: bool == True) -> None:
+    def __init__(self, is_Debug: bool == True, is_Recording: bool == False, is_Plotting: bool == False) -> None:
         with open('SettingFile/settings_single.json', 'r') as settings_file:
             settings = json.load(settings_file)
 
@@ -19,12 +19,14 @@ class RobotControlManager:
         ParticipantConfigs = settings['ParticipantsConfigs']
 
         self.cyberneticManager = CyberneticAvatarMotionManager(ParticipantConfigs, xArmConfigs)
-        if isDebug == False:
+        if is_Debug == False:
             self.xarmManager = xArmManager(xArmConfigs)
 
         self.loopTime = 0
         self.FrameList = []
-        self.isDebug = isDebug
+        self.is_Debug = is_Debug
+        self.is_Recording = is_Recording
+        self.is_Plotting = is_Plotting
 
     def SendDataToRobot(self, FrameRate = 240, isPrintFrameRate = True):
         # windll.winmm.timeBeginPeriod(1)
@@ -63,12 +65,15 @@ class RobotControlManager:
             print('\nKeyboardInterrupt >> Stop: RobotControlManager.SendDataToRobot()')
 
             # ----- Disconnect ----- #
-            if self.isDebug == False:
+            if self.is_Debug == False:
                 self.xarmManager.DisConnect()
                 print('successfully disconnected')
 
-            # self.cyberneticManager.ExportCSV()
-            self.cyberneticManager.PlotGraph()
+            if self.is_Recording:
+                self.cyberneticManager.ExportCSV()
+
+            if self.is_Plotting:
+                self.cyberneticManager.PlotGraph()
 
             # windll.winmm.timeEndPeriod(1)
 
