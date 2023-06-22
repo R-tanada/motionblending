@@ -2,18 +2,20 @@ import csv
 import time
 from matplotlib import pyplot as plt
 import numpy as np
+from datetime import datetime
 
 class DataRecordManager():
-    def __init__(self, header: list = None, exportPath: str = None) -> None:
+    def __init__(self, header: list = None, fileName: str = '') -> None:
         self.data = []
         self.header = header
-        self.exportPath = exportPath
+        self.fileName = fileName
 
     def record(self, data):
         self.data.append(data)
 
     def exportAsCSV(self):
-        with open(self.exportPath, 'w', newline='') as exportFile:
+        date = datetime.now().strftime("%Y%m%d_%H%M%S")
+        with open('Data/data/reaching/' + self.fileName + date + '.csv', 'w', newline='') as exportFile:
             writer = csv.writer(exportFile)
             writer.writerow(self.header)
             writer.writerows(self.data)
@@ -62,7 +64,7 @@ class DataPlotManager:
         plt.show()
 
 if __name__ == '__main__':
-    recorder = DataRecordManager(['x', 'y', 'z'])
+    recorder = DataRecordManager(['x', 'y', 'z'], fileName='position')
 
     try:
         while True:
@@ -71,4 +73,4 @@ if __name__ == '__main__':
             # print('111')
 
     except KeyboardInterrupt:
-        recorder.exportAsCSV('Recorder/RecordedData/test.csv')
+        recorder.exportAsCSV()

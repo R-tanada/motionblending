@@ -174,8 +174,8 @@ class MinimumJerk:
         position = []
         for i in range(3):
             position.append(function(x0[i], xf[i], flame))
-        print('t3: {}'.format(t3))
+        # print('t3: {}'.format(t3))
 
-        print(np.transpose(position)[1:])
+        # print(np.transpose(position)[1:])
 
         self.predictedPosition = iter(np.transpose(np.array(position))[1:])

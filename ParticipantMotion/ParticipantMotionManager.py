@@ -91,10 +91,10 @@ class MotionManager:
         self.recorder2 = DataPlotManager(legend = ['pos', 'vel', 'acc'], xlabel='time[s]', ylabel='')
 
         if self.recording:
-            self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'], exportPath=Config['DataPath']['position'])
-            self.recorder_rot = DataRecordManager(header = ['x', 'y', 'z', 'w'], exportPath=Config['DataPath']['rotation'])
-            self.recorder_grip = DataRecordManager(header = ['grip'], exportPath=Config['DataPath']['gripper'])
-            self.recorder_time = DataRecordManager(header = ['time'], exportPath = Config['DataPath']['time'])
+            self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'], fileName='pos')
+            self.recorder_rot = DataRecordManager(header = ['x', 'y', 'z', 'w'], fileName='rot')
+            self.recorder_grip = DataRecordManager(header = ['grip'], fileName='grip')
+            self.recorder_time = DataRecordManager(header = ['time'], fileName='time')
 
         if self.Simulation:
             self.data_pos = DataLoadManager(Config['DataPath']['position'])
@@ -292,7 +292,6 @@ class MotionManager:
     def PlotGraph(self):
         self.recorder.plotGraph()
         self.recorder2.plotGraph()
-        # pass
 
     def SetElaspedTime(self, elaspedTime):
         if self.Simulation == True:
