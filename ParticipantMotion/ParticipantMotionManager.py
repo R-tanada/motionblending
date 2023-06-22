@@ -77,7 +77,8 @@ class MotionManager:
         self.dt = 1/ 200
         self.before_time = 0
         self.recording = False
-        self.Simulation = False
+        self.Simulation = True
+        self.elaspedTime = 0
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
         self.initRot = xArmConfig['InitRot']
@@ -168,7 +169,7 @@ class MotionManager:
         else:
             grip = cf.ConvertSensorToGripper(self.sensorManager.sensorValue)
             if self.recording:
-                self.recorder_grip.record(grip)
+                self.recorder_grip.record([grip])
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             gripper = grip
@@ -301,4 +302,4 @@ class MotionManager:
         else:
             self.elaspedTime = elaspedTime
             if self.recording == True:
-                self.recorder_time.record(self.elaspedTime)
+                self.recorder_time.record([self.elaspedTime])

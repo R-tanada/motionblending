@@ -39,10 +39,10 @@ class RobotControlManager:
                 if isMoving:
                     loopStartTime = time.perf_counter()
 
+                    self.cyberneticManager.SetElaspedTime(time.perf_counter() - initTime)
+
                     if self.isDebug:
-                        self.cyberneticManager.SetElaspedTime(time.perf_counter() - initTime)
                         self.cyberneticManager.GetSharedTransform()
-                        # print(self.cyberneticManager.GetSharedTransform())
                     else:
                         self.xarmManager.SendDataToRobot(self.cyberneticManager.GetSharedTransform())
                         self.xarmManager.CheckError()
@@ -64,11 +64,11 @@ class RobotControlManager:
 
             # ----- Disconnect ----- #
             if self.isDebug == False:
-                xArmManager.DisConnect()
+                self.xarmManager.DisConnect()
                 print('successfully disconnected')
 
             # self.cyberneticManager.ExportCSV()
-            # self.cyberneticManager.PlotGraph()
+            self.cyberneticManager.PlotGraph()
 
             # windll.winmm.timeEndPeriod(1)
 
