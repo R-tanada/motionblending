@@ -43,6 +43,8 @@ class MotionManager:
         self.initPosition = []
         self.initQuaternion = []
         self.initInverseMatrix = []
+        self.pos_list = []
+        self.dt = 1/200
 
         MotionManager.optiTrackStreamingManager.position[self.rigidBody] = np.zeros(3)
         MotionManager.optiTrackStreamingManager.rotation[self.rigidBody] = np.zeros(4)
@@ -51,11 +53,14 @@ class MotionManager:
         sensorThread = threading.Thread(target = self.sensorManager.StartReceiving)
         sensorThread.setDaemon(True)
         sensorThread.start()
+
+        
     
     def GetMotionData(self):
         return {'position': self.GetPosition(), 'rotation': self.GetRotation(), 'gripper': self.GetGripperValue(), 'weight': self.weight}
 
     def GetPosition(self):
+        
         return cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000 - self.initPosition, self.mount)
     
     def GetRotation(self):
@@ -71,3 +76,15 @@ class MotionManager:
         self.initQuaternion = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
         self.initInverseMatrix = cf.Convert2Matrix_Quaternion(quaternion = self.initQuaternion, inverse = True)
     
+    def GetParticipnatMotionInfo(self, position, interval = 20):
+        pos = np.linalg.norm(position)
+        self.pos_list.append(pos)
+
+        if len(self.pos_list) == interval + 1:
+            vel = (self.pos_list[interval] - self.pos_list[0])/ (self.dt * interval)
+            del self.pos_list[0]
+
+        else:
+            vel = 0
+
+        return vel
