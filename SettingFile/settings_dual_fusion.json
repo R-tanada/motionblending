@@ -75,13 +75,15 @@
                 "Mount": "right",
                 "RigidBody": 1,
                 "SerialCOM": "None",
-                "Weight": 0.5
+                "Weight": 0.5,
+                "AudioIndex": 10
             },
             {
                 "Mount": "left",
                 "RigidBody": 2,
                 "SerialCOM": "None",
-                "Weight": 1
+                "Weight": 1,
+                "AudioIndex": 10
             }
         ],
         "participant2": [
@@ -89,13 +91,15 @@
                 "Mount": "right",
                 "RigidBody": 3,
                 "SerialCOM": "None",
-                "Weight": 0.5
+                "Weight": 0.5,
+                "AudioIndex": 10
             },
             {
                 "Mount": "left",
                 "RigidBody": 4,
                 "SerialCOM": "None",
-                "Weight": 1
+                "Weight": 1,
+                "AudioIndex": 10
             }
         ]
     }
