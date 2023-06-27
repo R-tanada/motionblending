@@ -90,6 +90,12 @@
                 "RigidBody": 3,
                 "SerialCOM": "None",
                 "Weight": 0.5
+            },
+            {
+                "Mount": "left",
+                "RigidBody": 4,
+                "SerialCOM": "None",
+                "Weight": 1
             }
         ]
     }
