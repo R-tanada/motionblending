@@ -1,5 +1,5 @@
 from math import pi
-import CustomFunction.CustomFunction as cf
+import lib.CustomFunction as cf
 import numpy as np
 
 

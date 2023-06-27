@@ -1,6 +1,6 @@
 import numpy as np
-from ParticipantMotion.ParticipantMotionManager import ParticipantManager
-import CustomFunction.CustomFunction as cf
+from src.ParticipantMotionManager import ParticipantManager
+import lib.CustomFunction as cf
 
 
 class CyberneticAvatarMotionManager:

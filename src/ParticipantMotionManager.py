@@ -4,11 +4,11 @@ import time
 import numpy as np
 
 # # ----- Custom class ----- #
-from OptiTrack.OptiTrackStreamingManager import OptiTrackStreamingManager
-from Sensor.SensorManager import GripperSensorManager
-from ParticipantMotion.MinimunJerk import MinimumJerk
-import CustomFunction.CustomFunction as cf
-from Data.DataManager import DataRecordManager, DataLoadManager, DataPlotManager
+from src.OptiTrackStreamingManager import OptiTrackStreamingManager
+from src.SensorManager import GripperSensorManager
+from src.MinimunJerk import MinimumJerk
+import lib.CustomFunction as cf
+from src.DataManager import DataRecordManager, DataLoadManager, DataPlotManager
 
 class ParticipantManager:
     with open('SettingFile/settings_single.json', 'r') as settings_file:

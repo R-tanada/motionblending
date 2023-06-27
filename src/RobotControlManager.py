@@ -5,7 +5,7 @@ import time
 import numpy as np
 from matplotlib.pyplot import flag
 
-from CyberneticAvatarMotion.CyberneticAvatarMotionManager import \
+from src.CyberneticAvatarMotionManager import \
     CyberneticAvatarMotionManager
 # ----- Custom class ----- #
 from RobotArmControl.xArmManager import xArmManager

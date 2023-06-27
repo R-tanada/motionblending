@@ -1,6 +1,6 @@
 import numpy as np
 import time
-import CustomFunction.CustomFunction as cf
+import lib.CustomFunction as cf
 from itertools import cycle as iter_cycle
 from matplotlib import pyplot as plt
 
