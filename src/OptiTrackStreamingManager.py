@@ -6,7 +6,7 @@
 
 from threading import local
 import numpy as np
-from ..OptiTrack import NatNetClient
+from lib.optitrack import NatNetClient
 
 serverAddress = ''
 localAddress = ''
