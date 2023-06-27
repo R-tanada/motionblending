@@ -259,7 +259,7 @@ class MotionManager:
 
         return vel, acc
     
-    def GetParticipnatMotionInfo2(self, position, interval = 25):
+    def GetParticipnatMotionInfo2(self, position, interval = 15):
         pos = np.linalg.norm(position)
         self.pos_list.append(pos)
 
