@@ -1,98 +1,26 @@
 import json
 import time
-# from ctypes import windll
 
 import numpy as np
 from matplotlib.pyplot import flag
 
-from src.CyberneticAvatarMotionManager import \
-    CyberneticAvatarMotionManager
 # ----- Custom class ----- #
-from RobotArmControl.xArmManager import xArmManager
+from src.xArmManager import xArmManager
+from src.SimulationManager import SimulationManager
+
+is_Simulation = True
+
 
 class RobotControlManager:
-    def __init__(self, is_Debug: bool == True, is_Recording: bool == False, is_Plotting: bool == False) -> None:
-        with open('SettingFile/settings_single.json', 'r') as settings_file:
-            settings = json.load(settings_file)
+    def __init__(self, xArmConfigs) -> None:
+        self.xarmManagers = {}
+        for xArm in xArmConfigs:
+            self.xarmManagers[xArmConfigs[xArm]['Mount']] = xArmManager(xArmConfigs[xArm]) if is_Simulation == False else SimulationManager()
 
-        xArmConfigs = settings['xArmConfigs']
-        ParticipantConfigs = settings['ParticipantsConfigs']
+    def SendDataToRobot(self, sharedMotions):
+        for mount in self.xarmManagers.keys():
+            self.xarmManagers[mount].SendDataToRobot(sharedMotions[mount])
 
-        self.cyberneticManager = CyberneticAvatarMotionManager(ParticipantConfigs, xArmConfigs)
-        if is_Debug == False:
-            self.xarmManager = xArmManager(xArmConfigs)
-
-        self.loopTime = 0
-        self.FrameList = []
-        self.is_Debug = is_Debug
-        self.is_Recording = is_Recording
-        self.is_Plotting = is_Plotting
-
-    def SendDataToRobot(self, FrameRate = 240, isPrintFrameRate = True):
-        # windll.winmm.timeBeginPeriod(1)
-        self.loopTime = 1/ FrameRate
-        initTime = 0
-
-        # ----- Control flags ----- #
-        isMoving    = False
-
-        try:
-            while True:
-                if isMoving:
-                    loopStartTime = time.perf_counter()
-
-                    self.cyberneticManager.SetElaspedTime(time.perf_counter() - initTime)
-
-                    if self.is_Debug:
-                        self.cyberneticManager.GetSharedTransform()
-                    else:
-                        self.xarmManager.SendDataToRobot(self.cyberneticManager.GetSharedTransform())
-                        self.xarmManager.CheckError()
-
-                    self.FixFrameRate(time.perf_counter() - loopStartTime)
-                    if isPrintFrameRate:
-                        self.CheckFrameRate(time.perf_counter() - loopStartTime)
-
-                else:
-                    keycode = input('Input > "s": start control \n')
-
-                    if keycode == 's':
-                        self.cyberneticManager.SetParticipantInitMotion()
-                        initTime = time.perf_counter()
-                        isMoving    = True
-
-        except KeyboardInterrupt:
-            print('\nKeyboardInterrupt >> Stop: RobotControlManager.SendDataToRobot()')
-
-            # ----- Disconnect ----- #
-            if self.is_Debug == False:
-                self.xarmManager.DisConnect()
-                print('successfully disconnected')
-
-            if self.is_Recording:
-                self.cyberneticManager.ExportCSV()
-
-            if self.is_Plotting:
-                self.cyberneticManager.PlotGraph()
-
-            # windll.winmm.timeEndPeriod(1)
-
-        except:
-            print('----- Exception has occurred -----')
-            import traceback
-            traceback.print_exc()
-
-            # windll.winmm.timeEndPeriod(1)
-
-    def FixFrameRate(self, processDuration):
-        sleepTime = self.loopTime - processDuration
-        if sleepTime < 0:
-            pass
-        else:
-            time.sleep(sleepTime)
-
-    def CheckFrameRate(self, loopTime):
-        self.FrameList.append(1/ loopTime)
-        if len(self.FrameList) == 30:
-            print(sum(self.FrameList)/ len(self.FrameList))
-            self.FrameList = []
+    def DisConnect(self):
+        for mount in self.xarmManagers.keys():
+            self.xarmManagers[mount].DisConnect()

@@ -4,7 +4,7 @@ import pybullet_data as pd
 import numpy as np
 import json
 import math
-import CustomFunction as cf
+import lib.self.CustomFunction as cf
 
 class SimulationManager():
     def __init__(self, configs: dict) -> None:
@@ -50,13 +50,31 @@ class SimulationManager():
 
     def SendDataToRobot(self, motions: dict):
         for mount in motions.keys():
-            self.robotManager[mount].SendDataToRobot(motions[mount])
-
-        # p.stepSimulation()
+            self.robotManager[mount].SendDataToRobot(motions[mount]['position']/1000, motions[mount]['rotation'], motions[mount]['gripper'])
 
     def SetInitTransform(self):
         for mount in self.robotManager.keys():
             self.robotManager[mount].SetInitTransform()
+
+    def MonitorKeyEvent(self):
+        key_flag = True
+        prev_key_state = {}
+        while key_flag:
+            keys = p.getKeyboardEvents()
+            if len(keys) > 0:
+                for key, state in keys.items():
+                    if state & p.KEY_IS_DOWN and key not in prev_key_state:
+                        if key == 65309:
+                            key_flag = False
+                        # キーが押された瞬間の処理
+                        print("キーが押されました:", type(key))
+                        prev_key_state[key] = state
+                    elif state == 0 and key in prev_key_state:
+                        # キーが離された瞬間の処理
+                        del prev_key_state[key]
+            time.sleep(0.005)
+
+        return 's'
 
 class RobotManager():
     def __init__(self, config) -> None:
@@ -95,13 +113,14 @@ class RobotManager():
         return basePosition, baseRotation
     
     def SendDataToRobot(self, position, rotation, gripper):
-        position = np.dot(self.homoMatrix, np.hstack((position, 1)))[0:3]
+        position = np.dot(self.homoMatrix, np.hstack((position+self.initPos, 1)))[0:3]
         rotation = (np.dot(self.InverseMatrix, rotation))
         gripper = gripper
 
         self.InverseKinematics(position, rotation)
 
         p.stepSimulation()
+        time.sleep(0.01)
     
     def InverseKinematics(self, position, rotation, nullspace: bool = True, usedynamics: bool = True, maxiter: int = 50):
         xarmNumDofs = 7 

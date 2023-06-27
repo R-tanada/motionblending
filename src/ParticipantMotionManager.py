@@ -11,7 +11,7 @@ import lib.self.CustomFunction as cf
 from src.DataManager import DataRecordManager, DataLoadManager, DataPlotManager
 
 class ParticipantManager:
-    with open('SettingFile/settings_single.json', 'r') as settings_file:
+    with open('docs/settings_single.json', 'r') as settings_file:
         settings = json.load(settings_file)
     xArmConfig = {}
     for xArm in settings['xArmConfigs'].keys():
@@ -229,6 +229,7 @@ class MotionManager:
     def SlerpInitRotation(self):
         try:
             rot = next(self.iter_initRot)
+            print(rot)
             self.initQuaternion, self.initInverseMatrix, flag = rot, cf.Convert2InverseMatrix(rot), True
         except StopIteration:
             flag = False
