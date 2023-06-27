@@ -7,7 +7,7 @@ import numpy as np
 from src.OptiTrackStreamingManager import OptiTrackStreamingManager
 from src.SensorManager import GripperSensorManager
 from src.MinimunJerk import MinimumJerk
-import lib.CustomFunction as cf
+import lib.self.CustomFunction as cf
 from src.DataManager import DataRecordManager, DataLoadManager, DataPlotManager
 
 class ParticipantManager:
