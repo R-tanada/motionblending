@@ -13,11 +13,11 @@ class xArmManager:
 
     def DisConnect(self):
         self.arm.disconnect()
-        print('Disconnect > xArm[{}]', format(self.xArmConfig['IP']))
+        print('Disconnect >> xArm: {}', format(self.xArmConfig['IP']))
 
     def CheckError(self):
         if self.arm.has_err_warn:
-            print('[ERROR] >> xArm[{}] Error has occured.', format(self.xArmConfig['IP']))
+            print('[ERROR] >> xArm: {} Error has occured.', format(self.xArmConfig['IP']))
 
 
     def SendDataToRobot(self, transform):
@@ -35,14 +35,14 @@ class xArmManager:
         self.arm.set_state(state=0)    
 
         self.arm.set_position(x = InitPos[0], y = InitPos[1], z = InitPos[2], roll = InitRot[0], pitch = InitRot[1], yaw = InitRot[2], wait=True)
-        print('Initialized > xArm')
+        print('Initialized >> xArm: {}'.format(self.xArmConfig['IP']))
 
         self.arm.set_tgpio_modbus_baudrate(2000000)
         self.arm.set_gripper_mode(0)
         self.arm.set_gripper_enable(True)
         self.arm.set_gripper_position(850, speed=5000)
         self.arm.getset_tgpio_modbus_data(self.ConvertToModbusData(850))
-        print('Initialized > xArm gripper')
+        print('Initialized >> xArm gripper: {}'.format(self.xArmConfig['IP']))
 
         self.arm.set_mode(1)
         self.arm.set_state(state=0)
@@ -71,8 +71,8 @@ class xArmManager:
         return modbus_data
 
     def IncrementInitValue(self, position, rotation):
-        pos = np.array(position) - self.initPosition
-        rot = cf.Quaternion2Euler(np.dot(cf.Convert2Matrix_Quaternion(rotation), self.initQuaternion))
+        pos = np.array(position) + self.initPosition
+        rot = cf.Quaternion2Euler(np.dot(cf.Convert2Matrix(rotation), self.initQuaternion))
 
         return pos[0], pos[1], pos[2], rot[0], rot[1], rot[2]
 

@@ -18,9 +18,7 @@ class SimulationManager():
 
     def SetEnviroment(self):
         p.connect(p.GUI)
-        # p.setViewport(0, 0, 1920, 1080)
         p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 0)
-        # p.configureDebugVisualizer(p.COV_ENABLE_RGB_BUFFER_PREVIEW, 0)
         planeId = p.loadURDF("/Users/yuzu/envs/simu/lib/python3.8/site-packages/pybullet_data/plane.urdf")
         p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)  # GUI表示を無効化
         p.setAdditionalSearchPath(pd.getDataPath())
@@ -52,6 +50,10 @@ class SimulationManager():
         for mount in motions.keys():
             self.robotManager[mount].SendDataToRobot(motions[mount]['position']/1000, motions[mount]['rotation'], motions[mount]['gripper'])
 
+    def DisConnect(self):
+        p.disconnect()
+        print('DisConnect >> Stop: Physics Simulation')
+
     def SetInitTransform(self):
         for mount in self.robotManager.keys():
             self.robotManager[mount].SetInitTransform()
@@ -64,7 +66,7 @@ class SimulationManager():
             if len(keys) > 0:
                 for key, state in keys.items():
                     if state & p.KEY_IS_DOWN and key not in prev_key_state:
-                        if key == 65309:
+                        if key == 65309: # detect enter key #
                             key_flag = False
                         # キーが押された瞬間の処理
                         print("キーが押されました:", type(key))
@@ -120,7 +122,6 @@ class RobotManager():
         self.InverseKinematics(position, rotation)
 
         p.stepSimulation()
-        time.sleep(0.01)
     
     def InverseKinematics(self, position, rotation, nullspace: bool = True, usedynamics: bool = True, maxiter: int = 50):
         xarmNumDofs = 7 

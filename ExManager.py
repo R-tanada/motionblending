@@ -3,7 +3,7 @@ import json
 import time
 
 class ExManager:
-    def __init__(self, is_Simulation: bool = True, is_Visualize: bool = True) -> None:
+    def __init__(self, is_Simulation: bool = False, is_Visualize: bool = False) -> None:
         self.frameList = []
 
         with open('docs/settings_single.json', 'r') as settings_file:
@@ -51,7 +51,7 @@ class ExManager:
                     # self.CheckFrameRate(time.perf_counter() - loopStartTime)
 
                 else:
-                    keycode = self.MonitorKeyEvent(is_Visualize = True, robotManager=robotManager)
+                    keycode = self.MonitorKeyEvent(is_Visualize = False, robotManager=robotManager)
 
                     if keycode == 's':
                         cyberneticManager.SetParticipantInitMotion()
@@ -62,7 +62,7 @@ class ExManager:
             print('\nKeyboardInterrupt >> Stop: mainLoop()')
             if robotManager != None:
                 robotManager.DisConnect()
-            print('Successfully Disconnected')
+                print('Successfully Disconnected')
 
         except:
             print('----- Exception has occurred -----')
@@ -71,6 +71,8 @@ class ExManager:
 
         if platform.system() == 'Windows':
             windll.winmm.timeEndPeriod(1)
+
+        cyberneticManager.PlotGraph()
 
     def FixFrameRate(self, processDuration, loopTime):
         sleepTime = loopTime - processDuration
@@ -95,6 +97,6 @@ class ExManager:
         return keycode
     
 if __name__ == '__main__':
-    ExManager(is_Simulation = True, is_Visualize = True)
+    ExManager(is_Simulation = True, is_Visualize = False)
 
     print('\n----- End program: ExManager.py -----')
