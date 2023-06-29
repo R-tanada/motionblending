@@ -81,7 +81,7 @@ class SimulationManager():
 class RobotManager():
     def __init__(self, config) -> None:
         basePosition, baseRotation = self.GetBasePositionRotation(config['Mount'])
-        self.arm = p.loadURDF("xarm/xarm7_pd.urdf", basePosition, baseRotation, useFixedBase=True, flags=p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES)
+        self.arm = p.loadURDF("self_urdf/xarm7.urdf", basePosition, baseRotation, useFixedBase=True, flags=p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES)
         self.homoMatrix, self.InverseMatrix = self.SetTransformMatrix(basePosition, baseRotation)
         self.initPos = np.array(config['InitPos'])/1000
         # self.SetInitTransform()
