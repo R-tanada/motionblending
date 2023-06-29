@@ -77,7 +77,7 @@ class MotionManager:
         self.dt = 1/ 200
         self.before_time = 0
         self.recording = False
-        self.Simulation = True
+        self.Simulation = False
         self.elaspedTime = 0
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
