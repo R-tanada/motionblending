@@ -55,7 +55,7 @@ class ExManager:
                     # self.CheckFrameRate(time.perf_counter() - loopStartTime)
 
                 else:
-                    keycode = self.MonitorKeyEvent(is_Visualize = False, robotManager=robotManager)
+                    keycode = self.MonitorKeyEvent(is_Visualize = True, robotManager=robotManager)
 
                     if keycode == 's':
                         cyberneticManager.SetParticipantInitMotion()
@@ -101,6 +101,6 @@ class ExManager:
         return keycode
     
 if __name__ == '__main__':
-    ExManager(is_Simulation = False, is_Visualize = False)
+    ExManager(is_Simulation = True, is_Visualize = True)
 
     print('\n----- End program: ExManager.py -----')
