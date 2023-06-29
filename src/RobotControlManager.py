@@ -37,7 +37,7 @@ class xArmManager:
             print('[ERROR] >> xArm: {} Error has occured.', format(self.xArmConfig['IP']))
 
     def SendDataToRobot(self, transform):
-        self.arm.set_servo_cartesian(self.safetyManager.CheckLimit(self.IncrementInitValue(transform['position'], transform['rotation'])))
+        self.arm.set_servo_cartesian(self.safetyManager.CheckLimit(transform['position'], transform['rotation']))
         self.arm.getset_tgpio_modbus_data(self.ConvertToModbusData(transform['gripper']))
 
     def InitializeAll(self, InitPos, InitRot):
