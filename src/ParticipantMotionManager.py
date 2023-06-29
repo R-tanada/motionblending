@@ -88,7 +88,7 @@ class MotionManager:
         sensorThread.start()
 
         self.recorder = DataPlotManager(legend = ['x', 'y', 'z'], xlabel='time[s]', ylabel='position')
-        self.recorder2 = DataPlotManager(legend = ['pos', 'vel', 'acc'], xlabel='time[s]', ylabel='')
+        self.recorder2 = DataPlotManager(legend = ['vel_siraki', 'vel_norm'], xlabel='time[s]', ylabel='')
 
         if self.recording:
             self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'], fileName='pos')
@@ -109,7 +109,7 @@ class MotionManager:
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
         self.recorder.record(np.hstack((position, self.elaspedTime)))
-        velocity, accelaration = self.GetParticipnatMotionInfo2(position)
+        velocity, accelaration = self.GetParticipnatMotionInfo3(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             if self.isMoving == True:
@@ -281,9 +281,22 @@ class MotionManager:
         else:
             vel = acc = 0
 
-        self.recorder2.record(np.hstack(([pos, vel, acc], self.elaspedTime)))
 
         return vel, acc
+    
+    def GetParticipnatMotionInfo3(self, position, interval = 15):
+        self.pos_list.append(position)
+
+        if len(self.pos_list) == interval:
+            vel = np.linalg.norm(np.polyfit(np.linspace(0, self.dt * interval, interval), self.pos_list, 1)[0])
+            del self.pos_list[0]
+
+        else:
+            vel = 0
+
+        # self.recorder2.record(np.hstack(([np.linalg.norm(position), vel], self.elaspedTime)))
+
+        return vel, 0
     
     def ExportCSV(self):
         self.recorder_pos.exportAsCSV()

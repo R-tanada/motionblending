@@ -59,7 +59,7 @@ class DataPlotManager:
             plt.xlabel(self.xlabel)
         if self.ylabel:
             plt.ylabel(self.ylabel)
-        plt.vlines(x = 2.919563, ymax=400, ymin=-400, linestyles='dotted', colors=[0, 0, 0])
+        plt.vlines(x = 2.7656666000000003, ymax=400, ymin=-400, linestyles='dotted', colors=[0, 0, 0])
         plt.legend()
         plt.show()
 
