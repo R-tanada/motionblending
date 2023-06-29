@@ -83,12 +83,12 @@ class RobotManager():
         basePosition, baseRotation = self.GetBasePositionRotation(config['Mount'])
         self.arm = p.loadURDF("self_urdf/xarm7.urdf", basePosition, baseRotation, useFixedBase=True, flags=p.URDF_ENABLE_CACHED_GRAPHICS_SHAPES)
         self.homoMatrix, self.InverseMatrix = self.SetTransformMatrix(basePosition, baseRotation)
-        self.initPos = np.array(config['InitPos'])/1000
+        self.initPos, self.initRot = np.array(config['InitPos'])/1000, cf.Euler2Quaternion(config['InitRot'])
         # self.SetInitTransform()
 
     def SetInitTransform(self):
         for i in range(100):
-            self.SendDataToRobot(self.initPos, [0, 0, 0, 1], 850)
+            self.SendDataToRobot(self.initPos, self.initRot, 850)
             time.sleep(0.01)
 
     def SetTransformMatrix(self, position, rotation):
@@ -115,7 +115,12 @@ class RobotManager():
         return basePosition, baseRotation
     
     def SendDataToRobot(self, position, rotation, gripper):
-        position = np.dot(self.homoMatrix, np.hstack((position+self.initPos, 1)))[0:3]
+        position += self.initPos
+        rotation = np.dot(cf.Convert2Matrix(rotation), self.initRot)
+        self.SetTransform(position, rotation, gripper)
+
+    def SetTransform(self, position, rotation, gripper):
+        position = np.dot(self.homoMatrix, np.hstack((position, 1)))[0:3]
         rotation = (np.dot(self.InverseMatrix, rotation))
         gripper = gripper
 
