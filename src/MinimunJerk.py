@@ -113,7 +113,7 @@ class MinimumJerk:
                 if (velocity - self.before_vel) < 0:
                     self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
                     target_index = self.DetermineTarget(self.target, position)
-                    self.CreateMotionData([self.wayPoint[0], self.wayPoint[int(len(self.wayPoint)/2)], self.wayPoint[-1]], rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'])
+                    self.CreateMotionData([self.wayPoint[0], self.wayPoint[int(len(self.wayPoint)/1.8)], self.wayPoint[-1]], rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'])
                     isMoving = True
                     self.flag = False
                     self.wayPoint = []
