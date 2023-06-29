@@ -25,6 +25,7 @@ class MinimumJerk:
         self.freq = 200
         self.acc_flag = True
         self.before_acc = 0
+        self.before_vel = 0
         self.time_list = []
         
     def GetPosition(self):
@@ -84,35 +85,40 @@ class MinimumJerk:
         #                 self.acc_flag = 1
         #                 print('3rd')
 
+        # if self.flag == True:
+        #     if diff_init >= self.initThreshold:
+        #         if self.acc_flag == 1:
+        #             self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
+        #             self.acc_flag = 2
+        #             print('1st')
+
+        #         elif self.acc_flag == 2:
+        #             if (accelaration - self.before_acc) < 0:
+        #                 self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
+        #                 self.acc_flag = 3
+        #                 print('2nd')
+        #             self.before_acc = accelaration
+
+        #         elif self.acc_flag == 3:
+        #             if self.before_acc * accelaration < 0:
+        #                 self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
+        #                 self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
+        #                 self.acc_flag = 1
+        #             self.before_acc = accelaration
+
         if self.flag == True:
             if diff_init >= self.initThreshold:
-                if self.acc_flag == 1:
-                    self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
-                    self.acc_flag = 2
-                    print('1st')
+                self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
 
-                elif self.acc_flag == 2:
-                    if (accelaration - self.before_acc) < 0:
-                        self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
-                        self.acc_flag = 3
-                        print('2nd')
-                    self.before_acc = accelaration
-
-                elif self.acc_flag == 3:
-                    if self.before_acc * accelaration < 0:
-                        self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
-                        self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
-                        self.acc_flag = 1
-                    self.before_acc = accelaration
-
-                if len(self.wayPoint) == 4:
+                if (velocity - self.before_vel) < 0:
+                    self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
                     target_index = self.DetermineTarget(self.target, position)
-                    print(self.wayPoint)
-                    print('currentPosition: {}, target: {}'.format(position, self.target[target_index]['position']))
-                    self.CreateMotionData(self.wayPoint, rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'])
+                    self.CreateMotionData([self.wayPoint[0], self.wayPoint[int(len(self.wayPoint)/2)], self.wayPoint[-1]], rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'])
                     isMoving = True
                     self.flag = False
                     self.wayPoint = []
+
+                self.before_vel = velocity
 
         return isMoving
     
@@ -124,7 +130,7 @@ class MinimumJerk:
         return diffList.index(min(diffList))
     
     def CreateMotionData(self, wayPoint, rot_n, grip_n, pos_f, rot_f, grip_f):
-        t1, t2, t3, t4 = wayPoint[0]['time'], wayPoint[1]['time'], wayPoint[2]['time'], wayPoint[3]['time']
+        t1, t2, t3, t4 = wayPoint[0]['time'], wayPoint[1]['time'], wayPoint[2]['time'], wayPoint[2]['time']
         v1, v2, v3 = wayPoint[0]['velocity'], wayPoint[1]['velocity'], wayPoint[2]['velocity']
         t0, tf, x0 = self.GetMinimumJerkParams(t1, t2, t3, v1, v2, v3, pos_f, wayPoint[2]['position'], t4)
         frameLength = int((tf-(t4 - t0))* self.freq)
