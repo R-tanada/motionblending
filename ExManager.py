@@ -20,8 +20,12 @@ class ExManager:
                 robotManager = None
 
         else:
-            from src.RobotControlManager import RobotControlManager
-            robotManager = RobotControlManager(settings['xArmConfigs'])
+            if is_Visualize == True:
+                from src.SimulationManager import SimulationManager
+                robotManager = SimulationManager(settings['xArmConfigs'])
+            else:
+                from src.RobotControlManager import RobotControlManager
+                robotManager = RobotControlManager(settings['xArmConfigs'])
             
         time.sleep(0.5)
 
@@ -51,7 +55,7 @@ class ExManager:
                     # self.CheckFrameRate(time.perf_counter() - loopStartTime)
 
                 else:
-                    keycode = self.MonitorKeyEvent(is_Visualize = False, robotManager=robotManager)
+                    keycode = self.MonitorKeyEvent(is_Visualize = True, robotManager=robotManager)
 
                     if keycode == 's':
                         cyberneticManager.SetParticipantInitMotion()
@@ -64,6 +68,8 @@ class ExManager:
                 robotManager.DisConnect()
                 print('Successfully Disconnected')
 
+            cyberneticManager.PlotGraph()
+
         except:
             print('----- Exception has occurred -----')
             import traceback
@@ -71,8 +77,6 @@ class ExManager:
 
         if platform.system() == 'Windows':
             windll.winmm.timeEndPeriod(1)
-
-        cyberneticManager.PlotGraph()
 
     def FixFrameRate(self, processDuration, loopTime):
         sleepTime = loopTime - processDuration
@@ -97,6 +101,6 @@ class ExManager:
         return keycode
     
 if __name__ == '__main__':
-    ExManager(is_Simulation = True, is_Visualize = False)
+    ExManager(is_Simulation = True, is_Visualize = True)
 
     print('\n----- End program: ExManager.py -----')
