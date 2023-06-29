@@ -4,12 +4,12 @@ import lib.self.CustomFunction as cf
 
 
 class CyberneticAvatarMotionManager:
-    def __init__(self, ParticipantConfigs: dict, xArmConfigs: dict) -> None:
+    def __init__(self, ParticipantConfigs: dict, xArmConfigs: dict, is_Simulation, is_Recording) -> None:
         self.xArmConfigs = xArmConfigs
 
         self.participantManagers = {}
         for participant in ParticipantConfigs.keys():
-            self.participantManagers[participant] = ParticipantManager(ParticipantConfigs[participant])
+            self.participantManagers[participant] = ParticipantManager(ParticipantConfigs[participant], is_Simulation, is_Recording)
 
     def GetSharedTransform(self):
         return self.IntegrationWithWeight(self.GetParticipantMotion())

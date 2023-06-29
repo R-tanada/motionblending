@@ -3,36 +3,39 @@ import json
 import time
 
 class ExManager:
-    def __init__(self, is_Simulation: bool = False, is_Visualize: bool = False) -> None:
+    def __init__(self, is_Simulation: bool = False, is_Visualize: bool = False, is_Recording: bool = False, is_Plotting: bool = False) -> None:
         self.frameList = []
+        self.is_Visualize = is_Visualize
+        self.is_Plotting = is_Plotting
+        self.is_Recording = is_Recording
 
         with open('docs/settings_single.json', 'r') as settings_file:
             settings = json.load(settings_file)
 
         from src.CyberneticAvatarMotionManager import CyberneticAvatarMotionManager
-        cyberneticManager = CyberneticAvatarMotionManager(settings['ParticipantsConfigs'], settings['xArmConfigs'])
+        self.cyberneticManager = CyberneticAvatarMotionManager(settings['ParticipantsConfigs'], settings['xArmConfigs'], is_Simulation, is_Recording)
 
         if is_Simulation == True:
             if is_Visualize == True:
                 from src.SimulationManager import SimulationManager
-                robotManager = SimulationManager(settings['xArmConfigs'])
+                self.robotManager = SimulationManager(settings['xArmConfigs'])
             else:
-                robotManager = None
+                self.robotManager = None
 
         else:
             if is_Visualize == True:
                 from src.SimulationManager import SimulationManager
-                robotManager = SimulationManager(settings['xArmConfigs'])
+                self.robotManager = SimulationManager(settings['xArmConfigs'])
             else:
                 from src.RobotControlManager import RobotControlManager
-                robotManager = RobotControlManager(settings['xArmConfigs'])
+                self.robotManager = RobotControlManager(settings['xArmConfigs'])
             
         time.sleep(0.5)
 
-        self.mainLoop(cyberneticManager, robotManager)
+        self.mainLoop()
             
 
-    def mainLoop(self, cyberneticManager, robotManager):
+    def mainLoop(self, FrameRate: int = 240):
         if platform.system() == 'Windows':
             from ctypes import windll
             windll.winmm.timeBeginPeriod(1)
@@ -45,30 +48,34 @@ class ExManager:
                     loopStartTime = time.perf_counter()
                     elapsedTime = time.perf_counter() - initTime
 
-                    cyberneticManager.SetElaspedTime(elapsedTime)
-                    transform = cyberneticManager.GetSharedTransform()
+                    self.cyberneticManager.SetElaspedTime(elapsedTime)
+                    transform = self.cyberneticManager.GetSharedTransform()
 
-                    if robotManager != None:
-                        robotManager.SendDataToRobot(transform)
+                    if self.robotManager != None:
+                        self.robotManager.SendDataToRobot(transform)
 
-                    self.FixFrameRate(time.perf_counter() - loopStartTime, 1/200)
+                    self.FixFrameRate(time.perf_counter() - loopStartTime, 1/FrameRate)
                     # self.CheckFrameRate(time.perf_counter() - loopStartTime)
 
                 else:
-                    keycode = self.MonitorKeyEvent(is_Visualize = True, robotManager=robotManager)
+                    keycode = self.MonitorKeyEvent(is_Visualize = self.is_Visualize)
 
                     if keycode == 's':
-                        cyberneticManager.SetParticipantInitMotion()
+                        self.cyberneticManager.SetParticipantInitMotion()
                         initTime = time.perf_counter()
                         isMoving = True
 
         except KeyboardInterrupt:
             print('\nKeyboardInterrupt >> Stop: mainLoop()')
-            if robotManager != None:
-                robotManager.DisConnect()
+            if self.robotManager != None:
+                self.robotManager.DisConnect()
                 print('Successfully Disconnected')
+            
+            if self.is_Plotting:
+                self.cyberneticManager.PlotGraph()
 
-            cyberneticManager.PlotGraph()
+            if self.is_Recording:
+                self.cyberneticManager.ExportCSV()
 
         except:
             print('----- Exception has occurred -----')
@@ -91,9 +98,9 @@ class ExManager:
             print(sum(self.frameList)/ len(self.frameList))
             self.frameList = []
 
-    def MonitorKeyEvent(self, is_Visualize, robotManager):
+    def MonitorKeyEvent(self, is_Visualize):
         if is_Visualize == True:
-            keycode = robotManager.MonitorKeyEvent()
+            keycode = self.robotManager.MonitorKeyEvent()
 
         else:
             keycode = input('Input > "s": start control \n')
@@ -101,6 +108,6 @@ class ExManager:
         return keycode
     
 if __name__ == '__main__':
-    ExManager(is_Simulation = True, is_Visualize = True)
+    ExManager(is_Simulation = True, is_Visualize = False, is_Recording = False, is_Plotting = False)
 
     print('\n----- End program: ExManager.py -----')

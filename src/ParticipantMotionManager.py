@@ -17,14 +17,14 @@ class ParticipantManager:
     for xArm in settings['xArmConfigs'].keys():
         xArmConfig[settings['xArmConfigs'][xArm]['Mount']] = settings['xArmConfigs'][xArm]
 
-    def __init__(self, ParticipantConfig: dict) -> None:
+    def __init__(self, ParticipantConfig: dict, is_Simulation, is_Recording) -> None:
         self.participantConfig = ParticipantConfig
         self.position = []
         self.rotation = []
 
         self.motionManagers= {}
         for Config in self.participantConfig:
-            self.motionManagers[Config['Mount']] = MotionManager(Config, ParticipantManager.xArmConfig[Config['Mount']])
+            self.motionManagers[Config['Mount']] = MotionManager(Config, ParticipantManager.xArmConfig[Config['Mount']], is_Simulation, is_Recording)
 
     def GetParticipantMotion(self):
         participantMotions = {}
@@ -59,7 +59,7 @@ class MotionManager:
     streamingThread.setDaemon(True)
     streamingThread.start()
 
-    def __init__(self, Config, xArmConfig) -> None:
+    def __init__(self, Config, xArmConfig, is_Simulation, is_Recording) -> None:
         self.mount = Config['Mount']
         self.rigidBody = str(Config['RigidBody'])
         self.weight = Config['Weight']
@@ -76,8 +76,8 @@ class MotionManager:
         self.vel_list = []
         self.dt = 1/ 200
         self.before_time = 0
-        self.recording = False
-        self.Simulation = False
+        self.recording = is_Recording
+        self.Simulation = is_Simulation
         self.elaspedTime = 0
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
