@@ -134,6 +134,7 @@ class MinimumJerk:
         v1, v2, v3 = wayPoint[0]['velocity'], wayPoint[1]['velocity'], wayPoint[2]['velocity']
         t0, tf, x0 = self.GetMinimumJerkParams(t1, t2, t3, v1, v2, v3, pos_f, wayPoint[2]['position'], t4)
         frameLength = int((tf-(t4 - t0))* self.freq)
+        print(frameLength)
 
         self.CreateMotionMinimumJerk(t4, tf, x0, pos_f, frameLength, t0)
         self.CreateSlerpMotion(rot_n, rot_f, frameLength)

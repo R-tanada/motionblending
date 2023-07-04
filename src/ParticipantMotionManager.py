@@ -73,7 +73,9 @@ class MotionManager:
         self.iter_initPos = self.iter_initRot = []
         self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = False
         self.pos_list = []
+        self.pos_box = []
         self.vel_list = []
+        self.vel_box = []
         self.dt = 1/ 200
         self.before_time = 0
         self.recording = is_Recording
@@ -88,7 +90,7 @@ class MotionManager:
         sensorThread.start()
 
         self.recorder = DataPlotManager(legend = ['x', 'y', 'z'], xlabel='time[s]', ylabel='position')
-        self.recorder2 = DataPlotManager(legend = ['vel_siraki', 'vel_norm'], xlabel='time[s]', ylabel='')
+        self.recorder2 = DataPlotManager(legend = ['vel','vel_interval'], xlabel='time[s]', ylabel='')
 
         if self.recording:
             self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'], fileName='pos')
@@ -110,6 +112,9 @@ class MotionManager:
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
         self.recorder.record(np.hstack((position, self.elaspedTime)))
         velocity, accelaration = self.GetParticipnatMotionInfo3(position)
+        # velocity2, accelaration2 = self.GetParticipnatMotionInfo3(position)
+        # self.recorder2.record(np.hstack(([velocity, velocity2], self.elaspedTime)))
+
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             if self.isMoving == True:
@@ -239,7 +244,7 @@ class MotionManager:
 
         return flag
 
-    def GetParticipnatMotionInfo(self, position, interval = 20):
+    def GetParticipnatMotionInfo(self, position, interval = 15):
         pos = np.linalg.norm(position)
         self.pos_list.append(pos)
 
@@ -255,6 +260,28 @@ class MotionManager:
                 acc = 0
             
             del self.pos_list[0]
+
+        else:
+            vel = acc = 0
+
+        return vel, acc
+    
+    def GetParticipnatMotionInfo_2(self, position, interval = 2):
+        pos = np.linalg.norm(position)
+        self.pos_box.append(pos)
+
+        if len(self.pos_box) == interval + 1:
+            vel = (self.pos_box[interval] - self.pos_box[0])/ (self.dt * interval)
+            self.vel_box.append(vel)
+
+            if len(self.vel_box) == interval + 1:
+                acc = (self.vel_box[interval] - self.vel_box[0])/ (self.dt * interval)
+                del self.vel_box[0]
+
+            else:
+                acc = 0
+            
+            del self.pos_box[0]
 
         else:
             vel = acc = 0
@@ -287,14 +314,28 @@ class MotionManager:
     def GetParticipnatMotionInfo3(self, position, interval = 15):
         self.pos_list.append(position)
 
-        if len(self.pos_list) == interval:
-            vel = np.linalg.norm(np.polyfit(np.linspace(0, self.dt * interval, interval), self.pos_list, 1)[0])
+        if len(self.pos_list) == interval+1:
+            vel = np.linalg.norm(np.polyfit(np.linspace(0, self.dt * (interval+1), (interval+1)), self.pos_list, 1)[0])
             del self.pos_list[0]
 
         else:
             vel = 0
 
-        # self.recorder2.record(np.hstack(([np.linalg.norm(position), vel], self.elaspedTime)))
+        # self.recorder2.record(np.hstack(([vel], self.elaspedTime)))
+
+        return vel, 0
+    
+    def GetParticipnatMotionInfo4(self, position, interval = 16):
+        self.pos_box.append(position)
+
+        if len(self.pos_box) == interval:
+            vel = np.linalg.norm(np.polyfit(np.linspace(0, self.dt * interval, interval), self.pos_box, 1)[0])
+            del self.pos_box[0]
+
+        else:
+            vel = 0
+
+        # self.recorder2.record(np.hstack(([vel], self.elaspedTime)))
 
         return vel, 0
     
