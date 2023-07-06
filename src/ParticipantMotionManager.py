@@ -111,7 +111,7 @@ class MotionManager:
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
         self.recorder.record(np.hstack((position, self.elaspedTime)))
-        velocity, accelaration = self.GetParticipnatMotionInfo3(position)
+        velocity, accelaration = self.GetParticipnatMotionInfo2(position)
         # velocity2, accelaration2 = self.GetParticipnatMotionInfo3(position)
         # self.recorder2.record(np.hstack(([velocity, velocity2], self.elaspedTime)))
 
