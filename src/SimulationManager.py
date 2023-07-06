@@ -18,7 +18,7 @@ class SimulationManager():
 
     def SetEnviroment(self):
         p.connect(p.GUI)
-        p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 0)
+        p.configureDebugVisualizer(p.COV_ENABLE_SHADOWS, 1)
         p.configureDebugVisualizer(p.COV_ENABLE_GUI, 0)  # GUI表示を無効化
         p.setAdditionalSearchPath(pd.getDataPath())
         planeId = p.loadURDF("plane.urdf")
