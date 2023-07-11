@@ -22,7 +22,7 @@ class MinimumJerk:
         self.flag = False
         self.initThreshold = 60
         self.wayPoint = []
-        self.freq = 70
+        self.freq = 240
         self.acc_flag = True
         self.before_acc = 0
         self.before_vel = 0
