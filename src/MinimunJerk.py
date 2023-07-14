@@ -115,7 +115,7 @@ class MinimumJerk:
         #             self.before_acc = accelaration
 
         if self.flag == True:
-            if diff_init >= self.initThreshold:
+            if position[2]**2 + position[0]**2 >= self.initThreshold**2:
                 self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
 
                 if (velocity - self.before_vel) < 0:
