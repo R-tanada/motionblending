@@ -27,10 +27,14 @@ class MinimumJerk:
         self.before_acc = 0
         self.before_vel = 0
         self.time_list = []
+        self.t0 = 0
+        self.tf = 0
+        self.x0 = 0
+        self.target_index = 0
         
-    def GetPosition(self):
+    def GetPosition(self, elaspedTime):
         try:
-            position = self.posRetained = next(self.predictedPosition)
+            position = self.posRetained = self.CaluculateMotion(elaspedTime, self.target[self.target_index]['position'])
             isMoving = True
         except StopIteration:
             position, isMoving = self.posRetained, False
@@ -120,8 +124,8 @@ class MinimumJerk:
 
                 if (velocity - self.before_vel) < 0:
                     self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
-                    target_index = self.DetermineTarget(self.target, position)
-                    self.CreateMotionData([self.wayPoint[0], self.wayPoint[int(len(self.wayPoint)/1.8)], self.wayPoint[-1]], rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'])
+                    self.target_index = self.DetermineTarget(self.target, position)
+                    self.CreateMotionData([self.wayPoint[0], self.wayPoint[int(len(self.wayPoint)/1.8)], self.wayPoint[-1]], rotation, gripper, self.target[self.target_index]['position'], self.target[self.target_index]['rotation'], self.target[self.target_index]['gripper'])
                     isMoving = True
                     self.flag = False
                     self.wayPoint = []
@@ -141,11 +145,11 @@ class MinimumJerk:
     def CreateMotionData(self, wayPoint, rot_n, grip_n, pos_f, rot_f, grip_f):
         t1, t2, t3, t4 = wayPoint[0]['time'], wayPoint[1]['time'], wayPoint[2]['time'], wayPoint[2]['time']
         v1, v2, v3 = wayPoint[0]['velocity'], wayPoint[1]['velocity'], wayPoint[2]['velocity']
-        t0, tf, x0 = self.GetMinimumJerkParams(t1, t2, t3, v1, v2, v3, pos_f, wayPoint[2]['position'], t4)
-        frameLength = int((tf-(t4 - t0))* self.freq)
+        self.t0, self.tf, self.x0 = self.GetMinimumJerkParams(t1, t2, t3, v1, v2, v3, pos_f, wayPoint[2]['position'], t4)
+        frameLength = int((self.tf-(t4 - self.t0))* self.freq)
         print(frameLength)
 
-        self.CreateMotionMinimumJerk(t4, tf, x0, pos_f, frameLength, t0)
+        # self.CreateMotionMinimumJerk(t4, tf, x0, pos_f, frameLength, t0)
         self.CreateSlerpMotion(rot_n, rot_f, frameLength)
         self.CreateGripMotion(grip_n, grip_f, frameLength, gripFrame = 300)
 
@@ -214,3 +218,9 @@ class MinimumJerk:
         # print(np.transpose(position)[1:])
 
         self.predictedPosition = iter(np.transpose(np.array(position))[1:])
+
+    def CaluculateMotion(self, elaspedTime, xf):
+        if (elaspedTime - self.t0)/self.tf > 1:
+            elaspedTime = self.t0 + self.tf
+        print((elaspedTime - self.t0)/self.tf)
+        return self.x0 + (xf- self.x0)* (6* (((elaspedTime - self.t0)/self.tf)** 5)- 15* (((elaspedTime - self.t0)/self.tf)** 4)+ 10* (((elaspedTime - self.t0)/self.tf)** 3))
