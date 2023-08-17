@@ -15,7 +15,7 @@ class DataRecordManager():
 
     def exportAsCSV(self):
         date = datetime.now().strftime("%Y%m%d_%H%M%S")
-        with open('Data/data/reaching/' + self.fileName + date + '.csv', 'w', newline='') as exportFile:
+        with open('resource/' + self.fileName + date + '.csv', 'w', newline='') as exportFile:
             writer = csv.writer(exportFile)
             writer.writerow(self.header)
             writer.writerows(self.data)
