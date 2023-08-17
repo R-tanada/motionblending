@@ -1,8 +1,11 @@
-import numpy as np
 import time
-import lib.self.CustomFunction as cf
 from itertools import cycle as iter_cycle
+
+import numpy as np
 from matplotlib import pyplot as plt
+
+import lib.self.CustomFunction as cf
+
 
 class MinimumJerk:
     def __init__(self, Target: list, xArmConfig: dict, Threshold = 300) -> None:
@@ -61,77 +64,77 @@ class MinimumJerk:
 
     def MonitoringMotion(self, position, rotation, gripper, velocity, accelaration, elaspedTime):
         isMoving = False
-        diff_init = np.linalg.norm(np.array(position))
-        self.time_list.append(elaspedTime)
+        # diff_init = np.linalg.norm(np.array(position))
+        # self.time_list.append(elaspedTime)
 
-        if diff_init < self.initThreshold:
-            self.flag = True
-            # print('hello')
+        # if diff_init < self.initThreshold:
+        #     self.flag = True
+        #     # print('hello')
+
+        # # if self.flag == True:
+        # #     if diff_init >= self.initThreshold:
+        # #         if self.acc_flag == 1:
+        # #             self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
+        # #             self.acc_flag = 2
+        # #             print('1st')
+
+        # #         elif self.acc_flag == 2:
+        # #             if self.before_acc * accelaration < 0:
+        # #                 self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
+        # #                 self.acc_flag = 3
+        # #                 print('2nd')
+        # #             self.before_acc = accelaration
+
+        # #         elif self.acc_flag == 3:
+        # #             if elaspedTime >= 1.5 * self.wayPoint[1]['time'] - 0.5 * self.wayPoint[0]['time']:
+        # #                 self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
+        # #                 self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
+        # #                 self.acc_flag = 1
+        # #                 print('3rd')
+
+        # #         if len(self.wayPoint) == 4:
+        # #             self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
+        # #             target_index = self.DetermineTarget(self.target, position)
+        # #             self.CreateMotionData(self.wayPoint, rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'])
+        # #             isMoving = True
+        # #             self.flag = False
+        # #             self.wayPoint = []
+
+        # # if self.flag == True:
+        # #     if diff_init >= self.initThreshold:
+        # #         if self.acc_flag == 1:
+        # #             self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
+        # #             self.acc_flag = 2
+        # #             print('1st')
+
+        # #         elif self.acc_flag == 2:
+        # #             if (accelaration - self.before_acc) < 0:
+        # #                 self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
+        # #                 self.acc_flag = 3
+        # #                 print('2nd')
+        # #             self.before_acc = accelaration
+
+        # #         elif self.acc_flag == 3:
+        # #             if self.before_acc * accelaration < 0:
+        # #                 self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
+        # #                 self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
+        # #                 self.acc_flag = 1
+        # #             self.before_acc = accelaration
 
         # if self.flag == True:
-        #     if diff_init >= self.initThreshold:
-        #         if self.acc_flag == 1:
-        #             self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
-        #             self.acc_flag = 2
-        #             print('1st')
+        #     if position[2]**2 + position[0]**2 >= self.initThreshold**2:
+        #         self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
 
-        #         elif self.acc_flag == 2:
-        #             if self.before_acc * accelaration < 0:
-        #                 self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
-        #                 self.acc_flag = 3
-        #                 print('2nd')
-        #             self.before_acc = accelaration
-
-        #         elif self.acc_flag == 3:
-        #             if elaspedTime >= 1.5 * self.wayPoint[1]['time'] - 0.5 * self.wayPoint[0]['time']:
-        #                 self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
-        #                 self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
-        #                 self.acc_flag = 1
-        #                 print('3rd')
-
-        #         if len(self.wayPoint) == 4:
+        #         if (velocity - self.before_vel) < 0:
         #             self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
-        #             target_index = self.DetermineTarget(self.target, position)
-        #             self.CreateMotionData(self.wayPoint, rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'])
+        #             self.target_index = self.DetermineTarget(self.target, position)
+        #             self.CreateMotionData([self.wayPoint[0], self.wayPoint[int(len(self.wayPoint)/1.8)], self.wayPoint[-1]], rotation, gripper, self.target[self.target_index]['position'], self.target[self.target_index]['rotation'], self.target[self.target_index]['gripper'])
         #             isMoving = True
         #             self.flag = False
         #             self.wayPoint = []
+        #             velocity = 0
 
-        # if self.flag == True:
-        #     if diff_init >= self.initThreshold:
-        #         if self.acc_flag == 1:
-        #             self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
-        #             self.acc_flag = 2
-        #             print('1st')
-
-        #         elif self.acc_flag == 2:
-        #             if (accelaration - self.before_acc) < 0:
-        #                 self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
-        #                 self.acc_flag = 3
-        #                 print('2nd')
-        #             self.before_acc = accelaration
-
-        #         elif self.acc_flag == 3:
-        #             if self.before_acc * accelaration < 0:
-        #                 self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
-        #                 self.wayPoint.append({'time': self.time_list[-1], 'position': position, 'velocity': velocity})
-        #                 self.acc_flag = 1
-        #             self.before_acc = accelaration
-
-        if self.flag == True:
-            if position[2]**2 + position[0]**2 >= self.initThreshold**2:
-                self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
-
-                if (velocity - self.before_vel) < 0:
-                    self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
-                    self.target_index = self.DetermineTarget(self.target, position)
-                    self.CreateMotionData([self.wayPoint[0], self.wayPoint[int(len(self.wayPoint)/1.8)], self.wayPoint[-1]], rotation, gripper, self.target[self.target_index]['position'], self.target[self.target_index]['rotation'], self.target[self.target_index]['gripper'])
-                    isMoving = True
-                    self.flag = False
-                    self.wayPoint = []
-                    velocity = 0
-
-                self.before_vel = velocity
+        #         self.before_vel = velocity
 
         return isMoving
 
@@ -219,8 +222,8 @@ class MinimumJerk:
 
         self.predictedPosition = iter(np.transpose(np.array(position))[1:])
 
-    # def CaluculateMotion(self, elaspedTime, xf):
-    #     if (elaspedTime - self.t0)/self.tf > 1:
-    #         elaspedTime = self.t0 + self.tf
-    #     print((elaspedTime - self.t0)/self.tf)
-    #     return self.x0 + (xf- self.x0)* (6* (((elaspedTime - self.t0)/self.tf)** 5)- 15* (((elaspedTime - self.t0)/self.tf)** 4)+ 10* (((elaspedTime - self.t0)/self.tf)** 3))
+    def CaluculateMotion(self, elaspedTime, xf):
+        if (elaspedTime - self.t0)/self.tf > 1:
+            elaspedTime = self.t0 + self.tf
+        print((elaspedTime - self.t0)/self.tf)
+        return self.x0 + (xf- self.x0)* (6* (((elaspedTime - self.t0)/self.tf)** 5)- 15* (((elaspedTime - self.t0)/self.tf)** 4)+ 10* (((elaspedTime - self.t0)/self.tf)** 3))

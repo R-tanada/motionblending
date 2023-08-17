@@ -1,6 +1,7 @@
-import platform
 import json
+import platform
 import time
+
 
 class ExManager:
     def __init__(self, is_Simulation: bool = False, is_Visualize: bool = False, is_Recording: bool = False, is_Plotting: bool = False) -> None:
@@ -12,7 +13,8 @@ class ExManager:
         with open('docs/settings_single.json', 'r') as settings_file:
             settings = json.load(settings_file)
 
-        from src.CyberneticAvatarMotionManager import CyberneticAvatarMotionManager
+        from src.CyberneticAvatarMotionManager import \
+            CyberneticAvatarMotionManager
         self.cyberneticManager = CyberneticAvatarMotionManager(settings['ParticipantsConfigs'], settings['xArmConfigs'], is_Simulation, is_Recording)
 
         if is_Simulation == True:
@@ -29,11 +31,11 @@ class ExManager:
             else:
                 from src.RobotControlManager import RobotControlManager
                 self.robotManager = RobotControlManager(settings['xArmConfigs'])
-            
+
         time.sleep(0.5)
 
         self.mainLoop()
-            
+
 
     def mainLoop(self, FrameRate: int = 240):
         if platform.system() == 'Windows':
@@ -70,7 +72,7 @@ class ExManager:
             if self.robotManager != None:
                 self.robotManager.DisConnect()
                 print('Successfully Disconnected')
-            
+
             if self.is_Plotting:
                 self.cyberneticManager.PlotGraph()
 
@@ -106,8 +108,8 @@ class ExManager:
             keycode = input('Input > "s": start control \n')
 
         return keycode
-    
+
 if __name__ == '__main__':
-    ExManager(is_Simulation = True, is_Visualize = False, is_Recording = False, is_Plotting = True)
+    ExManager(is_Simulation = False, is_Visualize = False, is_Recording = True, is_Plotting = False)
 
     print('\n----- End program: ExManager.py -----')
