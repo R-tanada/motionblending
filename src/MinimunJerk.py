@@ -35,6 +35,15 @@ class MinimumJerk:
         self.x0 = 0
         self.target_index = 0
 
+    # def GetPosition(self, elaspedTime):
+    #     try:
+    #         position = self.posRetained = self.CaluculateMotion(elaspedTime, self.target[self.target_index]['position'])
+    #         isMoving = True
+    #     except StopIteration:
+    #         position, isMoving = self.posRetained, False
+
+    #     return position, isMoving
+
     def GetPosition(self, elaspedTime):
         try:
             position = self.posRetained = self.CaluculateMotion(elaspedTime, self.target[self.target_index]['position'])
