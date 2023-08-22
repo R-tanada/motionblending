@@ -23,7 +23,7 @@ class MinimumJerk:
             if target['rotation'][3] < 0:
                 target['rotation'] = -target['rotation']
         self.flag = False
-        self.initThreshold = 60
+        self.initThreshold = 100
         self.wayPoint = []
         self.freq = 240
         self.acc_flag = True
@@ -46,10 +46,10 @@ class MinimumJerk:
     #     return position, isMoving
 
     def GetPosition(self, elaspedTime):
-        try:
-            position = self.posRetained = self.CaluculateMotion(elaspedTime, self.target[self.target_index]['position'])
-            isMoving = True
-        except StopIteration:
+        position, isMoving = self.CaluculateMotion(elaspedTime, self.target[self.target_index]['position'])
+        self.posRetained = position
+
+        if isMoving == False:
             position, isMoving = self.posRetained, False
 
         return position, isMoving
@@ -85,20 +85,20 @@ class MinimumJerk:
         if self.flag == True:
             if diff_init >= self.initThreshold:
                 if self.acc_flag == 1:
-                    self.wayPoint.append({'time': self.time_list[-15], 'position': self.pos_list[-15], 'velocity': velocity})
+                    self.wayPoint.append({'time': self.time_list[-1], 'position': self.pos_list[-1], 'velocity': velocity})
                     self.acc_flag = 2
                     print('1st')
 
                 elif self.acc_flag == 2:
                     if self.before_acc * accelaration < 0:
-                        self.wayPoint.append({'time': self.time_list[-15], 'position': self.pos_list[-15], 'velocity': velocity})
+                        self.wayPoint.append({'time': self.time_list[-1], 'position': self.pos_list[-1], 'velocity': velocity})
                         self.acc_flag = 3
                         print('2nd')
                     self.before_acc = accelaration
 
                 elif self.acc_flag == 3:
                     if elaspedTime >= 1.5 * self.wayPoint[1]['time'] - 0.5 * self.wayPoint[0]['time']:
-                        self.wayPoint.append({'time': self.time_list[-15], 'position': self.pos_list[-15], 'velocity': velocity})
+                        self.wayPoint.append({'time': self.time_list[-1], 'position': self.pos_list[-1], 'velocity': velocity})
                         self.wayPoint.append({'time': self.time_list[-1], 'position': self.pos_list[-1], 'velocity': velocity})
                         self.acc_flag = 1
                         print('3rd')
@@ -233,7 +233,8 @@ class MinimumJerk:
         self.predictedPosition = iter(np.transpose(np.array(position))[1:])
 
     def CaluculateMotion(self, elaspedTime, xf):
+        isMoving = True
         if (elaspedTime - self.t0)/self.tf > 1:
-            elaspedTime = self.t0 + self.tf
+            isMoving = False
         print((elaspedTime - self.t0)/self.tf)
-        return self.x0 + (xf- self.x0)* (6* (((elaspedTime - self.t0)/self.tf)** 5)- 15* (((elaspedTime - self.t0)/self.tf)** 4)+ 10* (((elaspedTime - self.t0)/self.tf)** 3))
+        return self.x0 + (xf- self.x0)* (6* (((elaspedTime - self.t0)/self.tf)** 5)- 15* (((elaspedTime - self.t0)/self.tf)** 4)+ 10* (((elaspedTime - self.t0)/self.tf)** 3)), isMoving
