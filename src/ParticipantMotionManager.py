@@ -145,7 +145,7 @@ class MotionManager:
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             self.position = cf.ConvertAxis_Position(position * 1000, self.mount) - np.array(self.initPosition)
         else:
-            self.position, self.isMoving_Pos = self.automation.GetPosition()
+            self.position, self.isMoving_Pos = self.automation.GetPosition(self.elaspedTime)
 
         return self.position
     
@@ -288,7 +288,7 @@ class MotionManager:
 
         return vel, acc
     
-    def GetParticipnatMotionInfo2(self, position, interval = 15):
+    def GetParticipnatMotionInfo2(self, position, interval = 20):
         pos = np.linalg.norm(position)
         self.pos_list.append(pos)
 

@@ -27,12 +27,25 @@ class MinimumJerk:
         self.before_acc = 0
         self.before_vel = 0
         self.time_list = []
+        self.t0 = 0
+        self.tf = 0
+        self.x0 = 0
+        self.target_index = 0
         
-    def GetPosition(self):
-        try:
-            position = self.posRetained = next(self.predictedPosition)
-            isMoving = True
-        except StopIteration:
+    # def GetPosition(self):
+    #     try:
+    #         position = self.posRetained = next(self.predictedPosition)
+    #         isMoving = True
+    #     except StopIteration:
+    #         position, isMoving = self.posRetained, False
+
+    #     return position, isMoving
+    
+    def GetPosition(self, elaspedTime):
+        position, isMoving = self.CaluculateMotion(elaspedTime, self.target[self.target_index]['position'])
+        self.posRetained = position
+
+        if isMoving == False:
             position, isMoving = self.posRetained, False
 
         return position, isMoving
@@ -118,16 +131,16 @@ class MinimumJerk:
             if position[2]**2 + position[0]**2 >= self.initThreshold**2:
                 self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
 
-                if (velocity - self.before_vel) < 0:
+                if (self.before_acc * accelaration) < 0:
                     self.wayPoint.append({'time': elaspedTime, 'position': position, 'velocity': velocity})
-                    target_index = self.DetermineTarget(self.target, position)
+                    self.target_index = target_index = self.DetermineTarget(self.target, position)
                     self.CreateMotionData([self.wayPoint[0], self.wayPoint[int(len(self.wayPoint)/1.8)], self.wayPoint[-1]], rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'])
                     isMoving = True
                     self.flag = False
                     self.wayPoint = []
                     velocity = 0
 
-                self.before_vel = velocity
+                self.before_acc = accelaration
 
         return isMoving
     
@@ -172,9 +185,9 @@ class MinimumJerk:
         #     b = 30* ((t3 - t0)**2)*((t3 - t0 - tf)**2)
         #     return xf - a/b
 
-        t0 = CalculateInitialTime(t1, t2, t3, v1, v2, v3)
-        tf = CalculateReachingTime(t0, t1, t2, v1, v2)
-        x0 = CalculateInitialPosition(t0, t4, tf, pf, x3)
+        self.t0 = t0 = CalculateInitialTime(t1, t2, t3, v1, v2, v3)
+        self.tf = tf = CalculateReachingTime(t0, t1, t2, v1, v2)
+        self.x0 = x0 = CalculateInitialPosition(t0, t4, tf, pf, x3)
 
         print(t0, tf, x0)
 
@@ -214,3 +227,11 @@ class MinimumJerk:
         # print(np.transpose(position)[1:])
 
         self.predictedPosition = iter(np.transpose(np.array(position))[1:])
+
+    def CaluculateMotion(self, elaspedTime, xf):
+        isMoving = True
+        if (elaspedTime - self.t0)/self.tf > 1:
+            isMoving = False
+            elaspedTime = self.t0 + self.tf
+        print((elaspedTime - self.t0)/self.tf)
+        return self.x0 + (xf- self.x0)* (6* (((elaspedTime - self.t0)/self.tf)** 5)- 15* (((elaspedTime - self.t0)/self.tf)** 4)+ 10* (((elaspedTime - self.t0)/self.tf)** 3)), isMoving
