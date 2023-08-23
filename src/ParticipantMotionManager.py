@@ -147,7 +147,9 @@ class MotionManager:
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             self.position = cf.ConvertAxis_Position(position * 1000, self.mount) - np.array(self.initPosition)
         else:
-            self.position, self.isMoving_Pos = self.automation.GetPosition()
+            pos_auto, self.isMoving_Pos, weight = self.automation.GetPosition()
+            position = cf.ConvertAxis_Position(position * 1000, self.mount) - np.array(self.initPosition)
+            self.position = pos_auto * weight + position * (1 - weight)
 
         return self.position
 
