@@ -1,8 +1,10 @@
 import csv
 import time
-from matplotlib import pyplot as plt
-import numpy as np
 from datetime import datetime
+
+import numpy as np
+from matplotlib import pyplot as plt
+
 
 class DataRecordManager():
     def __init__(self, header: list = None, fileName: str = '') -> None:
@@ -15,7 +17,7 @@ class DataRecordManager():
 
     def exportAsCSV(self):
         date = datetime.now().strftime("%Y%m%d_%H%M%S")
-        with open('Data/data/reaching/' + self.fileName + date + '.csv', 'w', newline='') as exportFile:
+        with open('resource/' + self.fileName + date + '.csv', 'w', newline='') as exportFile:
             writer = csv.writer(exportFile)
             writer.writerow(self.header)
             writer.writerows(self.data)
@@ -40,7 +42,7 @@ class DataLoadManager:
             pass
 
         return self.data
-    
+
 class DataPlotManager:
     def __init__(self, legend: list = None, xlabel: str = None, ylabel: str = None) -> None:
         self.data = []

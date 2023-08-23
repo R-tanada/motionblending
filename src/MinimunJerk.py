@@ -76,20 +76,20 @@ class MinimumJerk:
 
     def MonitoringMotion(self, position, rotation, gripper, velocity, accelaration, elaspedTime):
         isMoving = False
-        diff_init = np.linalg.norm(np.array(position))
-        self.time_list.append(elaspedTime)
+        # diff_init = np.linalg.norm(np.array(position))
+        # self.time_list.append(elaspedTime)
 
-        if diff_init < self.initThreshold:
-            self.flag = True
+        # if diff_init < self.initThreshold:
+        #     self.flag = True
 
-        if self.flag == True:
-            if diff_init >= self.initThreshold:
-                target_index = self.DetermineTarget(self.target, position)
-                self.tf = self.CalculateReachingTime(self.time_list[-1], velocity, self.target[self.target_index]['position'])
-                print(self.tf)
-                self.CreateMotionData(rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'], elaspedTime)
-                isMoving = True
-                self.flag = False
+        # if self.flag == True:
+        #     if diff_init >= self.initThreshold:
+        #         target_index = self.DetermineTarget(self.target, position)
+        #         self.tf = self.CalculateReachingTime(self.time_list[-1], velocity, self.target[self.target_index]['position'])
+        #         print(self.tf)
+        #         self.CreateMotionData(rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'], elaspedTime)
+        #         isMoving = True
+        #         self.flag = False
 
         return isMoving
 
