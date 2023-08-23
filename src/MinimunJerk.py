@@ -20,7 +20,7 @@ class MinimumJerk:
             if target['rotation'][3] < 0:
                 target['rotation'] = -target['rotation']
         self.flag = False
-        self.initThreshold = 60
+        self.initThreshold = 100
         self.wayPoint = []
         self.freq = 240
         self.acc_flag = True
@@ -83,6 +83,7 @@ class MinimumJerk:
             if diff_init >= self.initThreshold:
                 target_index = self.DetermineTarget(self.target, position)
                 self.tf = self.CalculateReachingTime(elaspedTime, velocity, self.target[self.target_index]['position'])
+                print(self.tf)
                 self.CreateMotionData(rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'], elaspedTime)
                 isMoving = True
                 self.flag = False
@@ -90,6 +91,7 @@ class MinimumJerk:
         return isMoving
     
     def CreateMotionData(self, rot_n, grip_n, pos_f, rot_f, grip_f, tn):
+        self.tn = tn
         frameLength = int((self.tf-(tn - self.t0))* self.freq)
         print(frameLength)
 
@@ -116,8 +118,12 @@ class MinimumJerk:
     #     return 1/12 + 0.5*np.sqrt(F) + 0.5*np.sqrt(-1/6 - D - E -5/108*F)
     
     def CalculateReachingTime(self, t, v, xf):
-        self.tn = t
-        return t* 3
+        a = np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
+        print(a, v)
+        b = v/(30*a)
+        c = 0.5*(1 - np.sqrt(1 - 4*np.sqrt(b)))
+
+        return (t - self.t0)/c
 
 
     def CreateGripMotion(self, grip_n, grip_f, frameLength, gripFrame):
@@ -161,7 +167,7 @@ class MinimumJerk:
         if t > 1:
             t = 1
             isMoving = False
-        weight = t - self.tn/self.tf
+        weight = t - (self.tn - self.t0)/self.tf
         print(weight)
 
         return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight
@@ -169,17 +175,9 @@ class MinimumJerk:
 if __name__ == '__main__':
     def CalculateReachingTime(t, v, xf, x0):
         a = np.sqrt((xf[0] - x0[0])**2 + (xf[1] - x0[1])**2 + (xf[2] - x0[2])**2)
-        A = (25 + 135*a*v + 3*np.sqrt(5)*np.sqrt(250*a*v + 165*(a**2)*(v**2) + 192*(a**3)*(v**3)))**(1/3)
-        B = 5 - 12*a*v
-        C = 185**(2/3)
-        D = 185**(1/3)
-        E = B/(D*A)
-        F = A/C
-        G = -1/12 + E + F
-        print(A, B, C, D, E, F, G)
-        print(-1/6 - E - F - 5/(108*G))
+        b = v/(30*a)
 
-        return 1/12 + 0.5*np.sqrt(G) + 0.5*np.sqrt(-1/6 - E - F - 5/(108*G))
+        return 0.5*(1 - np.sqrt(1 - 4*np.sqrt(b)))
     
     T = CalculateReachingTime(3, 20, [80, 60, 0], [0, 0, 0])
     print(T)
