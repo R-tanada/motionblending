@@ -1,14 +1,16 @@
 import json
 import threading
 import time
+
 import numpy as np
 
+import lib.self.CustomFunction as cf
+from src.DataManager import DataLoadManager, DataPlotManager, DataRecordManager
+from src.MinimunJerk import MinimumJerk
 # # ----- Custom class ----- #
 from src.OptiTrackStreamingManager import OptiTrackStreamingManager
 from src.SensorManager import GripperSensorManager
-from src.MinimunJerk import MinimumJerk
-import lib.self.CustomFunction as cf
-from src.DataManager import DataRecordManager, DataLoadManager, DataPlotManager
+
 
 class ParticipantManager:
     with open('docs/settings_single.json', 'r') as settings_file:
@@ -32,7 +34,7 @@ class ParticipantManager:
             participantMotions[Config['Mount']] = self.motionManagers[Config['Mount']].GetMotionData()
 
         return participantMotions
-    
+
     def SetParticipantInitPosition(self):
         for Config in self.participantConfig:
             self.motionManagers[Config['Mount']].SetInitPosition()
@@ -54,7 +56,7 @@ class ParticipantManager:
             self.motionManagers[Config['Mount']].PlotGraph()
 
 class MotionManager:
-    optiTrackStreamingManager = OptiTrackStreamingManager(mocapServer = "133.68.108.109", mocapLocal = "133.68.108.109")
+    optiTrackStreamingManager = OptiTrackStreamingManager(mocapServer = "192.168.1.111", mocapLocal = "192.168.1.111")
     streamingThread = threading.Thread(target = optiTrackStreamingManager.stream_run)
     streamingThread.setDaemon(True)
     streamingThread.start()
@@ -121,13 +123,13 @@ class MotionManager:
                 self.UpdateInitPosition(position)
                 self.UpdateInitRotation(rotation)
                 self.isMoving = False
-            
+
             if self.isMoving == False and self.initFlag == True:
                 posFlag = self.LerpInitPosition()
                 rotFlag = self.SlerpInitRotation()
                 if posFlag == rotFlag == False:
                     self.initFlag = False
-                    
+
             if self.initFlag == False:
                 if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration, self.elaspedTime):
                     self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.initFlag = True
@@ -148,7 +150,7 @@ class MotionManager:
             self.position, self.isMoving_Pos = self.automation.GetPosition()
 
         return self.position
-    
+
     def GetRotation(self):
         if self.Simulation:
             rotation = self.data_rot.getdata()
@@ -166,7 +168,7 @@ class MotionManager:
             self.rotation, self.isMoving_Rot = self.automation.GetRotation()
 
         return [self.rotation, self.initQuaternion, self.initInverseMatrix]
-    
+
     def GetGripperValue(self):
         if self.Simulation:
             grip = self.data_grip.getdata()[0]
@@ -181,7 +183,7 @@ class MotionManager:
             gripper, self.isMoving_Grip = self.automation.GetGripperValue()
 
         return gripper
-    
+
     def SetInitPosition(self):
         if self.Simulation:
             initPosition = self.data_pos.getdata()
@@ -189,7 +191,7 @@ class MotionManager:
             initPosition = MotionManager.optiTrackStreamingManager.position[self.rigidBody]
             if self.recording:
                 self.recorder_pos.record(initPosition)
-        
+
         self.initPosition = cf.ConvertAxis_Position(initPosition * 1000, self.mount)
 
     def SetInitRotation(self):
@@ -231,7 +233,7 @@ class MotionManager:
             flag = False
 
         return flag
-    
+
     def SlerpInitRotation(self):
         try:
             rot = next(self.iter_initRot)
@@ -258,14 +260,14 @@ class MotionManager:
 
             else:
                 acc = 0
-            
+
             del self.pos_list[0]
 
         else:
             vel = acc = 0
 
         return vel, acc
-    
+
     def GetParticipnatMotionInfo_2(self, position, interval = 2):
         pos = np.linalg.norm(position)
         self.pos_box.append(pos)
@@ -280,14 +282,14 @@ class MotionManager:
 
             else:
                 acc = 0
-            
+
             del self.pos_box[0]
 
         else:
             vel = acc = 0
 
         return vel, acc
-    
+
     def GetParticipnatMotionInfo2(self, position, interval = 15):
         pos = np.linalg.norm(position)
         self.pos_list.append(pos)
@@ -302,7 +304,7 @@ class MotionManager:
 
             else:
                 acc = 0
-            
+
             del self.pos_list[0]
 
         else:
@@ -310,7 +312,7 @@ class MotionManager:
 
 
         return vel, acc
-    
+
     def GetParticipnatMotionInfo3(self, position, interval = 15):
         self.pos_list.append(position)
 
@@ -324,7 +326,7 @@ class MotionManager:
         # self.recorder2.record(np.hstack(([vel], self.elaspedTime)))
 
         return vel, 0
-    
+
     def GetParticipnatMotionInfo4(self, position, interval = 16):
         self.pos_box.append(position)
 
@@ -338,7 +340,7 @@ class MotionManager:
         # self.recorder2.record(np.hstack(([vel], self.elaspedTime)))
 
         return vel, 0
-    
+
     def ExportCSV(self):
         self.recorder_pos.exportAsCSV()
         self.recorder_rot.exportAsCSV()
@@ -352,7 +354,7 @@ class MotionManager:
     def SetElaspedTime(self, elaspedTime):
         if self.Simulation == True:
             self.elaspedTime = self.data_time.getdata()[0]
-            
+
         else:
             self.elaspedTime = elaspedTime
             if self.recording == True:
