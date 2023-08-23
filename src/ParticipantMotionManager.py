@@ -327,7 +327,7 @@ class MotionManager:
 
         # self.recorder2.record(np.hstack(([vel], self.elaspedTime)))
 
-        print(vel)
+        # print(vel)
 
         return vel, 0
 

@@ -85,7 +85,7 @@ class MinimumJerk:
         if self.flag == True:
             if diff_init >= self.initThreshold:
                 target_index = self.DetermineTarget(self.target, position)
-                self.tf = self.CalculateReachingTime(self.time_list[-10], velocity, self.target[self.target_index]['position'])
+                self.tf = self.CalculateReachingTime(self.time_list[-1], velocity, self.target[self.target_index]['position'])
                 print(self.tf)
                 self.CreateMotionData(rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'], elaspedTime)
                 isMoving = True
