@@ -1,8 +1,11 @@
-import numpy as np
 import time
-import lib.self.CustomFunction as cf
 from itertools import cycle as iter_cycle
+
+import numpy as np
 from matplotlib import pyplot as plt
+
+import lib.self.CustomFunction as cf
+
 
 class MinimumJerk:
     def __init__(self, Target: list, xArmConfig: dict, Threshold = 300) -> None:
@@ -34,7 +37,7 @@ class MinimumJerk:
         self.pos_list = []
         self.tn = 0
 
-        
+
     # def GetPosition(self):
     #     try:
     #         position = self.posRetained = next(self.predictedPosition)
@@ -52,7 +55,7 @@ class MinimumJerk:
             position, isMoving = self.posRetained, False
 
         return position, isMoving, weight
-    
+
     def GetRotation(self):
         try:
             rotation = self.rotRetained = np.dot(cf.Convert2Matrix(self.q_init), next(self.predictedRotation))
@@ -61,7 +64,7 @@ class MinimumJerk:
             rotation, isMoving = self.rotRetained, False
 
         return rotation, isMoving
-    
+
     def GetGripperValue(self):
         try:
             gripper = self.gripRetained = next(self.predictedGripper)
@@ -82,14 +85,14 @@ class MinimumJerk:
         if self.flag == True:
             if diff_init >= self.initThreshold:
                 target_index = self.DetermineTarget(self.target, position)
-                self.tf = self.CalculateReachingTime(elaspedTime, velocity, self.target[self.target_index]['position'])
+                self.tf = self.CalculateReachingTime(self.time_list[-10], velocity, self.target[self.target_index]['position'])
                 print(self.tf)
                 self.CreateMotionData(rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'], elaspedTime)
                 isMoving = True
                 self.flag = False
 
         return isMoving
-    
+
     def CreateMotionData(self, rot_n, grip_n, pos_f, rot_f, grip_f, tn):
         self.tn = tn
         frameLength = int((self.tf-(tn - self.t0))* self.freq)
@@ -98,14 +101,14 @@ class MinimumJerk:
         # self.CreateMotionMinimumJerk(t4, tf, x0, pos_f, frameLength, t0)
         self.CreateSlerpMotion(rot_n, rot_f, frameLength)
         self.CreateGripMotion(grip_n, grip_f, frameLength, gripFrame = 300)
-    
+
     def DetermineTarget(self, target_list, position):
         diffList = []
         for target in target_list:
             diffList.append(np.linalg.norm(np.array(position) - target['position']))
 
         return diffList.index(min(diffList))
-    
+
     # def CalculateReachingTime(self, t, v, xf):
     #     a = np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
     #     A = (25 + 135*a*v + 3*np.sqrt(5)*np.sqrt(250*a*v + 165*(a**2)*(v**2) + 192*(a**3)*(v**3)))**(1/3)
@@ -116,12 +119,12 @@ class MinimumJerk:
     #     F = -1/12 + E + F
 
     #     return 1/12 + 0.5*np.sqrt(F) + 0.5*np.sqrt(-1/6 - D - E -5/108*F)
-    
+
     def CalculateReachingTime(self, t, v, xf):
         a = np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
-        print(a, v)
         b = v/(30*a)
         c = 0.5*(1 - np.sqrt(1 - 4*np.sqrt(b)))
+        print(c)
 
         return (t - self.t0)/c
 
@@ -130,12 +133,12 @@ class MinimumJerk:
         def CreateMotion_Liner(target, data, split):
             motionlist = np.linspace(data, target, split)
             return motionlist
-        
+
         diffGrip = [850] * frameLength
         diffGrip = np.concatenate([diffGrip, CreateMotion_Liner(grip_f, grip_n, gripFrame)], 0)
 
         self.predictedGripper = iter(diffGrip)
-    
+
     def CreateSlerpMotion(self, rot_n, rot_f, frameLength):
         weight_list = np.linspace(0, 1, int(frameLength*0.7))
         rot_list = []
@@ -148,7 +151,7 @@ class MinimumJerk:
 
         def function(x0, xf, flame):
             return x0 + (xf- x0)* (6* (flame** 5)- 15* (flame** 4)+ 10* (flame** 3))
- 
+
         flame = np.linspace((t3-t0)/tf, 1, frameLength)
         # flame = np.linspace(0, 1, frameLength)
 
@@ -160,25 +163,24 @@ class MinimumJerk:
         # print(np.transpose(position)[1:])
 
         self.predictedPosition = iter(np.transpose(np.array(position))[1:])
-    
+
     def CaluculateMotion(self, elaspedTime, xf):
         isMoving = True
         t = (elaspedTime - self.t0)/self.tf
         if t > 1:
             t = 1
             isMoving = False
-        weight = t - (self.tn - self.t0)/self.tf
+        weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
         print(weight)
 
         return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight
-    
+
 if __name__ == '__main__':
     def CalculateReachingTime(t, v, xf, x0):
         a = np.sqrt((xf[0] - x0[0])**2 + (xf[1] - x0[1])**2 + (xf[2] - x0[2])**2)
         b = v/(30*a)
 
         return 0.5*(1 - np.sqrt(1 - 4*np.sqrt(b)))
-    
+
     T = CalculateReachingTime(3, 20, [80, 60, 0], [0, 0, 0])
     print(T)
-        

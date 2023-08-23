@@ -327,6 +327,8 @@ class MotionManager:
 
         # self.recorder2.record(np.hstack(([vel], self.elaspedTime)))
 
+        print(vel)
+
         return vel, 0
 
     def GetParticipnatMotionInfo4(self, position, interval = 16):
