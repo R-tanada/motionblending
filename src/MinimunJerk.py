@@ -32,6 +32,7 @@ class MinimumJerk:
         self.x0 = [0, 0, 0]
         self.target_index = 0
         self.pos_list = []
+        self.tn = 0
 
         
     # def GetPosition(self):
@@ -82,13 +83,13 @@ class MinimumJerk:
             if diff_init >= self.initThreshold:
                 target_index = self.DetermineTarget(self.target, position)
                 self.tf = self.CalculateReachingTime(elaspedTime, velocity, self.target[self.target_index]['position'])
-                self.CreateMotionData(rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'])
+                self.CreateMotionData(rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'], elaspedTime)
                 isMoving = True
                 self.flag = False
 
         return isMoving
     
-    def CreateMotionData(self, rot_n, grip_n, pos_f, rot_f, grip_f, T, tn):
+    def CreateMotionData(self, rot_n, grip_n, pos_f, rot_f, grip_f, tn):
         frameLength = int((self.tf-(tn - self.t0))* self.freq)
         print(frameLength)
 
@@ -115,6 +116,7 @@ class MinimumJerk:
     #     return 1/12 + 0.5*np.sqrt(F) + 0.5*np.sqrt(-1/6 - D - E -5/108*F)
     
     def CalculateReachingTime(self, t, v, xf):
+        self.tn = t
         return t* 3
 
 
@@ -156,9 +158,12 @@ class MinimumJerk:
     def CaluculateMotion(self, elaspedTime, xf):
         isMoving = True
         t = (elaspedTime - self.t0)/self.tf
-        weight = t
         if t > 1:
+            t = 1
             isMoving = False
+        weight = t - self.tn/self.tf
+        print(weight)
+
         return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight
     
 if __name__ == '__main__':

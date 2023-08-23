@@ -43,22 +43,22 @@
                 "SerialCOM": "None",
                 "Weight": 1,
                 "DataPath": {
-                    "position": "resource/sample3/pos20230622_171814.csv",
-                    "rotation": "resource/sample2/rot20230622_171735.csv",
-                    "gripper": "resource/sample2/grip20230622_171735.csv",
-                    "time": "resource/sample2/time20230622_171735.csv"
+                    "position": "resource/pos20230817_162914.csv",
+                    "rotation": "resource/rot20230817_162914.csv",
+                    "gripper": "resource/grip20230817_162914.csv",
+                    "time": "resource/time20230817_162914.csv"
                 },
                 "Target": [
                     {
                         "position": [
-                            499.860352,
-                            -249.143204,
-                            100.957672
+                            436.86026,
+                            -199.803802,
+                            346.318695
                         ],
                         "rotation": [
-                            122.738217,
-                            44.007456,
-                            44.989563
+                            123.580579,
+                            27.097752,
+                            49.28583
                         ],
                         "gripper": 300
                     }
