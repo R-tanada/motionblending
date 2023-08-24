@@ -1,12 +1,13 @@
+import threading
 import time
 from itertools import cycle as iter_cycle
 
 import numpy as np
 from matplotlib import pyplot as plt
-from src.DataManager import DataPlotManager
+
 import lib.self.CustomFunction as cf
+from src.DataManager import DataPlotManager
 from src.SensorManager import FootSwitchManager
-import threading
 
 
 class MinimumJerk:
@@ -58,7 +59,7 @@ class MinimumJerk:
     #     return position, isMoving
 
     def GetPosition(self, elaspedTime):
-        position, isMoving, weight, velocity = self.CaluculateMotion(elaspedTime, self.target[self.target_index]['position'])
+        position, isMoving, weight, velocity = self.CaluculateMotion(self.elaspedTime, self.target[self.target_index]['position'])
         self.posRetained = position
 
         if isMoving == False:
@@ -85,12 +86,16 @@ class MinimumJerk:
         return gripper, isMoving
 
     def MonitoringMotion(self, position, rotation, gripper, velocity, accelaration, elaspedTime):
-        self.elaspedTime = time.perf_counter() - self.init_time
+
         if self.switchManager.flag == True:
             self.init_time = time.perf_counter()
             self.x0 = position
             self.flag = True
             self.switchManager.flag = False
+
+        self.elaspedTime = time.perf_counter() - self.init_time
+
+        print(self.elaspedTime, self.x0)
 
         isMoving = False
         diff_init = np.linalg.norm(np.array(position) - np.array(self.x0))
@@ -181,12 +186,13 @@ class MinimumJerk:
 
     def CaluculateMotion(self, elaspedTime, xf):
         isMoving = True
-        t = (elaspedTime - self.t0)/self.tf
+        t = (self.elaspedTime - self.t0)/self.tf
         if t > 1:
             t = 1
             isMoving = False
         weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
-        print(weight)
+        # print(weight)
+        print(t)
 
         return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
 
