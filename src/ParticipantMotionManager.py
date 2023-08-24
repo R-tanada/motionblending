@@ -56,7 +56,7 @@ class ParticipantManager:
             self.motionManagers[Config['Mount']].PlotGraph()
 
 class MotionManager:
-    optiTrackStreamingManager = OptiTrackStreamingManager(mocapServer = "192.168.1.111", mocapLocal = "192.168.1.111")
+    optiTrackStreamingManager = OptiTrackStreamingManager(mocapServer = "127.0.0.1", mocapLocal = "127.0.0.1")
     streamingThread = threading.Thread(target = optiTrackStreamingManager.stream_run)
     streamingThread.setDaemon(True)
     streamingThread.start()
@@ -276,7 +276,7 @@ class MotionManager:
         # print(vel)
 
         return vel, 0
-    
+
     def GetParticipnatMotionInfo2(self, position, interval = 25):
         self.pos_list2.append(position)
 
@@ -292,7 +292,7 @@ class MotionManager:
         # print(vel)
 
         return vel, 0
-    
+
     def GetParticipnatMotionInfo3(self, position, interval = 25):
         self.pos_list3.append(position)
 
