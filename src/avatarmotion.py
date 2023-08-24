@@ -1,13 +1,14 @@
 from src.ParticipantMotionManager import ParticipantManager
 from src.SensorManager import GripperSensorManager
-from src.MinimunJerk import MinimumJerk
+from src.prediction import MinimumJerk
 from src.DataManager import DataRecordManager
 
 class AvatarMotion:
     def __init__(self) -> None:
-        self.particpantMotionManager = ParticipantManager()
-        self.minimumjerk = MinimumJerk()
+        self.particpantmotion = ParticipantManager()
+        self.predicction = MinimumJerk()
 
     def set_motion(self, elaspedTime):
-        
-        self.particpantMotionManager.
+        self.particpantmotion.get_participant_motion(elaspedTime)
+
+        self.predicction.MonitoringMotion

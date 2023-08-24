@@ -48,6 +48,8 @@ class MinimumJerk:
 
     #     return position, isMoving
 
+    def get_predicted_motion(self):
+
     def GetPosition(self, elaspedTime):
         position, isMoving, weight, velocity = self.CaluculateMotion(elaspedTime, self.target[self.target_index]['position'])
         self.posRetained = position

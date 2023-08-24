@@ -6,7 +6,7 @@ import numpy as np
 
 import lib.self.CustomFunction as cf
 from src.DataManager import DataLoadManager, DataPlotManager, DataRecordManager
-from src.MinimunJerk import MinimumJerk
+from prediction import MinimumJerk
 # # ----- Custom class ----- #
 from src.OptiTrackStreamingManager import OptiTrackStreamingManager
 from src.SensorManager import GripperSensorManager
@@ -19,33 +19,29 @@ class ParticipantManager:
     for xArm in settings['xArmConfigs'].keys():
         xArmConfig[settings['xArmConfigs'][xArm]['Mount']] = settings['xArmConfigs'][xArm]
 
-    def __init__(self, ParticipantConfig: dict, is_Simulation, is_Recording) -> None:
+    def __init__(self, ParticipantConfig: dict) -> None:
         self.participantConfig = ParticipantConfig
         self.position = []
         self.rotation = []
 
         self.motionManagers= {}
         for Config in self.participantConfig:
-            self.motionManagers[Config['Mount']] = MotionManager(Config, ParticipantManager.xArmConfig[Config['Mount']], is_Simulation, is_Recording)
+            self.motionManagers[Config['Mount']] = MotionManager(Config, ParticipantManager.xArmConfig[Config['Mount']])
 
-    def GetParticipantMotion(self):
+    def get_participant_motion(self):
         participantMotions = {}
         for Config in self.participantConfig:
             participantMotions[Config['Mount']] = self.motionManagers[Config['Mount']].GetMotionData()
 
         return participantMotions
 
-    def SetParticipantInitPosition(self):
+    def set_participant_init_position(self):
         for Config in self.participantConfig:
             self.motionManagers[Config['Mount']].SetInitPosition()
 
-    def SetParticipantInitRotation(self):
+    def set_participant_init_rotation(self):
         for Config in self.participantConfig:
             self.motionManagers[Config['Mount']].SetInitRotation()
-
-    def SetElaspedTime(self, elaspedTime):
-        for Config in self.participantConfig:
-                    self.motionManagers[Config['Mount']].SetElaspedTime(elaspedTime)
 
 class MotionManager:
     optiTrackStreamingManager = OptiTrackStreamingManager(mocapServer = "127.0.0.1", mocapLocal = "127.0.0.1")
@@ -53,7 +49,7 @@ class MotionManager:
     streamingThread.setDaemon(True)
     streamingThread.start()
 
-    def __init__(self, Config, xArmConfig, is_Simulation, is_Recording) -> None:
+    def __init__(self, Config, xArmConfig) -> None:
         self.mount = Config['Mount']
         self.rigidBody = str(Config['RigidBody'])
         self.weight = Config['Weight']
@@ -66,7 +62,6 @@ class MotionManager:
         self.updateInitInverseMatrix = []
         self.iter_initPos = self.iter_initRot = []
         self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = False
-        self.pos_list = []
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
 
@@ -75,33 +70,9 @@ class MotionManager:
         sensorThread.setDaemon(True)
         sensorThread.start()
 
-        self.recorder = DataPlotManager(legend = ['x_mocap', 'x_minimumjerk'], xlabel='time[s]', ylabel='position[mm]')
-        self.recorder2 = DataPlotManager(legend = ['mocap','minimumjerk'], xlabel='time[s]', ylabel='velocity[mm/s]')
-        self.recorder3 = DataPlotManager(legend = ['x_robot'], xlabel='time[s]', ylabel='position[mm]')
-
-        if self.recording:
-            self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'], fileName='pos')
-            self.recorder_rot = DataRecordManager(header = ['x', 'y', 'z', 'w'], fileName='rot')
-            self.recorder_grip = DataRecordManager(header = ['grip'], fileName='grip')
-            self.recorder_time = DataRecordManager(header = ['time'], fileName='time')
-
-        if self.Simulation:
-            self.data_pos = DataLoadManager(Config['DataPath']['position'])
-            self.data_rot = DataLoadManager(Config['DataPath']['rotation'])
-            self.data_grip = DataLoadManager(Config['DataPath']['gripper'])
-            self.data_time = DataLoadManager(Config['DataPath']['time'])
-
-        else:
-            MotionManager.optiTrackStreamingManager.position[self.rigidBody] = np.zeros(3)
-            MotionManager.optiTrackStreamingManager.rotation[self.rigidBody] = np.zeros(4)
-
-    def GetMotionData(self):
-        position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
-        # self.recorder.record(np.hstack((position, self.elaspedTime)))
-        # print(np.hstack((position, self.elaspedTime)))
+    def get_motion_data(self):
+        position, rotation, gripper = self.get_position(), self.get_rotation(), self.get_gripper()
         velocity, accelaration = self.GetParticipnatMotionInfo(position)
-        # velocity2, accelaration2 = self.GetParticipnatMotionInfo3(position)
-        # self.recorder2.record(np.hstack(([velocity, velocity2], self.elaspedTime)))
 
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
@@ -120,34 +91,21 @@ class MotionManager:
                 if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration, self.elaspedTime):
                     self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.initFlag = True
 
-        return {'position': position, 'rotation': rotation, 'gripper': gripper}
+        return {'position': position, 'rotation': rotation, 'gripper': gripper, 'velocity': velocity, 'acceleration': accelaration}
 
-    def GetPosition(self):
+    def get_position(self):
         if self.Simulation:
             position = self.data_pos.getdata()
         else:
             position = MotionManager.optiTrackStreamingManager.position[self.rigidBody]
             if self.recording:
-                self.recorder_pos.record(position)
+                self.recorder_rot.record(position)
 
-        if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
-            self.position = cf.ConvertAxis_Position(position * 1000, self.mount) - np.array(self.initPosition)
-            velocity, accelaration = self.GetParticipnatMotionInfo2(self.position)
-            self.recorder.record(np.hstack(([self.position[0], self.position[0]], self.elaspedTime)))
-            self.recorder2.record(np.hstack(([velocity, 0], self.elaspedTime)))
-            self.recorder3.record([self.position[0], self.elaspedTime])
-        else:
-            pos_auto, self.isMoving_Pos, weight, velocity_auto = self.automation.GetPosition(self.elaspedTime)
-            position = cf.ConvertAxis_Position(position * 1000, self.mount) - np.array(self.initPosition)
-            self.position = pos_auto * weight + position * (1 - weight)
-            self.recorder3.record([position[0], self.elaspedTime])
-            velocity, accelaration = self.GetParticipnatMotionInfo2(position)
-            self.recorder2.record(np.hstack(([velocity, velocity_auto], self.elaspedTime)))
-            self.recorder.record(np.hstack(([position[0], pos_auto[0]], self.elaspedTime)))
+        position = cf.ConvertAxis_Position(position * 1000, self.mount) - np.array(self.initPosition)
 
-        return self.position
+        return position
 
-    def GetRotation(self):
+    def get_rotation(self):
         if self.Simulation:
             rotation = self.data_rot.getdata()
         else:
@@ -165,7 +123,7 @@ class MotionManager:
 
         return [self.rotation, self.initQuaternion, self.initInverseMatrix]
 
-    def GetGripperValue(self):
+    def get_gripper(self):
         if self.Simulation:
             grip = self.data_grip.getdata()[0]
         else:
@@ -180,7 +138,7 @@ class MotionManager:
 
         return gripper
 
-    def SetInitPosition(self):
+    def set_init_position(self):
         if self.Simulation:
             initPosition = self.data_pos.getdata()
         else:
@@ -190,7 +148,7 @@ class MotionManager:
 
         self.initPosition = cf.ConvertAxis_Position(initPosition * 1000, self.mount)
 
-    def SetInitRotation(self):
+    def set_init_rotation(self):
         if self.Simulation:
             initQuaternion = self.data_rot.getdata()
         else:
@@ -253,8 +211,7 @@ class MotionManager:
             vel = 0
 
         # self.recorder2.record(np.hstack(([vel], self.elaspedTime)))
-
+åå
         # print(vel)
 
         return vel, 0
-
