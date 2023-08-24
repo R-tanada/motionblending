@@ -47,14 +47,6 @@ class ParticipantManager:
         for Config in self.participantConfig:
                     self.motionManagers[Config['Mount']].SetElaspedTime(elaspedTime)
 
-    def ExportCSV(self):
-        for Config in self.participantConfig:
-            self.motionManagers[Config['Mount']].ExportCSV()
-
-    def PlotGraph(self):
-        for Config in self.participantConfig:
-            self.motionManagers[Config['Mount']].PlotGraph()
-
 class MotionManager:
     optiTrackStreamingManager = OptiTrackStreamingManager(mocapServer = "127.0.0.1", mocapLocal = "127.0.0.1")
     streamingThread = threading.Thread(target = optiTrackStreamingManager.stream_run)
@@ -75,17 +67,6 @@ class MotionManager:
         self.iter_initPos = self.iter_initRot = []
         self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = False
         self.pos_list = []
-        self.pos_list2 = []
-        self.pos_list3 = []
-        self.pos_box = []
-        self.vel_list = []
-        self.vel_box = []
-        self.dt = 1/ 200
-        self.before_time = 0
-        self.recording = is_Recording
-        self.Simulation = is_Simulation
-        self.elaspedTime = 0
-        self.auto_list = []
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
 
@@ -139,7 +120,7 @@ class MotionManager:
                 if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration, self.elaspedTime):
                     self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.initFlag = True
 
-        return {'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight}
+        return {'position': position, 'rotation': rotation, 'gripper': gripper}
 
     def GetPosition(self):
         if self.Simulation:
@@ -277,54 +258,3 @@ class MotionManager:
 
         return vel, 0
 
-    def GetParticipnatMotionInfo2(self, position, interval = 25):
-        self.pos_list2.append(position)
-
-        if len(self.pos_list2) == interval+1:
-            vel = np.linalg.norm(np.polyfit(np.linspace(0, self.dt * (interval+1), (interval+1)), self.pos_list2, 1)[0])
-            del self.pos_list2[0]
-
-        else:
-            vel = 0
-
-        # self.recorder2.record(np.hstack(([vel], self.elaspedTime)))
-
-        # print(vel)
-
-        return vel, 0
-
-    def GetParticipnatMotionInfo3(self, position, interval = 25):
-        self.pos_list3.append(position)
-
-        if len(self.pos_list3) == interval+1:
-            vel = np.linalg.norm(np.polyfit(np.linspace(0, self.dt * (interval+1), (interval+1)), self.pos_list3, 1)[0])
-            del self.pos_list3[0]
-
-        else:
-            vel = 0
-
-        # self.recorder2.record(np.hstack(([vel], self.elaspedTime)))
-
-        # print(vel)
-
-        return vel, 0
-
-    def ExportCSV(self):
-        self.recorder_pos.exportAsCSV()
-        self.recorder_rot.exportAsCSV()
-        self.recorder_grip.exportAsCSV()
-        self.recorder_time.exportAsCSV()
-
-    def PlotGraph(self):
-        self.recorder.plotGraph()
-        self.recorder2.plotGraph()
-        self.recorder3.plotGraph()
-
-    def SetElaspedTime(self, elaspedTime):
-        if self.Simulation == True:
-            self.elaspedTime = self.data_time.getdata()[0]
-
-        else:
-            self.elaspedTime = elaspedTime
-            if self.recording == True:
-                self.recorder_time.record([self.elaspedTime])
