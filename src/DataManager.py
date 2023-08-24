@@ -44,6 +44,7 @@ class DataLoadManager:
         return self.data
 
 class DataPlotManager:
+    thres = 0
     def __init__(self, legend: list = None, xlabel: str = None, ylabel: str = None) -> None:
         self.data = []
         self.legend = legend
@@ -56,12 +57,18 @@ class DataPlotManager:
     def plotGraph(self):
         data = np.array(self.data)
         for i in range(len(self.legend)):
-            plt.plot(data[:, -1], data[:, i], label = self.legend[i])
+            if i == 1:
+                index = np.where(data[:, -1] == DataPlotManager.thres)[0][0]
+                print(index)
+                plt.plot(data[index+1:, -1], data[index+1:, i], label = self.legend[i])
+            else:
+                plt.plot(data[:, -1], data[:, i], label = self.legend[i])
         if self.xlabel:
             plt.xlabel(self.xlabel)
         if self.ylabel:
             plt.ylabel(self.ylabel)
-        plt.vlines(x = 2.7656666000000003, ymax=400, ymin=-400, linestyles='dotted', colors=[0, 0, 0])
+
+        plt.vlines(x = DataPlotManager.thres, ymin=700, ymax=0, linestyles='dotted', colors='k')
         plt.legend()
         plt.show()
 
