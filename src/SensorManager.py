@@ -29,3 +29,22 @@ class GripperSensorManager:
         except KeyboardInterrupt:
             print('KeyboardInterrupt >> Stop: BendingSensorManager.py')
 
+class FootSwitchManager:
+    def __init__(self) -> None:
+        self.flag = False
+
+    def detect_sensor(self):
+        try:
+            while True:
+                key = input('press to start predicition')
+                if key == 's':
+                    self.flag = True
+                    print('----- foot switch pressed -----')
+
+                time.sleep(0.005)
+
+        except:
+            print('error occured')
+
+
+

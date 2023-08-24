@@ -5,6 +5,8 @@ import numpy as np
 from matplotlib import pyplot as plt
 from src.DataManager import DataPlotManager
 import lib.self.CustomFunction as cf
+from src.SensorManager import FootSwitchManager
+import threading
 
 
 class MinimumJerk:
@@ -38,6 +40,10 @@ class MinimumJerk:
         self.tn = 0
         self.a = 0
 
+        self.switchManager = FootSwitchManager()
+        switchThread = threading.Thread(target=self.switchManager.detect_sensor)
+        switchThread.setDaemon(True)
+        switchThread.start()
 
     # def GetPosition(self):
     #     try:
@@ -80,17 +86,14 @@ class MinimumJerk:
         diff_init = np.linalg.norm(np.array(position))
         self.time_list.append(elaspedTime)
 
-        if diff_init < self.initThreshold:
-            self.flag = True
-
-        if self.flag == True:
+        if self.switchManager.flag == True:
             if diff_init >= self.initThreshold:
                 target_index = self.DetermineTarget(self.target, position)
                 self.tf = self.CalculateReachingTime(self.time_list[-1], velocity, self.target[self.target_index]['position'])
                 print(self.tf)
                 self.CreateMotionData(rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'], elaspedTime)
                 isMoving = True
-                self.flag = False
+                self.switchManager.flag = False
 
         return isMoving
 
