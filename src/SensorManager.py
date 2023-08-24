@@ -37,7 +37,7 @@ class FootSwitchManager:
         try:
             while True:
                 key = input('press to start predicition')
-                if key == 's':
+                if key == 'f':
                     self.flag = True
                     print('----- foot switch pressed -----')
 
