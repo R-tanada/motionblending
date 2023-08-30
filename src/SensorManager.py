@@ -34,6 +34,8 @@ class FootSwitchManager:
         self.flag = False
 
     def detect_sensor(self):
+        time.sleep(3)
+
         try:
             while True:
                 key = input('press to start predicition')

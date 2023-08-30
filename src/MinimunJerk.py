@@ -41,9 +41,8 @@ class MinimumJerk:
         self.tn = 0
         self.a = 0
         self.elaspedTime = 0
-
-        self.init_time = time.perf_counter()
-
+        self.init_time = 0
+        
         self.switchManager = FootSwitchManager()
         switchThread = threading.Thread(target=self.switchManager.detect_sensor)
         switchThread.setDaemon(True)
@@ -86,22 +85,19 @@ class MinimumJerk:
         return gripper, isMoving
 
     def MonitoringMotion(self, position, rotation, gripper, velocity, accelaration, elaspedTime):
+        isMoving = False
 
         if self.switchManager.flag == True:
-            self.init_time = time.perf_counter()
+            self.init_time = elaspedTime
             self.x0 = position
             self.flag = True
             self.switchManager.flag = False
 
-        self.elaspedTime = time.perf_counter() - self.init_time
-
-        print(self.elaspedTime, self.x0)
-
-        isMoving = False
-        diff_init = np.linalg.norm(np.array(position) - np.array(self.x0))
-        self.time_list.append(self.elaspedTime)
-
         if self.flag == True:
+            self.elaspedTime = elaspedTime - self.init_time
+            diff_init = np.linalg.norm(np.array(position) - np.array(self.x0))
+            self.time_list.append(self.elaspedTime)
+
             if diff_init >= self.initThreshold:
                 target_index = self.DetermineTarget(self.target, position)
                 self.tf = self.CalculateReachingTime(self.time_list[-1], velocity, self.target[self.target_index]['position'])

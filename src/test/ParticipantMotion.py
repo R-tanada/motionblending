@@ -63,7 +63,8 @@ class MotionManager:
         self.iter_initPos = self.iter_initRot = []
         self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = False
         self.pos_list = []
-        self.dt = 1/200
+        self.dt = 1/
+        
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
 
