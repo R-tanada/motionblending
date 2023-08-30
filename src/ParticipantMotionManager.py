@@ -116,12 +116,7 @@ class MotionManager:
 
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
-        # self.recorder.record(np.hstack((position, self.elaspedTime)))
-        # print(np.hstack((position, self.elaspedTime)))
         velocity, accelaration = self.GetParticipnatMotionInfo(position)
-        # velocity2, accelaration2 = self.GetParticipnatMotionInfo3(position)
-        # self.recorder2.record(np.hstack(([velocity, velocity2], self.elaspedTime)))
-
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             if self.isMoving == True:
