@@ -132,7 +132,7 @@ class MotionManager:
                     print('finish_automation')
 
             if self.initFlag == False:
-                if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration, self.elaspedTime):
+                if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration):
                     self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.initFlag = True
 
         return {'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight}
