@@ -42,7 +42,7 @@ class MinimumJerk:
         self.a = 0
         self.elaspedTime = 0
         self.init_time = 0
-        
+
         self.switchManager = FootSwitchManager()
         switchThread = threading.Thread(target=self.switchManager.detect_sensor)
         switchThread.setDaemon(True)
@@ -58,6 +58,7 @@ class MinimumJerk:
     #     return position, isMoving
 
     def GetPosition(self, elaspedTime):
+        print(self.elaspedTime)
         position, isMoving, weight, velocity = self.CaluculateMotion(self.elaspedTime, self.target[self.target_index]['position'])
         self.posRetained = position
 
