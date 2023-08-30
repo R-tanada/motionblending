@@ -98,9 +98,10 @@ class MinimumJerk:
             self.elaspedTime = time.perf_counter() - self.init_time
             diff_init = np.linalg.norm(np.array(position) - np.array(self.x0))
             self.time_list.append(self.elaspedTime)
+            self.pos_list.append(position)
 
             if diff_init >= self.initThreshold:
-                target_index = self.DetermineTarget(self.target, position)
+                target_index = self.DetermineTarget(self.target, position, position[-1]-position[-2])
                 self.tf = self.CalculateReachingTime(self.time_list[-1], velocity, self.target[self.target_index]['position'])
                 print(self.tf)
                 self.CreateMotionData(rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'], self.elaspedTime)
@@ -119,12 +120,30 @@ class MinimumJerk:
         self.CreateSlerpMotion(rot_n, rot_f, frameLength)
         self.CreateGripMotion(grip_n, grip_f, frameLength, gripFrame = 300)
 
-    def DetermineTarget(self, target_list, position):
-        diffList = []
-        for target in target_list:
-            diffList.append(np.linalg.norm(np.array(position) - target['position']))
+    # def DetermineTarget(self, target_list, position):
+    #     diffList = []
+    #     for target in target_list:
+    #         diffList.append(np.linalg.norm(np.array(position) - target['position']))
 
-        return diffList.index(min(diffList))
+    #     return diffList.index(min(diffList))
+
+    def DetermineTarget(self, target_list, position, vector):
+        D_list = []
+        x = position
+        a = vector
+        alfa = beta = gamma = 0
+        for target in target_list:
+            y = target['position']
+            alfa = np.dot((2*x - y), a)
+            beta = np.dot(x, y)
+            k = (alfa + np.sqrt(alfa**2 - 4*np.dot(a, a)*(np.dot(x, x)-beta)))/2
+            gamma = np.dot((x + k*a), y)
+            d = np.sqrt(np.dot(y, y) - gamma)
+            D_list.append(d)
+            print(alfa, beta, k, gamma, d)
+        print(D_list)
+
+        return D_list.index(min(D_list))
 
     # def CalculateReachingTime(self, t, v, xf):
     #     a = np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
