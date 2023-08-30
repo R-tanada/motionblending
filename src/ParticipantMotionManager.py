@@ -134,6 +134,7 @@ class MotionManager:
                 rotFlag = self.SlerpInitRotation()
                 if posFlag == rotFlag == False:
                     self.initFlag = False
+                    print('finish_automation')
 
             if self.initFlag == False:
                 if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration, self.elaspedTime):
@@ -151,18 +152,11 @@ class MotionManager:
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             self.position = cf.ConvertAxis_Position(position * 1000, self.mount) - np.array(self.initPosition)
-            velocity, accelaration = self.GetParticipnatMotionInfo2(self.position)
-            self.recorder.record(np.hstack(([self.position[0], self.position[0]], self.elaspedTime)))
-            self.recorder2.record(np.hstack(([velocity, 0], self.elaspedTime)))
-            self.recorder3.record([self.position[0], self.elaspedTime])
+
         else:
             pos_auto, self.isMoving_Pos, weight, velocity_auto = self.automation.GetPosition(self.elaspedTime)
             position = cf.ConvertAxis_Position(position * 1000, self.mount) - np.array(self.initPosition)
             self.position = pos_auto * weight + position * (1 - weight)
-            self.recorder3.record([position[0], self.elaspedTime])
-            velocity, accelaration = self.GetParticipnatMotionInfo2(position)
-            self.recorder2.record(np.hstack(([velocity, velocity_auto], self.elaspedTime)))
-            self.recorder.record(np.hstack(([position[0], pos_auto[0]], self.elaspedTime)))
 
         return self.position
 
