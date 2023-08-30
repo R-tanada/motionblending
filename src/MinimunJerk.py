@@ -125,6 +125,20 @@ class MinimumJerk:
             diffList.append(np.linalg.norm(np.array(position) - target['position']))
 
         return diffList.index(min(diffList))
+    
+    def __DeterminTarget(self, target_list, position, vector):
+        D_list = []
+        x = position
+        a = vector
+        for y in target_list:
+            alfa = np.dot(alfa, a)
+            beta = np.dot(x*y)
+            k = (alfa + np.sqrt(alfa**2 - 4*np.dot(a, a)*(np.dot(x, x)-beta)))/2
+            gamma = np.dot(x + k*a, y)
+            d = np.sqrt(np.dot(y, y) - gamma)
+            D_list.append(d)
+
+        return D_list.index(min(D_list))
 
     # def CalculateReachingTime(self, t, v, xf):
     #     a = np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
