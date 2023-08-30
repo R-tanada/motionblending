@@ -119,14 +119,14 @@ class MinimumJerk:
         self.CreateSlerpMotion(rot_n, rot_f, frameLength)
         self.CreateGripMotion(grip_n, grip_f, frameLength, gripFrame = 300)
 
-    def DetermineTarget(self, target_list, position):
-        diffList = []
-        for target in target_list:
-            diffList.append(np.linalg.norm(np.array(position) - target['position']))
+    # def DetermineTarget(self, target_list, position):
+    #     diffList = []
+    #     for target in target_list:
+    #         diffList.append(np.linalg.norm(np.array(position) - target['position']))
 
-        return diffList.index(min(diffList))
+    #     return diffList.index(min(diffList))
     
-    def __DeterminTarget(self, target_list, position, vector):
+    def DeterminTarget(self, target_list, position, vector):
         D_list = []
         x = position
         a = vector
