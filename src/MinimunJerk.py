@@ -87,6 +87,7 @@ class MinimumJerk:
 
     def MonitoringMotion(self, position, rotation, gripper, velocity, accelaration, elaspedTime):
         isMoving = False
+        print(position)
 
         if self.switchManager.flag == True:
             self.init_time = elaspedTime
@@ -98,9 +99,10 @@ class MinimumJerk:
             self.elaspedTime = elaspedTime - self.init_time
             diff_init = np.linalg.norm(np.array(position) - np.array(self.x0))
             self.time_list.append(self.elaspedTime)
+            self.pos_list.append(position)
 
             if diff_init >= self.initThreshold:
-                target_index = self.DetermineTarget(self.target, position)
+                target_index = self.DetermineTarget(self.target, position, position[-1] - position[-2])
                 self.tf = self.CalculateReachingTime(self.time_list[-1], velocity, self.target[self.target_index]['position'])
                 print(self.tf)
                 self.CreateMotionData(rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'], self.elaspedTime)
@@ -125,14 +127,17 @@ class MinimumJerk:
     #         diffList.append(np.linalg.norm(np.array(position) - target['position']))
 
     #     return diffList.index(min(diffList))
-    
-    def DeterminTarget(self, target_list, position, vector):
+
+    def DetermineTarget(self, target_list, position, vector):
         D_list = []
         x = position
         a = vector
-        for y in target_list:
+        alfa = beta = gamma = 0
+        for target in target_list:
+            y = target['position']
             alfa = np.dot(alfa, a)
-            beta = np.dot(x*y)
+            print(x, y)
+            beta = np.dot(x, y)
             k = (alfa + np.sqrt(alfa**2 - 4*np.dot(a, a)*(np.dot(x, x)-beta)))/2
             gamma = np.dot(x + k*a, y)
             d = np.sqrt(np.dot(y, y) - gamma)
