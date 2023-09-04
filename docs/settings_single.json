@@ -1,1 +1,82 @@
-{"xArmConfigs": {"xArm1": {"IP": "192.168.1.217", "Mount": "right", "InitPos": [250, -100, 150], "InitRot": [180, 0, 90], "MaxPos": [600, 100, 500], "MinPos": [200, -300, -30], "MaxRot": [220, 20, 20], "MinRot": [180, -20, -20]}}, "ParticipantsConfigs": {"participant1": [{"Mount": "right", "RigidBody": 1, "SerialCOM": "COM10", "Weight": 1, "DataPath": {"position": "resource/pos20230823_181927.csv", "rotation": "resource/rot20230823_181927.csv", "gripper": "resource/grip20230823_181927.csv", "time": "resource/time20230823_181927.csv"}, "Target": [{"position": [533.410217, -292.572235, 33.687553], "rotation": [129.204618, 19.570004, 64.597668], "gripper": 300}, {"position": [540.130859, -296.754791, 278.691772], "rotation": [113.115161, 14.781967, 58.890035], "gripper": 300}]}]}}
+{
+    "xArmConfigs": {
+        "xArm1": {
+            "IP": "192.168.1.217",
+            "Mount": "right",
+            "InitPos": [
+                250,
+                -100,
+                150
+            ],
+            "InitRot": [
+                180,
+                0,
+                90
+            ],
+            "MaxPos": [
+                600,
+                100,
+                500
+            ],
+            "MinPos": [
+                200,
+                -300,
+                -30
+            ],
+            "MaxRot": [
+                220,
+                20,
+                20
+            ],
+            "MinRot": [
+                180,
+                -20,
+                -20
+            ]
+        }
+    },
+    "ParticipantsConfigs": {
+        "participant1": [
+            {
+                "Mount": "right",
+                "RigidBody": 1,
+                "SerialCOM": "COM10",
+                "Weight": 1,
+                "DataPath": {
+                    "position": "resource/pos20230823_181927.csv",
+                    "rotation": "resource/rot20230823_181927.csv",
+                    "gripper": "resource/grip20230823_181927.csv",
+                    "time": "resource/time20230823_181927.csv"
+                },
+                "Target": [
+                    {
+                        "position": [
+                            550.182007,
+                            -267.930847,
+                            22.418945
+                        ],
+                        "rotation": [
+                            123.892498,
+                            26.286616,
+                            53.995371
+                        ],
+                        "gripper": 300
+                    },
+                    {
+                        "position": [
+                            574.218872,
+                            -260.942871,
+                            255.877716
+                        ],
+                        "rotation": [
+                            106.459283,
+                            16.859455,
+                            42.942098
+                        ],
+                        "gripper": 300
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -78,7 +78,7 @@ class MinimumJerk:
 
     def GetRotation(self, elaspedTime):
         self.elaspedTime = time.perf_counter() - self.init_time
-        rotation, isMoving, weight = self.CaluculateMotion(self.elaspedTime, self.target[self.target_index]['rotation'])
+        rotation, isMoving, weight = self.CaluculateSlerpMotion(self.elaspedTime, self.target[self.target_index]['rotation'])
         self.rotRetained = rotation
 
         if isMoving == False:
@@ -111,7 +111,7 @@ class MinimumJerk:
             self.pos_list.append(position)
 
             if diff_init >= self.initThreshold:
-                self.rot_n = rotation
+                self.rot_n = rotation[0]
                 self.target_index = self.DetermineTarget(self.target, position, self.pos_list[-1]-self.pos_list[-2])
                 self.tf = self.CalculateReachingTime(self.time_list[-1], velocity, self.target[self.target_index]['position'])
                 self.CreateMotionData(rotation, gripper, self.target[self.target_index]['position'], self.target[self.target_index]['rotation'], self.target[self.target_index]['gripper'], self.elaspedTime)
@@ -126,8 +126,8 @@ class MinimumJerk:
         frameLength = int((self.tf-(tn - self.t0))* self.freq)
 
         # self.CreateMotionMinimumJerk(t4, tf, x0, pos_f, frameLength, t0)
-        self.CreateSlerpMotion(rot_n, rot_f, frameLength)
-        self.CreateGripMotion(grip_n, grip_f, frameLength, gripFrame = 300)
+        # self.CreateSlerpMotion(rot_n, rot_f, frameLength)
+        self.CreateGripMotion(grip_n, grip_f, frameLength, gripFrame = 200)
 
     # def DetermineTarget(self, target_list, position):
     #     diffList = []
@@ -218,6 +218,8 @@ class MinimumJerk:
             isMoving = False
         weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
 
+        print(weight)
+
         return cf.Slerp_Quaternion(xf, self.rot_n, weight), isMoving, weight
 
 
@@ -229,7 +231,6 @@ class MinimumJerk:
             isMoving = False
         weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
         # print(weight)
-        print(t)
 
         return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
 
