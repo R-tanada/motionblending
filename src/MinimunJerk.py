@@ -76,6 +76,16 @@ class MinimumJerk:
 
         return rotation, isMoving
 
+    # def GetRotation(self, elaspedTime):
+    #     self.elaspedTime = time.perf_counter() - self.init_time
+    #     rotation, isMoving = self.CaluculateMotion(self.elaspedTime, self.target[self.target_index]['rotation'])
+    #     self.rotRetained = rotation
+
+    #     if isMoving == False:
+    #         rotation, isMoving = self.rotRetained, False
+
+    #     return rotation, isMoving
+
     def GetGripperValue(self):
         try:
             gripper = self.gripRetained = next(self.predictedGripper)
@@ -101,6 +111,7 @@ class MinimumJerk:
             self.pos_list.append(position)
 
             if diff_init >= self.initThreshold:
+                # self.rot_n = rotation
                 self.target_index = self.DetermineTarget(self.target, position, self.pos_list[-1]-self.pos_list[-2])
                 self.tf = self.CalculateReachingTime(self.time_list[-1], velocity, self.target[self.target_index]['position'])
                 self.CreateMotionData(rotation, gripper, self.target[self.target_index]['position'], self.target[self.target_index]['rotation'], self.target[self.target_index]['gripper'], self.elaspedTime)
@@ -138,7 +149,6 @@ class MinimumJerk:
             z = x + k*a
             d = np.linalg.norm(z - y)
             D_list.append(d)
-
 
             print('current: {}, target: {}, distance: {}'.format(x, y, d))
         print(D_list)
@@ -199,6 +209,16 @@ class MinimumJerk:
         # print(np.transpose(position)[1:])
 
         self.predictedPosition = iter(np.transpose(np.array(position))[1:])
+
+    # def CaluculateSlerpMotion(self, elaspedTime, xf):
+    #     isMoving = True
+    #     t = (self.elaspedTime - self.t0)/self.tf
+    #     if t > 1:
+    #         t = 1
+    #         isMoving = False
+    #     weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
+
+    #     return cf.Slerp_Quaternion(xf, self.rot_n, weight), isMoving
 
     def CaluculateMotion(self, elaspedTime, xf):
         isMoving = True
