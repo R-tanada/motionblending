@@ -7,9 +7,11 @@ class GripperSensorManager:
     def __init__(self, ComPort, BandRate) -> None:
         self.sensorValue   = 850
         self.ComPort = ComPort
+        print(self.ComPort)
 
         if ComPort != 'None':
             self.serialObject = serial.Serial(ComPort, BandRate)
+            # self.serialObject.close()
 
         else:
             pass

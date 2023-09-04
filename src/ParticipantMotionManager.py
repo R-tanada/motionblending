@@ -89,7 +89,7 @@ class MotionManager:
 
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
 
-        self.sensorManager = GripperSensorManager(Config['SerialCOM'], BandRate = 9600)
+        self.sensorManager = GripperSensorManager(Config['SerialCOM'], BandRate = 115200)
         sensorThread = threading.Thread(target = self.sensorManager.StartReceiving)
         sensorThread.setDaemon(True)
         sensorThread.start()
