@@ -220,6 +220,7 @@ class MinimumJerk:
 
     #     return cf.Slerp_Quaternion(xf, self.rot_n, weight), isMoving
 
+
     def CaluculateMotion(self, elaspedTime, xf):
         isMoving = True
         t = (self.elaspedTime - self.t0)/self.tf
