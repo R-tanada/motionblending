@@ -101,10 +101,9 @@ class MinimumJerk:
             self.pos_list.append(position)
 
             if diff_init >= self.initThreshold:
-                target_index = self.DetermineTarget(self.target, position, position[-1]-position[-2])
+                self.target_index = self.DetermineTarget(self.target, position, self.pos_list[-1]-self.pos_list[-2])
                 self.tf = self.CalculateReachingTime(self.time_list[-1], velocity, self.target[self.target_index]['position'])
-                print(self.tf)
-                self.CreateMotionData(rotation, gripper, self.target[target_index]['position'], self.target[target_index]['rotation'], self.target[target_index]['gripper'], self.elaspedTime)
+                self.CreateMotionData(rotation, gripper, self.target[self.target_index]['position'], self.target[self.target_index]['rotation'], self.target[self.target_index]['gripper'], self.elaspedTime)
                 isMoving = True
                 self.flag = False
 
@@ -114,7 +113,6 @@ class MinimumJerk:
         self.tn = tn
         DataPlotManager.thres = tn
         frameLength = int((self.tf-(tn - self.t0))* self.freq)
-        print(frameLength)
 
         # self.CreateMotionMinimumJerk(t4, tf, x0, pos_f, frameLength, t0)
         self.CreateSlerpMotion(rot_n, rot_f, frameLength)
@@ -140,6 +138,9 @@ class MinimumJerk:
             z = x + k*a
             d = np.linalg.norm(z - y)
             D_list.append(d)
+
+
+            print('current: {}, target: {}, distance: {}'.format(x, y, d))
         print(D_list)
 
         return D_list.index(min(D_list))
