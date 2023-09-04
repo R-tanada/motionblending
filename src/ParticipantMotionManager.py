@@ -169,7 +169,11 @@ class MotionManager:
                 quaternion = -np.array(quaternion)
             self.rotation = quaternion
         else:
-            self.rotation, self.isMoving_Rot = self.automation.GetRotation()
+            rot_auto, self.isMoving_Rot, weight = self.automation.GetRotation()
+            quaternion = cf.CnvertAxis_Rotation(rotation, self.mount)
+            if quaternion[3] < 0:
+                quaternion = -np.array(quaternion)
+            self.rotation = cf.Slerp_Quaternion(quaternion, rot_auto, weight)
 
         return [self.rotation, self.initQuaternion, self.initInverseMatrix]
 
