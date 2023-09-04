@@ -134,13 +134,12 @@ class MinimumJerk:
         alfa = beta = gamma = 0
         for target in target_list:
             y = target['position']
-            alfa = np.dot((2*x - y), a)
-            beta = np.dot(x, y)
-            k = (alfa + np.sqrt(alfa**2 - 4*np.dot(a, a)*(np.dot(x, x)-beta)))/2
-            gamma = np.dot((x + k*a), y)
-            d = np.sqrt(np.dot(y, y) - gamma)
+            alfa = np.dot(a, x-y)
+            beta = np.dot(a, a)
+            k = -alfa/beta
+            z = x + k*a
+            d = np.linalg.norm(z - y)
             D_list.append(d)
-            print(alfa, beta, k, gamma, d)
         print(D_list)
 
         return D_list.index(min(D_list))
