@@ -7,13 +7,10 @@ from src.DataManager import DataPlotManager
 import lib.self.CustomFunction as cf
 
 
-class MinimumJerk:
-    def __init__(self, Target: list, xArmConfig: dict, Threshold = 300) -> None:
+class RecordedMotion:
+    def __init__(self, Target: list, RecordedMotion: list, xArmConfig: dict, Threshold = 300) -> None:
         self.initPos = xArmConfig['InitPos']
         initRot = cf.Convert2InverseMatrix(cf.Euler2Quaternion(xArmConfig['InitRot']))
-        self.predictedPosition = []
-        self.predictedRotation = []
-        self.predictedGripper = []
         self.Threshold = Threshold
         self.target = Target
         self.q_init = []
@@ -24,42 +21,23 @@ class MinimumJerk:
                 target['rotation'] = -target['rotation']
         self.flag = False
         self.initThreshold = 100
-        self.wayPoint = []
-        self.freq = 240
-        self.acc_flag = True
-        self.before_acc = 0
-        self.before_vel = 0
-        self.time_list = []
-        self.t0 = 0
-        self.tf = 0
-        self.x0 = [0, 0, 0]
-        self.target_index = 0
-        self.pos_list = []
-        self.tn = 0
-        self.a = 0
+        self.recordedPosition = RecordedMotion['position']
+        self.recordedRotation = RecordedMotion['rotation']
+        self.recordedGrip = RecordedMotion['gripper']
 
 
-    # def GetPosition(self):
-    #     try:
-    #         position = self.posRetained = next(self.predictedPosition)
-    #         isMoving = True
-    #     except StopIteration:
-    #         position, isMoving = self.posRetained, False
-
-    #     return position, isMoving
-
-    def GetPosition(self, elaspedTime):
-        position, isMoving, weight, velocity = self.CaluculateMotion(elaspedTime, self.target[self.target_index]['position'])
-        self.posRetained = position
-
-        if isMoving == False:
+    def GetPosition(self):
+        try:
+            position = self.posRetained = next(self.recordedPosition)
+            isMoving = True
+        except StopIteration:
             position, isMoving = self.posRetained, False
 
-        return position, isMoving, weight, velocity
+        return position, isMoving
 
     def GetRotation(self):
         try:
-            rotation = self.rotRetained = np.dot(cf.Convert2Matrix(self.q_init), next(self.predictedRotation))
+            rotation = self.rotRetained = np.dot(cf.Convert2Matrix(self.q_init), next(self.recordedRotation))
             isMoving = True
         except StopIteration:
             rotation, isMoving = self.rotRetained, False
@@ -176,6 +154,7 @@ class MinimumJerk:
         print(weight)
 
         return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
+    
 
 if __name__ == '__main__':
     def CalculateReachingTime(t, v, xf, x0):

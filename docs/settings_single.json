@@ -62,7 +62,12 @@
                         ],
                         "gripper": 300
                     }
-                ]
+                ],
+                "ReachingMotion":{
+                    "position": "resource/pos20230823_181927.csv",
+                    "rotation": "resource/rot20230823_181927.csv",
+                    "gripper": "resource/grip20230823_181927.csv"
+                }
             }
         ]
     }

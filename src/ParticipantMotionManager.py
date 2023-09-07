@@ -6,7 +6,7 @@ import numpy as np
 
 import lib.self.CustomFunction as cf
 from src.DataManager import DataLoadManager, DataPlotManager, DataRecordManager
-from src.MinimunJerk import MinimumJerk
+from src.MinimunJerk import RecordedMotion
 # # ----- Custom class ----- #
 from src.OptiTrackStreamingManager import OptiTrackStreamingManager
 from src.SensorManager import GripperSensorManager
@@ -87,7 +87,7 @@ class MotionManager:
         self.elaspedTime = 0
         self.auto_list = []
 
-        self.automation = MinimumJerk(Config['Target'], xArmConfig)
+        self.automation = RecordedMotion(Config['Target'], Config['RecordedMotion'], xArmConfig)
 
         self.sensorManager = GripperSensorManager(Config['SerialCOM'], BandRate = 9600)
         sensorThread = threading.Thread(target = self.sensorManager.StartReceiving)
