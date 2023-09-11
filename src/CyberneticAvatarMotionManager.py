@@ -1,11 +1,16 @@
 import numpy as np
 from src.ParticipantMotionManager import ParticipantManager
 import lib.self.CustomFunction as cf
+from src.DataManager import DataRecordManager
 
 
 class CyberneticAvatarMotionManager:
     def __init__(self, ParticipantConfigs: dict, xArmConfigs: dict, is_Simulation, is_Recording) -> None:
         self.xArmConfigs = xArmConfigs
+        self.recorder_pos = DataRecordManager()
+        self.recorder_rot = DataRecordManager()
+        self.recorder_grip = DataRecordManager()
+        self.is_Recording = is_Recording
 
         self.participantManagers = {}
         for participant in ParticipantConfigs.keys():
@@ -26,6 +31,13 @@ class CyberneticAvatarMotionManager:
                 sharedMotions[mount]['rotation'] = np.dot(cf.Convert2Matrix(np.dot(motions['rotation'][2], cf.Slerp_Quaternion(motions['rotation'][0], motions['rotation'][1], motions['weight']))), sharedMotions[mount]['rotation'])
                 sharedMotions[mount]['gripper'] += np.array(motions['gripper']) * motions['weight']
 
+        if self.is_Recording:
+            self.recorder_pos.record(sharedMotions['right']['position'])
+            self.recorder_rot.record(sharedMotions['right']['rotation'])
+            self.recorder_grip.record(sharedMotions['right']['gripper'])
+
+        
+
         return sharedMotions
 
     def GetParticipantMotion(self):
@@ -45,8 +57,11 @@ class CyberneticAvatarMotionManager:
             self.participantManagers[participant].SetElaspedTime(elaspedTtime)
 
     def ExportCSV(self):
-        for participant in self.participantManagers.keys():
-            self.participantManagers[participant].ExportCSV()
+        # for participant in self.participantManagers.keys():
+        #     self.participantManagers[participant].ExportCSV()
+        self.recorder_pos.exportAsCSV()
+        self.recorder_rot.exportAsCSV()
+        self.recorder_grip.exportAsCSV()
 
     def PlotGraph(self):
         for participant in self.participantManagers.keys():
