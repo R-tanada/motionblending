@@ -1,69 +1,123 @@
-import numpy as np
-from src.ParticipantMotionManager import ParticipantManager
-import lib.self.CustomFunction as cf
-from src.DataManager import DataRecordManager
+import json
+import platform
+import time
+from DataManager import DataRecordManager
+from ParticipantMotionManager import ParticipantManager
 
 
 class CyberneticAvatarMotionManager:
-    def __init__(self, ParticipantConfigs: dict, xArmConfigs: dict, is_Simulation, is_Recording) -> None:
-        self.xArmConfigs = xArmConfigs
-        self.recorder_pos = DataRecordManager()
-        self.recorder_rot = DataRecordManager()
-        self.recorder_grip = DataRecordManager()
+    def __init__(self, is_Simulation: bool = False, is_Visualize: bool = False, is_Recording: bool = False, is_Plotting: bool = False) -> None:
+        self.frameList = []
+        self.is_Visualize = is_Visualize
+        self.is_Plotting = is_Plotting
         self.is_Recording = is_Recording
+        self.is_Simulation = is_Simulation
 
-        self.participantManagers = {}
-        for participant in ParticipantConfigs.keys():
-            self.participantManagers[participant] = ParticipantManager(ParticipantConfigs[participant], is_Simulation, is_Recording)
+        with open('docs/settings_single.json', 'r') as settings_file:
+            settings = json.load(settings_file)
 
-    def GetSharedTransform(self):
-        return self.IntegrationWithWeight(self.GetParticipantMotion())
+        self.participant = ParticipantManager(settings['ParticipantConfigs'])
+        self.recorder_participant = DataRecordManager()
+        self.recorder_time = DataRecordManager()
 
-    def IntegrationWithWeight(self, participantMotions: dict):
-        sharedMotions = {}
-        for xArm in self.xArmConfigs.keys():
-            sharedMotions[self.xArmConfigs[xArm]['Mount']] = {'position': [0, 0, 0], 'rotation': [0, 0, 0, 1], 'gripper': 0}
+        if is_Simulation == True:
+            if is_Visualize == True:
+                from src.SimulationManager import SimulationManager
+                self.robotManager = SimulationManager(settings['xArmConfigs'])
+            else:
+                self.robotManager = None
 
-        for participant in participantMotions.keys():
-            for mount in participantMotions[participant].keys():
-                motions = participantMotions[participant][mount]
-                sharedMotions[mount]['position'] += np.array(motions['position']) * motions['weight']
-                sharedMotions[mount]['rotation'] = np.dot(cf.Convert2Matrix(np.dot(motions['rotation'][2], cf.Slerp_Quaternion(motions['rotation'][0], motions['rotation'][1], motions['weight']))), sharedMotions[mount]['rotation'])
-                sharedMotions[mount]['gripper'] += np.array(motions['gripper']) * motions['weight']
+        else:
+            if is_Visualize == True:
+                from src.SimulationManager import SimulationManager
+                self.robotManager = SimulationManager(settings['xArmConfigs'])
+            else:
+                from src.RobotControlManager import RobotControlManager
+                self.robotManager = RobotControlManager(settings['xArmConfigs'])
 
-        if self.is_Recording:
-            self.recorder_pos.record(sharedMotions['right']['position'])
-            self.recorder_rot.record(sharedMotions['right']['rotation'])
-            self.recorder_grip.record(sharedMotions['right']['gripper'])
+        time.sleep(0.5)
 
-        
+        self.mainLoop()
 
-        return sharedMotions
+    def mainLoop(self, FrameRate: int = 240):
+        if platform.system() == 'Windows':
+            from ctypes import windll
+            windll.winmm.timeBeginPeriod(1)
 
-    def GetParticipantMotion(self):
-        motions = {}
-        for participant in self.participantManagers.keys():
-            motions[participant] = self.participantManagers[participant].GetParticipantMotion()
+        isMoving = False
+        initTime = time.perf_counter()
 
-        return motions
+        try:
+            while True:
+                if isMoving:
+                    loopStartTime = time.perf_counter()
+                    elapsedTime = time.perf_counter() - initTime
 
-    def SetParticipantInitMotion(self):
-        for participant in self.participantManagers.keys():
-            self.participantManagers[participant].SetParticipantInitPosition()
-            self.participantManagers[participant].SetParticipantInitRotation()
 
-    def SetElaspedTime(self, elaspedTtime):
-        for participant in self.participantManagers.keys():
-            self.participantManagers[participant].SetElaspedTime(elaspedTtime)
+                    participant_motions = self.participant.get_motions(self.is_Simulation)
 
-    def ExportCSV(self):
-        # for participant in self.participantManagers.keys():
-        #     self.participantManagers[participant].ExportCSV()
-        self.recorder_pos.exportAsCSV()
-        self.recorder_rot.exportAsCSV()
-        self.recorder_grip.exportAsCSV()
 
-    def PlotGraph(self):
-        for participant in self.participantManagers.keys():
-            self.participantManagers[participant].PlotGraph()
+                    if self.robotManager != None:
+                        self.robotManager.SendDataToRobot(transform)
 
+                    if self.is_Recording == True and self.is_Simulation == False:
+                        self.recorder_time.record(elapsedTime)
+                        self.recorder_participant.record(participant_motions)
+
+                    self.FixFrameRate(time.perf_counter() - loopStartTime, 1/FrameRate)
+                    # self.CheckFrameRate(time.perf_counter() - loopStartTime)
+
+                else:
+                    keycode = self.MonitorKeyEvent(is_Visualize = self.is_Visualize)
+
+                    if keycode == 's':
+                        self.cyberneticManager.SetParticipantInitMotion()
+                        initTime = time.perf_counter()
+                        isMoving = True
+
+        except KeyboardInterrupt:
+            print('\nKeyboardInterrupt >> Stop: mainLoop()')
+            if self.robotManager != None:
+                self.robotManager.DisConnect()
+                print('Successfully Disconnected')
+
+            if self.is_Plotting:
+                self.cyberneticManager.PlotGraph()
+
+            if self.is_Recording:
+                self.cyberneticManager.ExportCSV()
+
+        except:
+            print('----- Exception has occurred -----')
+            import traceback
+            traceback.print_exc()
+
+        if platform.system() == 'Windows':
+            windll.winmm.timeEndPeriod(1)
+
+    def FixFrameRate(self, processDuration, loopTime):
+        sleepTime = loopTime - processDuration
+        if sleepTime < 0:
+            pass
+        else:
+            time.sleep(sleepTime)
+
+    def CheckFrameRate(self, loopTime):
+        self.frameList.append(1/ loopTime)
+        if len(self.frameList) == 30:
+            print(sum(self.frameList)/ len(self.frameList))
+            self.frameList = []
+
+    def MonitorKeyEvent(self, is_Visualize):
+        if is_Visualize == True:
+            keycode = self.robotManager.MonitorKeyEvent()
+
+        else:
+            keycode = input('Input > "s": start control \n')
+
+        return keycode
+
+if __name__ == '__main__':
+    ExManager(is_Simulation = False, is_Visualize = False, is_Recording = False, is_Plotting = True)
+
+    print('\n----- End program: ExManager.py -----')

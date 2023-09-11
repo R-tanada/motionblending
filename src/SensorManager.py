@@ -1,11 +1,11 @@
 import time
-
+import threading
 import serial
 
 
 class GripperSensorManager:
     def __init__(self, ComPort, BandRate) -> None:
-        self.sensorValue   = 850
+        self.sensorValue = 850
         self.ComPort = ComPort
 
         if ComPort != 'None':
@@ -13,6 +13,10 @@ class GripperSensorManager:
 
         else:
             pass
+
+        grip_thread = threading.Thread(target=self.StartReceiving)
+        grip_thread.setDaemon(True)
+        grip_thread.start()
 
     def StartReceiving(self):
         try:

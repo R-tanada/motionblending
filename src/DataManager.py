@@ -7,9 +7,8 @@ from matplotlib import pyplot as plt
 
 
 class DataRecordManager():
-    def __init__(self, header: list = None, fileName: str = '') -> None:
+    def __init__(self, fileName: str = '') -> None:
         self.data = []
-        self.header = header
         self.fileName = fileName
 
     def record(self, data):
