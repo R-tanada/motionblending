@@ -1,8 +1,9 @@
 import json
 import platform
 import time
-from DataManager import DataRecordManager
-from ParticipantMotionManager import ParticipantManager
+from datamanage import DataRecordManager
+from participantmotion import ParticipantManager
+from automation import RecordedMotion
 
 
 class CyberneticAvatarMotionManager:
@@ -17,22 +18,23 @@ class CyberneticAvatarMotionManager:
             settings = json.load(settings_file)
 
         self.participant = ParticipantManager(settings['ParticipantConfigs'], settings['xArmConfigs'])
+        self.automation = RecordedMotion()
         self.recorder_participant = DataRecordManager()
         self.recorder_time = DataRecordManager()
 
         if is_Simulation == True:
             if is_Visualize == True:
-                from src.SimulationManager import SimulationManager
+                from src.bulletcontrol import SimulationManager
                 self.robotManager = SimulationManager(settings['xArmConfigs'])
             else:
                 self.robotManager = None
 
         else:
             if is_Visualize == True:
-                from src.SimulationManager import SimulationManager
+                from src.bulletcontrol import SimulationManager
                 self.robotManager = SimulationManager(settings['xArmConfigs'])
             else:
-                from src.RobotControlManager import RobotControlManager
+                from src.robotcontrol import RobotControlManager
                 self.robotManager = RobotControlManager(settings['xArmConfigs'])
 
         time.sleep(0.5)
@@ -47,15 +49,18 @@ class CyberneticAvatarMotionManager:
         isMoving = False
         initTime = time.perf_counter()
 
+        avatar_motions = {}
+
         try:
             while True:
                 if isMoving:
                     loopStartTime = time.perf_counter()
                     elapsedTime = time.perf_counter() - initTime
 
-
                     participant_motions = self.participant.get_motions()
-                    avatar_motions = 
+
+                    for mount in participant_motions.keys():
+                        avatar_motions[mount] = self.automation.MonitoringMotion()
                     
 
                     if self.robotManager != None:

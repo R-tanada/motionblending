@@ -2,7 +2,7 @@ import json
 import time
 import numpy as np
 from matplotlib.pyplot import flag
-from src.SafetyManager import SafetyManager
+from safety import SafetyManager
 from lib.xarm.wrapper import XArmAPI
 import lib.self.CustomFunction as cf
 

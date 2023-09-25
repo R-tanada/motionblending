@@ -5,12 +5,11 @@ import time
 import numpy as np
 
 import lib.self.CustomFunction as cf
-from src.DataManager import DataLoadManager, DataPlotManager, DataRecordManager
-from MotionBlending import RecordedMotion
+from src.datamanage import DataLoadManager, DataPlotManager, DataRecordManager
 # # ----- Custom class ----- #
-from src.OptiTrackStreamingManager import OptiTrackStreamingManager
-from src.SensorManager import GripperSensorManager
-
+from src.optitrack import OptiTrackStreamingManager
+from src.sensor import GripperSensorManager
+from src.automation import RecordedMotion
 
 class ParticipantManager:
     def __init__(self, ParticipantConfig: dict) -> None:
@@ -48,6 +47,7 @@ class MotionManager:
 
         self.recorder_motion = DataRecordManager('motion_' + self.mount)
         self.sensorManager = GripperSensorManager(Config['SerialCOM'], BandRate = 9600)
+        self.automation = RecordedMotion()
 
         MotionManager.optiTrackStreamingManager.position[self.rigidBody] = np.zeros(3)
         MotionManager.optiTrackStreamingManager.rotation[self.rigidBody] = np.zeros(4)
@@ -56,6 +56,7 @@ class MotionManager:
         motion = {'position': self.get_position(), 'rotation': self.get_rotation(), 'gripper': self.get_gripper}
         if self.is_recording == True and self.is_simulation == False:
             self.recorder_motion.record(motion)
+
         return motion
 
     def get_position(self):
@@ -92,10 +93,9 @@ class MotionManager:
 
     def update_init_rotation(self, rotation):
         q_zero = [0, 0, 0, 1]
-        quaternion, initQuaternion, initInveseMatrix = self.get_rotation()
+        quaternion = self.get_rotation()
         q_inverse = np.dot(cf.Convert2InverseMatrix(quaternion), q_zero)
-        self.updateInitQuaternion = np.dot(initInveseMatrix, np.dot(cf.Convert2Matrix(rotation[0]), q_inverse))
-        self.updateInitQuaternion = np.dot(cf.Convert2InverseMatrix(self.updateInitQuaternion), q_zero)
+        self.updateInitQuaternion = np.dot(cf.Convert2Matrix(rotation[0]), q_inverse)
         weight_list = np.linspace(0, 1, 300)
         q_list = []
         for weight in weight_list:
@@ -114,7 +114,6 @@ class MotionManager:
     def slerp_init_rotation(self):
         try:
             rot = next(self.iter_initRot)
-            print(rot)
             self.initQuaternion, self.initInverseMatrix, flag = rot, cf.Convert2InverseMatrix(rot), True
         except StopIteration:
             flag = False
