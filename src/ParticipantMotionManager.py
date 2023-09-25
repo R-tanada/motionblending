@@ -29,13 +29,9 @@ class ParticipantManager:
 
         return participantMotions
 
-    def SetParticipantInitPosition(self):
+    def set_init_motions(self):
         for Config in self.participantConfig:
-            self.motionManagers[Config['Mount']].SetInitPosition()
-
-    def SetParticipantInitRotation(self):
-        for Config in self.participantConfig:
-            self.motionManagers[Config['Mount']].SetInitRotation()
+            self.motionManagers[Config['Mount']].set_init_motion()
 
 class MotionManager:
     optiTrackStreamingManager = OptiTrackStreamingManager(mocapServer = "127.0.0.1", mocapLocal = "127.0.0.1")
@@ -109,7 +105,7 @@ class MotionManager:
 
     def lerp_init_position(self):
         try:
-            self.initPosition, flag = next(self.iter_initPos), True
+            self.initPosition, flag = next(self.iter_init_position), True
         except StopIteration:
             flag = False
 

@@ -54,8 +54,9 @@ class CyberneticAvatarMotionManager:
                     elapsedTime = time.perf_counter() - initTime
 
 
-                    participant_motions = self.participant.get_motions(self.is_Simulation)
-
+                    participant_motions = self.participant.get_motions()
+                    avatar_motions = 
+                    
 
                     if self.robotManager != None:
                         self.robotManager.SendDataToRobot(transform)
@@ -71,7 +72,7 @@ class CyberneticAvatarMotionManager:
                     keycode = self.MonitorKeyEvent(is_Visualize = self.is_Visualize)
 
                     if keycode == 's':
-                        self.cyberneticManager.SetParticipantInitMotion()
+                        self.participant.set_init_motions()
                         initTime = time.perf_counter()
                         isMoving = True
 
@@ -80,12 +81,6 @@ class CyberneticAvatarMotionManager:
             if self.robotManager != None:
                 self.robotManager.DisConnect()
                 print('Successfully Disconnected')
-
-            if self.is_Plotting:
-                self.cyberneticManager.PlotGraph()
-
-            if self.is_Recording:
-                self.cyberneticManager.ExportCSV()
 
         except:
             print('----- Exception has occurred -----')
