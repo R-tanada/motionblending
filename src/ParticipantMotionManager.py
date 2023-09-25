@@ -45,10 +45,10 @@ class MotionManager:
 
     def __init__(self, Config, xArmConfig, is_Simulation, is_Recording) -> None:
         self.mount, self.rigidBody = Config['Mount'], str(Config['RigidBody'])
-        self.init_position = self.init_quaternion = self.init_inverse_matrix = []
-        self.updated_init_position = self.updated_init_quaternion = self.updated_init_inverse_matrix = []
-        self.iter_init_position = self.iter_init_quaternion = []
-        self.
+        self.init_position = self.init_rotation = self.init_inverse_matrix = []
+        self.updated_init_position = self.updated_init_rotation = self.updated_init_inverse_matrix = []
+        self.iter_init_position = self.iter_init_rotation = []
+        self.is_recording, self.is_simulation = is_Recording, is_Simulation
 
         self.recorder_motion = DataRecordManager('motion_' + self.mount)
         self.sensorManager = GripperSensorManager(Config['SerialCOM'], BandRate = 9600)
@@ -58,8 +58,8 @@ class MotionManager:
 
     def get_motion(self):
         motion = {'position': self.get_position(), 'rotation': self.get_rotation(), 'gripper': self.get_gripper}
-        if 
-        self.recorder_motion.record(motion)
+        if self.is_recording == True and self.is_simulation == False:
+            self.recorder_motion.record(motion)
         return motion
 
     def get_position(self):
@@ -74,39 +74,29 @@ class MotionManager:
 
     def get_gripper(self):
         return cf.ConvertSensorToGripper(self.sensorManager.sensorValue)
+    
+    def set_init_motion(self):
+        self.set_init_position()
+        self.set_init_rotation()
 
-    def SetInitPosition(self):
-        if self.Simulation:
-            initPosition = self.data_pos.getdata()
-        else:
-            initPosition = MotionManager.optiTrackStreamingManager.position[self.rigidBody]
-            if self.recording:
-                self.recorder_pos.record(initPosition)
+    def set_init_position(self):
+        self.init_position = cf.ConvertAxis_Position(MotionManager.optiTrackStreamingManager.position[self.rigidBody] * 1000, self.mount)
 
-        self.initPosition = cf.ConvertAxis_Position(initPosition * 1000, self.mount)
-
-    def SetInitRotation(self):
-        if self.Simulation:
-            initQuaternion = self.data_rot.getdata()
-        else:
-            initQuaternion = MotionManager.optiTrackStreamingManager.rotation[self.rigidBody]
-            if self.recording:
-                self.recorder_rot.record(initQuaternion)
-
-        quaternion = cf.CnvertAxis_Rotation(initQuaternion, self.mount)
+    def set_init_rotation(self):
+        quaternion = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
         if quaternion[3] < 0:
             quaternion = -np.array(quaternion)
-        self.initQuaternion = self.automation.q_init = quaternion
-        self.initInverseMatrix = cf.Convert2InverseMatrix(quaternion)
+        self.init_rotation = quaternion
+        self.init_inverse_matrix = cf.Convert2InverseMatrix(quaternion)
 
-    def UpdateInitPosition(self, position):
-        self.updateInitPosition = self.initPosition - (np.array(position) - self.GetPosition())
-        p_list = np.linspace(self.updateInitPosition, self.initPosition, 500)
-        self.iter_initPos = iter(p_list)
+    def update_init_position(self, position):
+        self.updated_init_position = self.initPosition - (np.array(position) - self.get_position())
+        p_list = np.linspace(self.updated_init_position, self.init_position, 500)
+        self.iter_init_position = iter(p_list)
 
     def UpdateInitRotation(self, rotation):
         q_zero = [0, 0, 0, 1]
-        quaternion, initQuaternion, initInveseMatrix = self.GetRotation()
+        quaternion, initQuaternion, initInveseMatrix = self.get_rotation()
         q_inverse = np.dot(cf.Convert2InverseMatrix(quaternion), q_zero)
         self.updateInitQuaternion = np.dot(initInveseMatrix, np.dot(cf.Convert2Matrix(rotation[0]), q_inverse))
         self.updateInitQuaternion = np.dot(cf.Convert2InverseMatrix(self.updateInitQuaternion), q_zero)

@@ -16,7 +16,7 @@ class CyberneticAvatarMotionManager:
         with open('docs/settings_single.json', 'r') as settings_file:
             settings = json.load(settings_file)
 
-        self.participant = ParticipantManager(settings['ParticipantConfigs'])
+        self.participant = ParticipantManager(settings['ParticipantConfigs'], settings['xArmConfigs'])
         self.recorder_participant = DataRecordManager()
         self.recorder_time = DataRecordManager()
 
