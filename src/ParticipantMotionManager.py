@@ -94,7 +94,7 @@ class MotionManager:
         p_list = np.linspace(self.updated_init_position, self.init_position, 500)
         self.iter_init_position = iter(p_list)
 
-    def UpdateInitRotation(self, rotation):
+    def update_init_rotation(self, rotation):
         q_zero = [0, 0, 0, 1]
         quaternion, initQuaternion, initInveseMatrix = self.get_rotation()
         q_inverse = np.dot(cf.Convert2InverseMatrix(quaternion), q_zero)
@@ -107,7 +107,7 @@ class MotionManager:
 
         self.iter_initRot = iter(q_list)
 
-    def LerpInitPosition(self):
+    def lerp_init_position(self):
         try:
             self.initPosition, flag = next(self.iter_initPos), True
         except StopIteration:
@@ -115,7 +115,7 @@ class MotionManager:
 
         return flag
 
-    def SlerpInitRotation(self):
+    def slerp_init_rotation(self):
         try:
             rot = next(self.iter_initRot)
             print(rot)
