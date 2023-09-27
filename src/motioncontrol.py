@@ -70,11 +70,11 @@ class CyberneticAvatarMotionManager:
                         self.recorder_time.record(elapsedTime)
                         self.recorder_participant.record(participant_motions)
 
-                    self.FixFrameRate(time.perf_counter() - loopStartTime, 1/FrameRate)
+                    self.fix_frame_rate(time.perf_counter() - loopStartTime, 1/FrameRate)
                     # self.CheckFrameRate(time.perf_counter() - loopStartTime)
 
                 else:
-                    keycode = self.MonitorKeyEvent(is_Visualize = self.is_Visualize)
+                    keycode = self.monitor_key_event(is_Visualize = self.is_Visualize)
 
                     if keycode == 's':
                         self.participant.set_init_motions()
@@ -95,20 +95,20 @@ class CyberneticAvatarMotionManager:
         if platform.system() == 'Windows':
             windll.winmm.timeEndPeriod(1)
 
-    def FixFrameRate(self, processDuration, loopTime):
+    def fix_frame_rate(self, processDuration, loopTime):
         sleepTime = loopTime - processDuration
         if sleepTime < 0:
             pass
         else:
             time.sleep(sleepTime)
 
-    def CheckFrameRate(self, loopTime):
+    def check_frame_rate(self, loopTime):
         self.frameList.append(1/ loopTime)
         if len(self.frameList) == 30:
             print(sum(self.frameList)/ len(self.frameList))
             self.frameList = []
 
-    def MonitorKeyEvent(self, is_Visualize):
+    def monitor_key_event(self, is_Visualize):
         if is_Visualize == True:
             keycode = self.robotManager.MonitorKeyEvent()
 
