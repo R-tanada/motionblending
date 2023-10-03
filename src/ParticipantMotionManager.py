@@ -94,9 +94,9 @@ class MotionManager:
         sensorThread.setDaemon(True)
         sensorThread.start()
 
-        self.recorder = DataPlotManager(legend = ['x_mocap', 'x_minimumjerk'], xlabel='time[s]', ylabel='position[mm]')
+        # self.recorder = DataPlotManager(legend = ['x_mocap', 'x_minimumjerk'], xlabel='time[s]', ylabel='position[mm]')
         self.recorder2 = DataPlotManager(legend = ['mocap','minimumjerk'], xlabel='time[s]', ylabel='velocity[mm/s]')
-        self.recorder3 = DataPlotManager(legend = ['x_robot'], xlabel='time[s]', ylabel='position[mm]')
+        # self.recorder3 = DataPlotManager(legend = ['x_robot'], xlabel='time[s]', ylabel='position[mm]')
 
         if self.recording:
             self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'], fileName='pos')
@@ -265,7 +265,7 @@ class MotionManager:
         else:
             vel = 0
 
-        # self.recorder2.record(np.hstack(([vel], self.elaspedTime)))
+        self.recorder2.record(np.hstack(([vel], self.elaspedTime)))
 
         # print(vel)
 
@@ -310,9 +310,9 @@ class MotionManager:
         self.recorder_time.exportAsCSV()
 
     def PlotGraph(self):
-        self.recorder.plotGraph()
+        # self.recorder.plotGraph()
         self.recorder2.plotGraph()
-        self.recorder3.plotGraph()
+        # self.recorder3.plotGraph()
 
     def SetElaspedTime(self, elaspedTime):
         if self.Simulation == True:
