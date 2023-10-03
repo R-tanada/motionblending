@@ -53,9 +53,9 @@ class MotionManager:
         MotionManager.optiTrackStreamingManager.rotation[self.rigidBody] = np.zeros(4)
 
     def get_motion(self):
-        motion = {'position': self.get_position(), 'rotation': self.get_rotation(), 'gripper': self.get_gripper}
-        if self.is_recording == True and self.is_simulation == False:
-            self.recorder_motion.record(motion)
+        motion = {'position': self.get_position(), 'rotation': self.get_rotation(), 'gripper': self.get_gripper(), 'velocity': self.get_velocity()}
+
+        motion_automated = self.automation.MonitoringMotion()
 
         return motion
 
@@ -64,13 +64,16 @@ class MotionManager:
 
     def get_rotation(self):
         # rotationはquternionで取得
-        rotation = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
+        quaternion = cf.CnvertAxis_Rotation(MotionManager.optiTrackStreamingManager.rotation[self.rigidBody], self.mount)
         if quaternion[3] < 0:
             quaternion = -np.array(quaternion)
-        return np.dot(self.initInverseMatrix, quaternion)
+        return np.dot(self.init_inverse_matrix, quaternion)
 
     def get_gripper(self):
         return cf.ConvertSensorToGripper(self.sensorManager.sensorValue)
+    
+    def get_velocity(self):
+        pass
     
     def set_init_motion(self):
         self.set_init_position()
@@ -85,39 +88,3 @@ class MotionManager:
             quaternion = -np.array(quaternion)
         self.init_rotation = quaternion
         self.init_inverse_matrix = cf.Convert2InverseMatrix(quaternion)
-
-    def update_init_position(self, position):
-        self.updated_init_position = self.initPosition - (np.array(position) - self.get_position())
-        p_list = np.linspace(self.updated_init_position, self.init_position, 500)
-        self.iter_init_position = iter(p_list)
-
-    def update_init_rotation(self, rotation):
-        q_zero = [0, 0, 0, 1]
-        quaternion = self.get_rotation()
-        q_inverse = np.dot(cf.Convert2InverseMatrix(quaternion), q_zero)
-        self.updateInitQuaternion = np.dot(cf.Convert2Matrix(rotation[0]), q_inverse)
-        weight_list = np.linspace(0, 1, 300)
-        q_list = []
-        for weight in weight_list:
-            q_list.append(cf.Slerp_Quaternion(self.initQuaternion, self.updateInitQuaternion, weight))
-
-        self.iter_initRot = iter(q_list)
-
-    def lerp_init_position(self):
-        try:
-            self.initPosition, flag = next(self.iter_init_position), True
-        except StopIteration:
-            flag = False
-
-        return flag
-
-    def slerp_init_rotation(self):
-        try:
-            rot = next(self.iter_initRot)
-            self.initQuaternion, self.initInverseMatrix, flag = rot, cf.Convert2InverseMatrix(rot), True
-        except StopIteration:
-            flag = False
-            self.initQuaternion = self.automation.q_init
-            self.initInverseMatrix = cf.Convert2InverseMatrix(self.automation.q_init)
-
-        return flag

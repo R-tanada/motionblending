@@ -10,7 +10,7 @@ from src.datamanage import DataPlotManager
 from src.sensor import FootSwitchManager
 
 
-class RecordedMotion:
+class Automation:
     def __init__(self, Target: list, xArmConfig: dict, Threshold = 300) -> None:
         self.initPos = xArmConfig['InitPos']
         initRot = cf.Convert2InverseMatrix(cf.Euler2Quaternion(xArmConfig['InitRot']))
@@ -43,64 +43,19 @@ class RecordedMotion:
         self.elaspedTime = 0
         self.init_time = time.perf_counter()
 
+        self.method = Minimumjerk()
+
         self.switchManager = FootSwitchManager()
         switchThread = threading.Thread(target=self.switchManager.detect_sensor)
         switchThread.setDaemon(True)
         switchThread.start()
 
-    # def GetPosition(self):
-    #     try:
-    #         position = self.posRetained = next(self.predictedPosition)
-    #         isMoving = True
-    #     except StopIteration:
-    #         position, isMoving = self.posRetained, False
-
-    #     return position, isMoving
-
-    def GetPosition(self, elaspedTime):
-        self.elaspedTime = time.perf_counter() - self.init_time
-        position, isMoving, weight, velocity = self.CaluculateMotion(self.elaspedTime, self.target[self.target_index]['position'])
-        self.posRetained = position
-
-        if isMoving == False:
-            position, isMoving = self.posRetained, False
-
-        return position, isMoving, weight, velocity
-
-    # def GetRotation(self):
-    #     try:
-    #         rotation = self.rotRetained = np.dot(cf.Convert2Matrix(self.q_init), next(self.predictedRotation))
-    #         isMoving = True
-    #     except StopIteration:
-    #         rotation, isMoving = self.rotRetained, False
-
-    #     return rotation, isMoving
-
-    def GetRotation(self, elaspedTime):
-        self.elaspedTime = time.perf_counter() - self.init_time
-        rotation, isMoving, weight = self.CaluculateSlerpMotion(self.elaspedTime, self.target[self.target_index]['rotation'])
-        self.rotRetained = rotation
-
-        if isMoving == False:
-            rotation, isMoving = self.rotRetained, False
-
-        return rotation, isMoving, weight
-
-    def GetGripperValue(self):
-        try:
-            gripper = self.gripRetained = next(self.predictedGripper)
-            isMoving = True
-        except StopIteration:
-            gripper, isMoving = self.gripRetained, False
-
-        return gripper, isMoving
-
-    def MonitoringMotion(self, position, rotation, gripper, velocity, accelaration):
+    def monitor_motion(self, position, rotation, gripper, velocity):
         isMoving = False
+        motion = {'position': position, 'rotation': rotation, 'gripper': gripper}
 
         if self.switchManager.flag == True:
-            self.init_time = time.perf_counter()
-            self.x0 = position
+            self.method.set_init_params(position)
             self.flag = True
             self.switchManager.flag = False
 
@@ -110,33 +65,23 @@ class RecordedMotion:
             self.time_list.append(self.elaspedTime)
             self.pos_list.append(position)
 
-            if diff_init >= self.initThreshold:
-                self.rot_n = rotation[0]
-                self.target_index = self.DetermineTarget(self.target, position, self.pos_list[-1]-self.pos_list[-2])
-                self.tf = self.CalculateReachingTime(self.time_list[-1], velocity, self.target[self.target_index]['position'])
-                self.CreateMotionData(rotation, gripper, self.target[self.target_index]['position'], self.target[self.target_index]['rotation'], self.target[self.target_index]['gripper'], self.elaspedTime)
+            if diff_init >= self.initThreshold:#動作の切り替え地点threshold
+                self.target_index = self.detect_target(self.target, position, self.pos_list[-1]-self.pos_list[-2])
+                self.tf = self.get_reaching_time(self.time_list[-1], velocity, self.target[self.target_index]['position'])
+                self.method.set_via_params()
+                self.method.calculate_traject_params()
                 isMoving = True
-                self.flag = False
 
-        return isMoving
+            if isMoving == True:
+                motion, isMoving = self.method.get_motion()
+                if isMoving == False:
+                    self.flag = False
+            else:
+                pass
 
-    def CreateMotionData(self, rot_n, grip_n, pos_f, rot_f, grip_f, tn):
-        self.tn = tn
-        DataPlotManager.thres = tn
-        frameLength = int((self.tf-(tn - self.t0))* self.freq)
+        return motion
 
-        # self.CreateMotionMinimumJerk(t4, tf, x0, pos_f, frameLength, t0)
-        # self.CreateSlerpMotion(rot_n, rot_f, frameLength)
-        self.CreateGripMotion(grip_n, grip_f, frameLength, gripFrame = 200)
-
-    # def DetermineTarget(self, target_list, position):
-    #     diffList = []
-    #     for target in target_list:
-    #         diffList.append(np.linalg.norm(np.array(position) - target['position']))
-
-    #     return diffList.index(min(diffList))
-
-    def DetermineTarget(self, target_list, position, vector):
+    def detect_target(self, target_list, position, vector):
         D_list = []
         x = position
         a = vector
@@ -155,84 +100,102 @@ class RecordedMotion:
 
         return D_list.index(min(D_list))
 
-    # def CalculateReachingTime(self, t, v, xf):
-    #     a = np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
-    #     A = (25 + 135*a*v + 3*np.sqrt(5)*np.sqrt(250*a*v + 165*(a**2)*(v**2) + 192*(a**3)*(v**3)))**(1/3)
-    #     B = 5 - 12*a*v
-    #     C = 185**(2/3)
-    #     D = B/(C*A)
-    #     E = A/C
-    #     F = -1/12 + E + F
-
-    #     return 1/12 + 0.5*np.sqrt(F) + 0.5*np.sqrt(-1/6 - D - E -5/108*F)
-
-    def CalculateReachingTime(self, t, v, xf):
+    def get_reaching_time(self, t, v, xf):
         a = self.a =  np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
         b = v/(30*a)
         c = 0.5*(1 - np.sqrt(1 - 4*np.sqrt(b)))
         print(c)
 
         return (t - self.t0)/c
+    
+    def update_init_position(self, position):
+        self.updated_init_position = self.initPosition - (np.array(position) - self.get_position())
+        p_list = np.linspace(self.updated_init_position, self.init_position, 500)
+        self.iter_init_position = iter(p_list)
 
-
-    def CreateGripMotion(self, grip_n, grip_f, frameLength, gripFrame):
-        def CreateMotion_Liner(target, data, split):
-            motionlist = np.linspace(data, target, split)
-            return motionlist
-
-        diffGrip = [850] * frameLength
-        diffGrip = np.concatenate([diffGrip, CreateMotion_Liner(grip_f, grip_n, gripFrame)], 0)
-
-        self.predictedGripper = iter(diffGrip)
-
-    def CreateSlerpMotion(self, rot_n, rot_f, frameLength):
-        weight_list = np.linspace(0, 1, int(frameLength*0.7))
-        rot_list = []
+    def update_init_rotation(self, rotation):
+        q_zero = [0, 0, 0, 1]
+        quaternion = self.get_rotation()
+        q_inverse = np.dot(cf.Convert2InverseMatrix(quaternion), q_zero)
+        self.updateInitQuaternion = np.dot(cf.Convert2Matrix(rotation[0]), q_inverse)
+        weight_list = np.linspace(0, 1, 300)
+        q_list = []
         for weight in weight_list:
-            rot_list.append(cf.Slerp_Quaternion(rot_f, rot_n[0], weight))
+            q_list.append(cf.Slerp_Quaternion(self.initQuaternion, self.updateInitQuaternion, weight))
 
-        self.predictedRotation = iter(np.array(rot_list))
+        self.iter_initRot = iter(q_list)
 
-    def CreateMotionMinimumJerk(self, t3, tf, x0, xf, frameLength, t0):
+    def lerp_init_position(self):
+        try:
+            self.initPosition, flag = next(self.iter_init_position), True
+        except StopIteration:
+            flag = False
 
-        def function(x0, xf, flame):
-            return x0 + (xf- x0)* (6* (flame** 5)- 15* (flame** 4)+ 10* (flame** 3))
+        return flag
 
-        flame = np.linspace((t3-t0)/tf, 1, frameLength)
-        # flame = np.linspace(0, 1, frameLength)
+    def slerp_init_rotation(self):
+        try:
+            rot = next(self.iter_initRot)
+            self.initQuaternion, self.initInverseMatrix, flag = rot, cf.Convert2InverseMatrix(rot), True
+        except StopIteration:
+            flag = False
+            self.initQuaternion = self.automation.q_init
+            self.initInverseMatrix = cf.Convert2InverseMatrix(self.automation.q_init)
 
-        position = []
-        for i in range(3):
-            position.append(function(x0[i], xf[i], flame))
-        print('t3: {}'.format(t3))
+        return flag
+    
+class Minimumjerk:
+    def __init__(self) -> None:
+        self.init_time = 0
+        self.x0 = 0
 
-        # print(np.transpose(position)[1:])
+    def set_init_params(self, position):
+        self.init_time = time.perf_counter()
+        self.x0 = position
 
-        self.predictedPosition = iter(np.transpose(np.array(position))[1:])
+    def set_via_params(self):
+        pass
 
-    def CaluculateSlerpMotion(self, elaspedTime, xf):
-        isMoving = True
-        t = (self.elaspedTime - self.t0)/self.tf
-        if t > 1:
-            t = 1
-            isMoving = False
-        weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
-
-        print(weight)
-
-        return cf.Slerp_Quaternion(xf, self.rot_n, weight), isMoving, weight
+    def get_motion(self):
+        position, pos_flag = self.get_position()
+        rotation, rot_flag = self.get_rotation()
+        gripper, grip_flag = self.get_gripper()
 
 
-    def CaluculateMotion(self, elaspedTime, xf):
-        isMoving = True
-        t = (self.elaspedTime - self.t0)/self.tf
-        if t > 1:
-            t = 1
-            isMoving = False
-        weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
-        # print(weight)
+    def get_position(self, elaspedTime):
+        self.elaspedTime = time.perf_counter() - self.init_time
+        position, isMoving, weight, velocity = self.CaluculateMotion(self.elaspedTime, self.target[self.target_index]['position'])
+        self.posRetained = position
 
-        return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
+        if isMoving == False:
+            position, isMoving = self.posRetained, False
+
+        return position, isMoving, weight, velocity
+
+    def get_rotation(self, elaspedTime):
+        self.elaspedTime = time.perf_counter() - self.init_time
+        rotation, isMoving, weight = self.CaluculateSlerpMotion(self.elaspedTime, self.target[self.target_index]['rotation'])
+        self.rotRetained = rotation
+
+        if isMoving == False:
+            rotation, isMoving = self.rotRetained, False
+
+        return rotation, isMoving, weight
+
+    def get_gripper(self):
+        try:
+            gripper = self.gripRetained = next(self.predictedGripper)
+            isMoving = True
+        except StopIteration:
+            gripper, isMoving = self.gripRetained, False
+
+        return gripper, isMoving
+    
+    def calculate_traject_params(self):
+        pass
+
+
+
 
 if __name__ == '__main__':
     def CalculateReachingTime(t, v, xf, x0):
