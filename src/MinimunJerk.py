@@ -46,7 +46,7 @@ class MinimumJerk:
         self.switchManager = FootSwitchManager()
         switchThread = threading.Thread(target=self.switchManager.detect_sensor)
         switchThread.setDaemon(True)
-        switchThread.start()
+        # switchThread.start()
 
     # def GetPosition(self):
     #     try:

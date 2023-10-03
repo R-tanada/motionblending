@@ -95,7 +95,7 @@ class MotionManager:
         sensorThread.start()
 
         # self.recorder = DataPlotManager(legend = ['x_mocap', 'x_minimumjerk'], xlabel='time[s]', ylabel='position[mm]')
-        self.recorder2 = DataPlotManager(legend = ['mocap','minimumjerk'], xlabel='time[s]', ylabel='velocity[mm/s]')
+        self.recorder2 = DataPlotManager(legend = ['mocap'], xlabel='time[s]', ylabel='velocity[mm/s]')
         # self.recorder3 = DataPlotManager(legend = ['x_robot'], xlabel='time[s]', ylabel='position[mm]')
 
         if self.recording:
