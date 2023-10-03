@@ -1,19 +1,48 @@
 import csv
 import time
 from datetime import datetime
+import threading
 
 import numpy as np
 from matplotlib import pyplot as plt
 
 
 class DataRecordManager():
-    def __init__(self, header: list = None, fileName: str = '') -> None:
+    def __init__(self, custom: bool = False,  header: list = None, fileName: str = '') -> None:
         self.data = []
         self.header = header
         self.fileName = fileName
+        self.record_flag = False
+
+        if custom == True:
+            switch_thread = threading.Thread(target=self.key_thread)
+            switch_thread.setDaemon(True)
+            switch_thread.start()
 
     def record(self, data):
         self.data.append(data)
+
+    def custom_record(self, data):
+        if self.record_flag == True:
+            self.data.append(data)
+        else:
+            pass
+    
+    def key_thread(self):
+        key_count = 0
+
+        while True:
+            key = input('push foot switch start recording')
+
+            if key == 'f':
+                key_count += 1
+
+                if key_count % 2 == 1:
+                    self.record_flag = True
+                else:
+                    self.record_flag = False
+
+            time.sleep(0.5)
 
     def exportAsCSV(self):
         date = datetime.now().strftime("%Y%m%d_%H%M%S")
