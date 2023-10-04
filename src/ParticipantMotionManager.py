@@ -95,7 +95,7 @@ class MotionManager:
         sensorThread.start()
 
         # self.recorder = DataPlotManager(legend = ['x_mocap', 'x_minimumjerk'], xlabel='time[s]', ylabel='position[mm]')
-        self.recorder2 = DataPlotManager(legend = ['mocap'], xlabel='time[s]', ylabel='velocity[mm/s]')
+        self.recorder2 = DataRecordManager(header=['time', 'velocity'], fileName='velocity')
         # self.recorder3 = DataPlotManager(legend = ['x_robot'], xlabel='time[s]', ylabel='position[mm]')
 
         if self.recording:
@@ -265,7 +265,7 @@ class MotionManager:
         else:
             vel = 0
 
-        self.recorder2.record(np.hstack(([vel], self.elaspedTime)))
+        self.recorder2.custom_record(np.hstack((self.elaspedTime, [vel])))
 
         # print(vel)
 
