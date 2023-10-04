@@ -223,7 +223,18 @@ class MinimumJerk:
         return cf.Slerp_Quaternion(xf, self.rot_n, weight), isMoving, weight
 
 
-    def CaluculateMotion(self, elaspedTime, xf):
+    # def CaluculateMotion(self, elaspedTime, xf): # デフォルト
+    #     isMoving = True
+    #     t = (self.elaspedTime - self.t0)/self.tf
+    #     if t > 1:
+    #         t = 1
+    #         isMoving = False
+    #     weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
+    #     # print(weight)
+
+    #     return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
+    
+    def CaluculateMotion(self, elaspedTime, xf): # 終端の割合を少し残したバージョン
         isMoving = True
         t = (self.elaspedTime - self.t0)/self.tf
         if t > 1:
