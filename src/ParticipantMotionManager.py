@@ -174,7 +174,7 @@ class MotionManager:
             if quaternion[3] < 0:
                 quaternion = -np.array(quaternion)
             self.rotation = cf.Slerp_Quaternion(rot_auto, quaternion, weight)
-            print(weight)
+            # print(weight)
 
         return [self.rotation, self.initQuaternion, self.initInverseMatrix]
 

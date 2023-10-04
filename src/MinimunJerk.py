@@ -4,9 +4,9 @@ from itertools import cycle as iter_cycle
 
 import numpy as np
 from matplotlib import pyplot as plt
-import lib.self.function as fc
 
 import lib.self.CustomFunction as cf
+import lib.self.function as fc
 from src.DataManager import DataPlotManager
 from src.SensorManager import FootSwitchManager
 
@@ -47,7 +47,7 @@ class MinimumJerk:
         self.switchManager = FootSwitchManager()
         switchThread = threading.Thread(target=self.switchManager.detect_sensor)
         switchThread.setDaemon(True)
-        # switchThread.start()
+        switchThread.start()
 
     # def GetPosition(self):
     #     try:
@@ -219,7 +219,8 @@ class MinimumJerk:
             isMoving = False
         weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
 
-        print(weight)
+
+        # print(weight)
 
         return cf.Slerp_Quaternion(xf, self.rot_n, weight), isMoving, weight
 
@@ -234,7 +235,7 @@ class MinimumJerk:
     #     # print(weight)
 
     #     return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
-    
+
     def CaluculateMotion(self, elaspedTime, xf): # 割合変化をアレンジしたバージョン
         isMoving = True
         t = (self.elaspedTime - self.t0)/self.tf
@@ -243,7 +244,7 @@ class MinimumJerk:
             isMoving = False
         weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
         weight = fc.trapezium(weight)
-        # print(weight)
+        print(weight)
 
         return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
 
