@@ -1,7 +1,7 @@
 import csv
+import threading
 import time
 from datetime import datetime
-import threading
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -27,7 +27,7 @@ class DataRecordManager():
             self.data.append(data)
         else:
             pass
-    
+
     def key_thread(self):
         key_count = 0
 
