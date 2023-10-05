@@ -17,8 +17,8 @@ transform = arm.get_position()[1]
 
 with open('docs\settings_single.json') as f:
     setting_update = json.load(f)
-    setting_update['ParticipantsConfigs']['participant1'][0]['Target'][1]['position'] = transform[0:3]
-    setting_update['ParticipantsConfigs']['participant1'][0]['Target'][1]['rotation'] = transform[3:6]
+    setting_update['ParticipantsConfigs']['participant1'][0]['Target'][0]['position'] = transform[0:3]
+    setting_update['ParticipantsConfigs']['participant1'][0]['Target'][0]['rotation'] = transform[3:6]
 
 with open('docs\settings_single.json', 'w') as f:
     json.dump(setting_update, f)

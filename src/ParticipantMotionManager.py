@@ -95,7 +95,7 @@ class MotionManager:
         sensorThread.start()
 
         # self.recorder = DataPlotManager(legend = ['x_mocap', 'x_minimumjerk'], xlabel='time[s]', ylabel='position[mm]')
-        self.recorder2 = DataRecordManager(header=['time', 'velocity'], fileName='velocity', custom=True)
+        self.recorder2 = DataRecordManager(header=['time', 'velocity'], fileName='velocity', custom=False)
         # self.recorder3 = DataPlotManager(legend = ['x_robot'], xlabel='time[s]', ylabel='position[mm]')
 
         if self.recording:
@@ -174,6 +174,7 @@ class MotionManager:
             if quaternion[3] < 0:
                 quaternion = -np.array(quaternion)
             self.rotation = cf.Slerp_Quaternion(rot_auto, quaternion, weight)
+            print(self.rotation, rot_auto)
             # print(weight)
 
         return [self.rotation, self.initQuaternion, self.initInverseMatrix]

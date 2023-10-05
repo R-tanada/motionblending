@@ -1,6 +1,8 @@
 from math import pi
-import lib.self.CustomFunction as cf
+
 import numpy as np
+
+import lib.self.CustomFunction as cf
 
 
 class SafetyManager:
@@ -9,6 +11,7 @@ class SafetyManager:
         self.Max_X, self.Max_Y, self.Max_Z, self.Max_Roll, self.Max_Pitch, self.Max_Yow = self.SetInitial(xArmConfigs['MaxPos'], xArmConfigs['MaxRot'])
         self.Min_X, self.Min_Y, self.Min_Z, self.Min_Roll, self.Min_Pitch, self.Min_Yow = self.SetInitial(xArmConfigs['MinPos'], xArmConfigs['MinRot'])
         self.initRot = cf.Euler2Quaternion(xArmConfigs['InitRot'])
+        print('safety:' + str(xArmConfigs['InitRot']))
 
     def SetInitial(self, InitPos, InitRot):
         return InitPos[0], InitPos[1], InitPos[2], InitRot[0], InitRot[1], InitRot[2]
@@ -20,7 +23,11 @@ class SafetyManager:
         return MinPos[0], MinPos[1], MinPos[2], MinRot[0], MinRot[1], MinRot[2]
 
     def CheckLimit(self, position, rotation):
+        print('test')
+        print(rotation, self.initRot)
+        print(np.dot(cf.Convert2Matrix(rotation), self.initRot))
         rotation = cf.Quaternion2Euler(np.dot(cf.Convert2Matrix(rotation), self.initRot))
+
         x, y, z = position[0] + self.Init_X, position[1] + self.Init_Y, position[2] + self.Init_Z
         roll, pitch, yow = rotation[0], rotation[1], rotation[2]
 

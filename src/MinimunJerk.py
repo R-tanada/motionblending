@@ -13,6 +13,7 @@ from src.SensorManager import FootSwitchManager
 
 class MinimumJerk:
     def __init__(self, Target: list, xArmConfig: dict, Threshold = 300) -> None:
+        print('minimum init rot' + str(xArmConfig['InitRot']))
         self.initPos = xArmConfig['InitPos']
         initRot = cf.Convert2InverseMatrix(cf.Euler2Quaternion(xArmConfig['InitRot']))
         self.predictedPosition = []
@@ -23,9 +24,16 @@ class MinimumJerk:
         self.q_init = []
         for target in self.target:
             target['position'] -= np.array(self.initPos)
+            print(cf.Euler2Quaternion(target['rotation']))
             target['rotation'] = np.dot(cf.Convert2Matrix(cf.Euler2Quaternion(target['rotation'])), np.dot(initRot, [0, 0, 0, 1]))
             if target['rotation'][3] < 0:
                 target['rotation'] = -target['rotation']
+            print('test')
+            print(target['rotation'])
+            print(np.dot(cf.Convert2Matrix(target['rotation']), cf.Euler2Quaternion(xArmConfig['InitRot'])))
+
+            print('test')
+            print(np.dot(cf.Convert2Matrix(np.dot(cf.Convert2Matrix([0.2, 0.1, 0.2, 0.5]), (np.dot(initRot, [0, 0, 0, 1])))), cf.Euler2Quaternion(xArmConfig['InitRot'])))
         self.flag = False
         self.initThreshold = 100
         self.wayPoint = []
@@ -43,11 +51,12 @@ class MinimumJerk:
         self.a = 0
         self.elaspedTime = 0
         self.init_time = time.perf_counter()
+        self.init_rot = 0
 
         self.switchManager = FootSwitchManager()
         switchThread = threading.Thread(target=self.switchManager.detect_sensor)
         switchThread.setDaemon(True)
-        # switchThread.start()
+        switchThread.start()
 
     # def GetPosition(self):
     #     try:
@@ -80,6 +89,7 @@ class MinimumJerk:
     def GetRotation(self, elaspedTime):
         self.elaspedTime = time.perf_counter() - self.init_time
         rotation, isMoving, weight = self.CaluculateSlerpMotion(self.elaspedTime, self.target[self.target_index]['rotation'])
+        rotation = np.dot(cf.Convert2Matrix(self.q_init), rotation)
         self.rotRetained = rotation
 
         if isMoving == False:
@@ -220,33 +230,33 @@ class MinimumJerk:
         weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
 
 
-        # print(weight)
+        print(weight)
 
         return cf.Slerp_Quaternion(xf, self.rot_n, weight), isMoving, weight
 
 
-    # def CaluculateMotion(self, elaspedTime, xf): # デフォルト
-    #     isMoving = True
-    #     t = (self.elaspedTime - self.t0)/self.tf
-    #     if t > 1:
-    #         t = 1
-    #         isMoving = False
-    #     weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
-    #     # print(weight)
-
-    #     return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
-
-    def CaluculateMotion(self, elaspedTime, xf): # 割合変化をアレンジしたバージョン
+    def CaluculateMotion(self, elaspedTime, xf): # デフォルト
         isMoving = True
         t = (self.elaspedTime - self.t0)/self.tf
         if t > 1:
             t = 1
             isMoving = False
         weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
-        weight = fc.trapezium(weight)
-        print(weight)
+        # print(weight)
 
         return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
+
+    # def CaluculateMotion(self, elaspedTime, xf): # 割合変化をアレンジしたバージョン
+    #     isMoving = True
+    #     t = (self.elaspedTime - self.t0)/self.tf
+    #     if t > 1:
+    #         t = 1
+    #         isMoving = False
+    #     weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
+    #     weight = fc.trapezium(weight)
+    #     print(weight)
+
+    #     return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
 
 if __name__ == '__main__':
     def CalculateReachingTime(t, v, xf, x0):
