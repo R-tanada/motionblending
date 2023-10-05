@@ -94,7 +94,7 @@ class MotionManager:
         sensorThread.setDaemon(True)
         sensorThread.start()
 
-        # self.recorder = DataPlotManager(legend = ['x_mocap', 'x_minimumjerk'], xlabel='time[s]', ylabel='position[mm]')
+        self.recorder = DataPlotManager(legend = ['x_mocap', 'x_minimumjerk'], xlabel='time[s]', ylabel='position[mm]')
         self.recorder2 = DataRecordManager(header=['time', 'velocity'], fileName='velocity', custom=False)
         # self.recorder3 = DataPlotManager(legend = ['x_robot'], xlabel='time[s]', ylabel='position[mm]')
 
@@ -152,6 +152,8 @@ class MotionManager:
             pos_auto, self.isMoving_Pos, weight, velocity_auto = self.automation.GetPosition(self.elaspedTime)
             position = cf.ConvertAxis_Position(position * 1000, self.mount) - np.array(self.initPosition)
             self.position = pos_auto * weight + position * (1 - weight)
+
+            self.recorder.record(np.hstack([position[0], pos_auto[0],  self.elaspedTime]))
 
         return self.position
 
@@ -313,7 +315,7 @@ class MotionManager:
 
     def PlotGraph(self):
         pass
-        # self.recorder.plotGraph()
+        self.recorder.plotGraph()
         # self.recorder3.plotGraph()
 
     def SetElaspedTime(self, elaspedTime):
