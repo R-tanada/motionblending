@@ -11,28 +11,50 @@ def load(path):
 
     return data
 
-data = load('/Users/yuzu/Documents/GitHub/MotionBlending-CA/resource/pos20230823_181927.csv')[0:500, 0]
-time = load('/Users/yuzu/Documents/GitHub/MotionBlending-CA/resource/time20230823_181927.csv')[0:500, 0]
+def custom_ployfit(x, y):
+    a11 = sum((x**4 - x)**2)
+    a12 = sum((x**4 - x)*(x**3 - x))
+    a13 = sum((x**4 - x)*(x**2 - x))
+    a21 = sum((x**4 - x)*(x**3 - x))
+    a22 = sum((x**3 - x)**2)
+    a23 = sum((x**3 - x)*(x**2 - x))
+    a31 = sum((x**4 - x)*(x**2 - x))
+    a32 = sum((x**3 - x)*(x**2 - x))
+    a33 = sum((x**2 - x)**2)
+    A = np.array([
+        [a11, a12, a13],
+        [a21, a22, a23],
+        [a31, a32, a33]
+    ])
+    A_inv = np.linalg.inv(A)
 
-plt.plot(time, data)
-plt.show()
-print(time)
- 
-# ばらつきを持った3次関数の波形を生成
-a1 = -2
-a2 = 1
-a3 = 20
-a4 = 1
-x = np.arange(-5, 5, 0.2)                              # 時間軸配列を作成
-noise = np.random.normal(loc=0, scale=10, size=len(x)) # ガウシアンノイズを生成
-y = a1 * x ** 3 + a2 * x ** 2 + a3 * x + a4 + noise    # 3次関数にノイズを重畳
+    b1 = sum(y*(x**4 - x))
+    b2 = sum(y*(x**3 - x))
+    b3 = sum(y*(x**2 - x))
+    B = np.array([
+        b1, 
+        b2,
+        b3
+    ])
+
+    return np.dot(A_inv, B)
+
+data = load('/Users/yuzu/Documents/GitHub/MotionBlending-CA/resource/velocity20231004_143223.csv')[:380]
+time = data[:, 0] - data[0, 0]
+time = time/time[-1]
+velocity = data[:, 1]
+
+coe = custom_ployfit(time, velocity)
+
+y_fit = coe[0] * time ** 4 + coe[1] * time ** 3 + coe[2] * time ** 2 - (coe[0] + coe[1] + coe[2]) * time
  
 # 近似パラメータakを算出
-coe = np.polyfit(x, y, 3)
+# coe = np.polyfit(time, velocity, 4)
 print(coe)
  
 # 得られたパラメータakからカーブフィット後の波形を作成
-y_fit = coe[0] * x ** 3 + coe[1] * x ** 2 + coe[2] * x + coe[3]
+# y_fit = coe[0] * time ** 4 + coe[1] * time ** 3 + coe[2] * time ** 2 + coe[3] * time + coe[4]
 
-# plt.plot(x, y_fit)
-# plt.show()
+plt.plot(time, velocity)
+plt.plot(time, y_fit)
+plt.show()
