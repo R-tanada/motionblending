@@ -96,6 +96,7 @@ class MotionManager:
 
         self.recorder = DataPlotManager(legend = ['x_mocap', 'x_minimumjerk'], xlabel='time[s]', ylabel='position[mm]')
         self.recorder2 = DataRecordManager(header=['time', 'velocity'], fileName='velocity', custom=False)
+        self.recorder3 = DataRecordManager(header=['time', 'x', 'y', 'z'], fileName='SI2023/data', custom=True)
         # self.recorder3 = DataPlotManager(legend = ['x_robot'], xlabel='time[s]', ylabel='position[mm]')
 
         if self.recording:
@@ -116,6 +117,7 @@ class MotionManager:
 
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
+        self.recorder3.custom_record(np.hstack((self.elaspedTime, position)))
         velocity, accelaration = self.GetParticipnatMotionInfo(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
@@ -307,15 +309,16 @@ class MotionManager:
         return vel, 0
 
     def ExportCSV(self):
-        self.recorder_pos.exportAsCSV()
-        self.recorder_rot.exportAsCSV()
-        self.recorder_grip.exportAsCSV()
-        self.recorder_time.exportAsCSV()
-        self.recorder2.exportAsCSV()
+        # self.recorder_pos.exportAsCSV()
+        # self.recorder_rot.exportAsCSV()
+        # self.recorder_grip.exportAsCSV()
+        # self.recorder_time.exportAsCSV()
+        # self.recorder2.exportAsCSV()
+        self.recorder3.exportAsCSV()
 
     def PlotGraph(self):
         pass
-        self.recorder.plotGraph()
+        # self.recorder.plotGraph()
         # self.recorder3.plotGraph()
 
     def SetElaspedTime(self, elaspedTime):
