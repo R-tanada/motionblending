@@ -100,7 +100,7 @@ class MinimumJerk:
             if diff_init >= self.initThreshold:
                 self.rot_n = rotation[0]
                 self.target_index = self.DetermineTarget(self.target, position, self.pos_list[-1]-self.pos_list[-2])
-                self.tf = self.CalculateReachingTime_personal(self.time_list[-25], velocity, self.target[self.target_index]['position'])
+                self.tf = self.CalculateReachingTime_test(self.time_list[-25], velocity, self.target[self.target_index]['position'])
                 self.CreateMotionData(rotation, gripper, self.target[self.target_index]['position'], self.target[self.target_index]['rotation'], self.target[self.target_index]['gripper'], self.elaspedTime)
                 isMoving = True
                 self.flag = False
@@ -136,10 +136,16 @@ class MinimumJerk:
         a = self.a =  np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
         b = v/(30*a)
         c = 0.5*(1 - np.sqrt(1 - 4*np.sqrt(b)))
-        print(c)
+        # print(c)
         time.sleep(10)
 
         return (t - self.t0)/c
+    
+    def CalculateReachingTime_test(self, t, v, xf):
+        a = self.a =  np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
+        c = cf.solve_nploy(np.array([-(30*a*((t - self.t0)**4))/v, (60*a*((t - self.t0)**3))/v, (30*a*((t - self.t0)**2))/v, 0, 0]))
+        print(c)
+        time.sleep(10)
 
     def CalculateReachingTime_personal(self, t, v, xf):
         ans = []
@@ -193,7 +199,7 @@ class MinimumJerk:
         weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
         # print(weight)
 
-        return self.x0 + (xf- self.x0)* self.func_personalize(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
+        return self.x0 + (xf- self.x0)* self.func_minimumjerk(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
 
     # def CaluculateMotion(self, elaspedTime, xf): # 割合変化をアレンジしたバージョン
     #     isMoving = True
