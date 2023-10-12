@@ -1,5 +1,7 @@
 import math
+
 import numpy as np
+
 
 def Quaternion2Euler(quaternion, isDeg: bool = True):
     qx, qy, qz, qw = quaternion[0], quaternion[1], quaternion[2], quaternion[3]
@@ -58,10 +60,10 @@ def Euler2Quaternion(euler):
 def Slerp_Quaternion(Quaternion, initQuaternion, weight):
     if weight == 1:
         return Quaternion
-    
+
     elif weight == 0:
         return initQuaternion
-    
+
     else:
         e = 10e-30
         dot = np.dot(initQuaternion, Quaternion)

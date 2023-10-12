@@ -50,7 +50,7 @@ class MinimumJerk:
         self.switchManager = FootSwitchManager()
         switchThread = threading.Thread(target=self.switchManager.detect_sensor)
         switchThread.setDaemon(True)
-        # switchThread.start()
+        switchThread.start()
 
     def GetPosition(self, elaspedTime):
         self.elaspedTime = time.perf_counter() - self.init_time
@@ -100,7 +100,7 @@ class MinimumJerk:
             if diff_init >= self.initThreshold:
                 self.rot_n = rotation[0]
                 self.target_index = self.DetermineTarget(self.target, position, self.pos_list[-1]-self.pos_list[-2])
-                self.tf = self.CalculateReachingTime(self.time_list[-25], velocity, self.target[self.target_index]['position'])
+                self.tf = self.CalculateReachingTime_personal(self.time_list[-25], velocity, self.target[self.target_index]['position'])
                 self.CreateMotionData(rotation, gripper, self.target[self.target_index]['position'], self.target[self.target_index]['rotation'], self.target[self.target_index]['gripper'], self.elaspedTime)
                 isMoving = True
                 self.flag = False
@@ -137,13 +137,14 @@ class MinimumJerk:
         b = v/(30*a)
         c = 0.5*(1 - np.sqrt(1 - 4*np.sqrt(b)))
         print(c)
+        time.sleep(10)
 
         return (t - self.t0)/c
-        
+
     def CalculateReachingTime_personal(self, t, v, xf):
         ans = []
         a = self.a =  np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
-        c = cf.solve_nploy([(1 - (self.coe_personalize[0] + self.coe_personalize[1] + self.coe_personalize[2] + self.coe_personalize[3] + v/a))/(self.coe_personalize[0] * 5), self.coe_personalize[3]*2/(self.coe_personalize[0] * 5), self.coe_personalize[2]*3/(self.coe_personalize[0] * 5), self.coe_personalize[1]*4/(self.coe_personalize[0] * 5)])
+        c = cf.solve_nploy(np.array([(1 - (self.coe_personalize[0] + self.coe_personalize[1] + self.coe_personalize[2] + self.coe_personalize[3] + v/a))/(self.coe_personalize[0] * 5), self.coe_personalize[3]*2/(self.coe_personalize[0] * 5), self.coe_personalize[2]*3/(self.coe_personalize[0] * 5), self.coe_personalize[1]*4/(self.coe_personalize[0] * 5)]))
         for cn in c:
             if cn.imag == 0 and 0 < cn and cn < 1:
                 ans.append(cn)
@@ -174,7 +175,7 @@ class MinimumJerk:
         print(weight)
 
         return cf.Slerp_Quaternion(xf, self.rot_n, weight), isMoving, weight
-    
+
     def func_minimumjerk(self,t):
         return 6* (t** 5)- 15* (t** 4)+ 10* (t** 3)
 

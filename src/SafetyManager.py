@@ -23,9 +23,6 @@ class SafetyManager:
         return MinPos[0], MinPos[1], MinPos[2], MinRot[0], MinRot[1], MinRot[2]
 
     def CheckLimit(self, position, rotation):
-        print('test')
-        print(rotation, self.initRot)
-        print(np.dot(cf.Convert2Matrix(rotation), self.initRot))
         rotation = cf.Quaternion2Euler(np.dot(cf.Convert2Matrix(rotation), self.initRot))
 
         x, y, z = position[0] + self.Init_X, position[1] + self.Init_Y, position[2] + self.Init_Z
