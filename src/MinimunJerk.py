@@ -146,11 +146,13 @@ class MinimumJerk:
         a = self.a =  np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
         c = cf.solve_nploy(np.array([(1 - (self.coe_personalize[0] + self.coe_personalize[1] + self.coe_personalize[2] + self.coe_personalize[3] + v/a))/(self.coe_personalize[0] * 5), self.coe_personalize[3]*2/(self.coe_personalize[0] * 5), self.coe_personalize[2]*3/(self.coe_personalize[0] * 5), self.coe_personalize[1]*4/(self.coe_personalize[0] * 5)]))
         for cn in c:
+            # print(cn)
             if cn.imag == 0 and 0 < cn and cn < 1:
-                ans.append(cn)
+                ans.append(float(cn))
 
-        print(cn)
-        time.sleep(10)
+        print(ans)
+        c = min(ans)
+        # time.sleep(10)
         return (t - self.t0)/c
 
     def CreateGripMotion(self, grip_n, grip_f, frameLength, gripFrame):
@@ -191,7 +193,7 @@ class MinimumJerk:
         weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
         # print(weight)
 
-        return self.x0 + (xf- self.x0)* self.func_minimumjerk(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
+        return self.x0 + (xf- self.x0)* self.func_personalize(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
 
     # def CaluculateMotion(self, elaspedTime, xf): # 割合変化をアレンジしたバージョン
     #     isMoving = True
