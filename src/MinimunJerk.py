@@ -141,9 +141,15 @@ class MinimumJerk:
         return (t - self.t0)/c
         
     def CalculateReachingTime_personal(self, t, v, xf):
+        ans = []
         a = self.a =  np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
         c = cf.solve_nploy([(1 - (self.coe_personalize[0] + self.coe_personalize[1] + self.coe_personalize[2] + self.coe_personalize[3] + v/a))/(self.coe_personalize[0] * 5), self.coe_personalize[3]*2/(self.coe_personalize[0] * 5), self.coe_personalize[2]*3/(self.coe_personalize[0] * 5), self.coe_personalize[1]*4/(self.coe_personalize[0] * 5)])
+        for cn in c:
+            if cn.imag == 0 and 0 < cn and cn < 1:
+                ans.append(cn)
 
+        print(cn)
+        time.sleep(10)
         return (t - self.t0)/c
 
     def CreateGripMotion(self, grip_n, grip_f, frameLength, gripFrame):
