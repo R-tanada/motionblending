@@ -110,6 +110,6 @@ class ExManager:
         return keycode
 
 if __name__ == '__main__':
-    ExManager(is_Simulation = False, is_Visualize = False, is_Recording = True, is_Plotting = False)
+    ExManager(is_Simulation = True, is_Visualize = False, is_Recording = False, is_Plotting = False)
 
     print('\n----- End program: ExManager.py -----')
