@@ -100,7 +100,7 @@ class MinimumJerk:
             if diff_init >= self.initThreshold:
                 self.rot_n = rotation[0]
                 self.target_index = self.DetermineTarget(self.target, position, self.pos_list[-1]-self.pos_list[-2])
-                self.tf = self.CalculateReachingTime_test(self.time_list[-25], velocity, self.target[self.target_index]['position'])
+                self.tf = self.CalculateReachingTime_personal(self.time_list[-25], velocity, self.target[self.target_index]['position'])
                 self.CreateMotionData(rotation, gripper, self.target[self.target_index]['position'], self.target[self.target_index]['rotation'], self.target[self.target_index]['gripper'], self.elaspedTime)
                 isMoving = True
                 self.flag = False
@@ -153,18 +153,15 @@ class MinimumJerk:
         return ans
 
     def CalculateReachingTime_personal(self, t, v, xf):
-        ans = []
+        ans = 0
         a = self.a =  np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
-        c = cf.solve_nploy(np.array([(1 - (self.coe_personalize[0] + self.coe_personalize[1] + self.coe_personalize[2] + self.coe_personalize[3] + v/a))/(self.coe_personalize[0] * 5), self.coe_personalize[3]*2/(self.coe_personalize[0] * 5), self.coe_personalize[2]*3/(self.coe_personalize[0] * 5), self.coe_personalize[1]*4/(self.coe_personalize[0] * 5)]))
+        c = cf.solve_nploy(np.array([-(5*self.coe_personalize[0]*a*((t - self.t0)**4))/v, -(4*self.coe_personalize[1]*a*((t - self.t0)**3))/v, -(3*self.coe_personalize[2]*a*((t - self.t0)**2))/v, -(2*self.coe_personalize[3]*a*(t - self.t0))/v, -(1 - (self.coe_personalize[0]+self.coe_personalize[1]+self.coe_personalize[2]+self.coe_personalize[3]))*a/v]))
         for cn in c:
-            # print(cn)
-            if cn.imag == 0 and 0 < cn and cn < 1:
-                ans.append(float(cn))
+            normalize = (t - self.t0)/cn
+            if 0 < normalize and normalize < 0.5:
+                ans = cn
 
-        print(ans)
-        c = min(ans)
-        # time.sleep(10)
-        return (t - self.t0)/c
+        return ans
 
     def CreateGripMotion(self, grip_n, grip_f, frameLength, gripFrame):
         def CreateMotion_Liner(target, data, split):
@@ -204,7 +201,7 @@ class MinimumJerk:
         weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
         # print(weight)
 
-        return self.x0 + (xf- self.x0)* self.func_minimumjerk(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
+        return self.x0 + (xf- self.x0)* self.func_personalize(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
 
     # def CaluculateMotion(self, elaspedTime, xf): # 割合変化をアレンジしたバージョン
     #     isMoving = True
