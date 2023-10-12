@@ -142,10 +142,15 @@ class MinimumJerk:
         return (t - self.t0)/c
 
     def CalculateReachingTime_test(self, t, v, xf):
+        ans = 0
         a = self.a =  np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
         c = cf.solve_nploy(np.array([-(30*a*((t - self.t0)**4))/v, (60*a*((t - self.t0)**3))/v, -(30*a*((t - self.t0)**2))/v, 0, 0]))
-        print((t - self.t0)/c)
-        time.sleep(10)
+        for cn in c:
+            normalize = (t - self.t0)/cn
+            if 0 < normalize and normalize < 0.5:
+                ans = cn
+
+        return ans
 
     def CalculateReachingTime_personal(self, t, v, xf):
         ans = []
@@ -199,7 +204,7 @@ class MinimumJerk:
         weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
         # print(weight)
 
-        return self.x0 + (xf- self.x0)* self.func_personalize(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
+        return self.x0 + (xf- self.x0)* self.func_minimumjerk(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
 
     # def CaluculateMotion(self, elaspedTime, xf): # 割合変化をアレンジしたバージョン
     #     isMoving = True
