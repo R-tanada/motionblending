@@ -24,16 +24,9 @@ class MinimumJerk:
         self.q_init = []
         for target in self.target:
             target['position'] -= np.array(self.initPos)
-            print(cf.Euler2Quaternion(target['rotation']))
             target['rotation'] = np.dot(cf.Convert2Matrix(cf.Euler2Quaternion(target['rotation'])), np.dot(initRot, [0, 0, 0, 1]))
             if target['rotation'][3] < 0:
                 target['rotation'] = -target['rotation']
-            print('test')
-            print(target['rotation'])
-            print(np.dot(cf.Convert2Matrix(target['rotation']), cf.Euler2Quaternion(xArmConfig['InitRot'])))
-
-            print('test')
-            print(np.dot(cf.Convert2Matrix(np.dot(cf.Convert2Matrix([0.2, 0.1, 0.2, 0.5]), (np.dot(initRot, [0, 0, 0, 1])))), cf.Euler2Quaternion(xArmConfig['InitRot'])))
         self.flag = False
         self.initThreshold = 100
         self.wayPoint = []
@@ -52,20 +45,12 @@ class MinimumJerk:
         self.elaspedTime = 0
         self.init_time = time.perf_counter()
         self.init_rot = 0
+        self.coe_personalize = [-4.42089805, 15.94956842, -20.87811584, 10.45458102]
 
         self.switchManager = FootSwitchManager()
         switchThread = threading.Thread(target=self.switchManager.detect_sensor)
         switchThread.setDaemon(True)
         # switchThread.start()
-
-    # def GetPosition(self):
-    #     try:
-    #         position = self.posRetained = next(self.predictedPosition)
-    #         isMoving = True
-    #     except StopIteration:
-    #         position, isMoving = self.posRetained, False
-
-    #     return position, isMoving
 
     def GetPosition(self, elaspedTime):
         self.elaspedTime = time.perf_counter() - self.init_time
@@ -76,15 +61,6 @@ class MinimumJerk:
             position, isMoving = self.posRetained, False
 
         return position, isMoving, weight, velocity
-
-    # def GetRotation(self):
-    #     try:
-    #         rotation = self.rotRetained = np.dot(cf.Convert2Matrix(self.q_init), next(self.predictedRotation))
-    #         isMoving = True
-    #     except StopIteration:
-    #         rotation, isMoving = self.rotRetained, False
-
-    #     return rotation, isMoving
 
     def GetRotation(self, elaspedTime):
         self.elaspedTime = time.perf_counter() - self.init_time
@@ -135,17 +111,7 @@ class MinimumJerk:
         self.tn = tn
         DataPlotManager.thres = tn
         frameLength = int((self.tf-(tn - self.t0))* self.freq)
-
-        # self.CreateMotionMinimumJerk(t4, tf, x0, pos_f, frameLength, t0)
-        # self.CreateSlerpMotion(rot_n, rot_f, frameLength)
         self.CreateGripMotion(grip_n, grip_f, frameLength, gripFrame = 200)
-
-    # def DetermineTarget(self, target_list, position):
-    #     diffList = []
-    #     for target in target_list:
-    #         diffList.append(np.linalg.norm(np.array(position) - target['position']))
-
-    #     return diffList.index(min(diffList))
 
     def DetermineTarget(self, target_list, position, vector):
         D_list = []
@@ -166,17 +132,6 @@ class MinimumJerk:
 
         return D_list.index(min(D_list))
 
-    # def CalculateReachingTime(self, t, v, xf):
-    #     a = np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
-    #     A = (25 + 135*a*v + 3*np.sqrt(5)*np.sqrt(250*a*v + 165*(a**2)*(v**2) + 192*(a**3)*(v**3)))**(1/3)
-    #     B = 5 - 12*a*v
-    #     C = 185**(2/3)
-    #     D = B/(C*A)
-    #     E = A/C
-    #     F = -1/12 + E + F
-
-    #     return 1/12 + 0.5*np.sqrt(F) + 0.5*np.sqrt(-1/6 - D - E -5/108*F)
-
     def CalculateReachingTime(self, t, v, xf):
         a = self.a =  np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
         b = v/(30*a)
@@ -184,7 +139,12 @@ class MinimumJerk:
         print(c)
 
         return (t - self.t0)/c
+        
+    def CalculateReachingTime_personal(self, t, v, xf):
+        a = self.a =  np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
+        c = cf.solve_nploy([(1 - (self.coe_personalize[0] + self.coe_personalize[1] + self.coe_personalize[2] + self.coe_personalize[3] + v/a))/(self.coe_personalize[0] * 5), self.coe_personalize[3]*2/(self.coe_personalize[0] * 5), self.coe_personalize[2]*3/(self.coe_personalize[0] * 5), self.coe_personalize[1]*4/(self.coe_personalize[0] * 5)])
 
+        return (t - self.t0)/c
 
     def CreateGripMotion(self, grip_n, grip_f, frameLength, gripFrame):
         def CreateMotion_Liner(target, data, split):
@@ -195,31 +155,6 @@ class MinimumJerk:
         diffGrip = np.concatenate([diffGrip, CreateMotion_Liner(grip_f, grip_n, gripFrame)], 0)
 
         self.predictedGripper = iter(diffGrip)
-
-    def CreateSlerpMotion(self, rot_n, rot_f, frameLength):
-        weight_list = np.linspace(0, 1, int(frameLength*0.7))
-        rot_list = []
-        for weight in weight_list:
-            rot_list.append(cf.Slerp_Quaternion(rot_f, rot_n[0], weight))
-
-        self.predictedRotation = iter(np.array(rot_list))
-
-    def CreateMotionMinimumJerk(self, t3, tf, x0, xf, frameLength, t0):
-
-        def function(x0, xf, flame):
-            return x0 + (xf- x0)* (6* (flame** 5)- 15* (flame** 4)+ 10* (flame** 3))
-
-        flame = np.linspace((t3-t0)/tf, 1, frameLength)
-        # flame = np.linspace(0, 1, frameLength)
-
-        position = []
-        for i in range(3):
-            position.append(function(x0[i], xf[i], flame))
-        print('t3: {}'.format(t3))
-
-        # print(np.transpose(position)[1:])
-
-        self.predictedPosition = iter(np.transpose(np.array(position))[1:])
 
     def CaluculateSlerpMotion(self, elaspedTime, xf):
         isMoving = True
@@ -233,7 +168,12 @@ class MinimumJerk:
         print(weight)
 
         return cf.Slerp_Quaternion(xf, self.rot_n, weight), isMoving, weight
+    
+    def func_minimumjerk(self,t):
+        return 6* (t** 5)- 15* (t** 4)+ 10* (t** 3)
 
+    def func_personalize(self,t):
+        return self.coe_personalize[0]*(t**5) + self.coe_personalize[1]*(t**4) + self.coe_personalize[2]*(t**3) + self.coe_personalize[3]*(t**2) + (1 - (self.coe_personalize[0] + self.coe_personalize[1] + self.coe_personalize[2] + self.coe_personalize[3]))*t
 
     def CaluculateMotion(self, elaspedTime, xf): # デフォルト
         isMoving = True
@@ -244,7 +184,7 @@ class MinimumJerk:
         weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
         # print(weight)
 
-        return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
+        return self.x0 + (xf- self.x0)* self.func_minimumjerk(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
 
     # def CaluculateMotion(self, elaspedTime, xf): # 割合変化をアレンジしたバージョン
     #     isMoving = True
@@ -256,7 +196,7 @@ class MinimumJerk:
     #     weight = fc.trapezium(weight)
     #     print(weight)
 
-        return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
+        # return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
 
 if __name__ == '__main__':
     def CalculateReachingTime(t, v, xf, x0):

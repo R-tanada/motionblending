@@ -120,3 +120,14 @@ def ConvertSensorToGripper(sensorValue, InputMax = 1, InputMin = 0, TargetMax = 
         gripperValue = TargetMin
 
     return gripperValue
+
+def solve_nploy(vec,is_complex=False):
+    dim =len(vec)
+    if is_complex:
+        A = np.zeros((dim,dim),dtype=complex)
+    else:
+        A = np.zeros((dim,dim))
+    A[np.arange(dim-1),1+np.arange(dim-1)] =1
+    A[-1,:] = -vec
+    ans,vec = np.linalg.eig(A)
+    return ans
