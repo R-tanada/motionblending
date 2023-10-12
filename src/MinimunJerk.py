@@ -144,8 +144,7 @@ class MinimumJerk:
     def CalculateReachingTime_test(self, t, v, xf):
         a = self.a =  np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
         c = cf.solve_nploy(np.array([-(30*a*((t - self.t0)**4))/v, (60*a*((t - self.t0)**3))/v, -(30*a*((t - self.t0)**2))/v, 0, 0]))
-        print(self.t0)
-        print(c)
+        print((t - self.t0)/c)
         time.sleep(10)
 
     def CalculateReachingTime_personal(self, t, v, xf):
