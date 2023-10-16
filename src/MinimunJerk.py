@@ -100,7 +100,7 @@ class MinimumJerk:
             if diff_init >= self.initThreshold:
                 self.rot_n = rotation[0]
                 self.target_index = self.DetermineTarget(self.target, position, self.pos_list[-1]-self.pos_list[-2])
-                self.tf = self.CalculateReachingTime_personal(self.time_list[-25], velocity, self.target[self.target_index]['position'])
+                self.tf = self.CalculateReachingTime_liner(self.time_list[-25], velocity, self.target[self.target_index]['position'])
                 self.CreateMotionData(rotation, gripper, self.target[self.target_index]['position'], self.target[self.target_index]['rotation'], self.target[self.target_index]['gripper'], self.elaspedTime)
                 isMoving = True
                 self.flag = False
@@ -140,13 +140,13 @@ class MinimumJerk:
         # time.sleep(10)
 
         return (t - self.t0)/c
-    
+
     def CalculateReachingTime_liner(self, t, v, xf):
         a = self.a =  np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
         c = a/v
         print(c)
 
-        time.sleep(10)
+        return c
 
     def CalculateReachingTime_test(self, t, v, xf):
         ans = 0
@@ -198,7 +198,7 @@ class MinimumJerk:
 
     def func_personalize(self,t):
         return self.coe_personalize[0]*(t**5) + self.coe_personalize[1]*(t**4) + self.coe_personalize[2]*(t**3) + self.coe_personalize[3]*(t**2) + (1 - (self.coe_personalize[0] + self.coe_personalize[1] + self.coe_personalize[2] + self.coe_personalize[3]))*t
-    
+
     def func_liner(self, t):
         return t
 
@@ -211,7 +211,7 @@ class MinimumJerk:
         weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
         # print(weight)
 
-        return self.x0 + (xf- self.x0)* self.func_personalize(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
+        return self.x0 + (xf- self.x0)* self.func_liner(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
 
     # def CaluculateMotion(self, elaspedTime, xf): # 割合変化をアレンジしたバージョン
     #     isMoving = True
