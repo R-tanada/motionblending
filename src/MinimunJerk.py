@@ -140,6 +140,13 @@ class MinimumJerk:
         # time.sleep(10)
 
         return (t - self.t0)/c
+    
+    def CalculateReachingTime_liner(self, t, v, xf):
+        a = self.a =  np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
+        c = a/v
+        print(c)
+
+        time.sleep(10)
 
     def CalculateReachingTime_test(self, t, v, xf):
         ans = 0
@@ -191,6 +198,9 @@ class MinimumJerk:
 
     def func_personalize(self,t):
         return self.coe_personalize[0]*(t**5) + self.coe_personalize[1]*(t**4) + self.coe_personalize[2]*(t**3) + self.coe_personalize[3]*(t**2) + (1 - (self.coe_personalize[0] + self.coe_personalize[1] + self.coe_personalize[2] + self.coe_personalize[3]))*t
+    
+    def func_liner(self, t):
+        return t
 
     def CaluculateMotion(self, elaspedTime, xf): # デフォルト
         isMoving = True
