@@ -1,6 +1,7 @@
 import threading
 import time
 from itertools import cycle as iter_cycle
+import csv
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -45,12 +46,17 @@ class MinimumJerk:
         self.elaspedTime = 0
         self.init_time = time.perf_counter()
         self.init_rot = 0
-        self.coe_personalize = [-4.42089805, 15.94956842, -20.87811584, 10.45458102]
+        # self.coe_personalize = [-4.42089805, 15.94956842, -20.87811584, 10.45458102]
 
         self.switchManager = FootSwitchManager()
         switchThread = threading.Thread(target=self.switchManager.detect_sensor)
         switchThread.setDaemon(True)
         switchThread.start()
+
+        self.mode = 4
+
+        if self.mode == 4:
+            self.personalize = Fitting('/Users/yuzu/Documents/GitHub/MotionBlending-CA/resource/SI2023/data20231010_183937.csv')
 
     def GetPosition(self, elaspedTime):
         self.elaspedTime = time.perf_counter() - self.init_time
@@ -85,25 +91,32 @@ class MinimumJerk:
     def MonitoringMotion(self, position, rotation, gripper, velocity, accelaration):
         isMoving = False
 
-        if self.switchManager.flag == True:
-            self.init_time = time.perf_counter()
-            self.x0 = position
-            self.flag = True
-            self.switchManager.flag = False
+        if self.mode != 1:
 
-        if self.flag == True:
-            self.elaspedTime = time.perf_counter() - self.init_time
-            diff_init = np.linalg.norm(np.array(position) - np.array(self.x0))
-            self.time_list.append(self.elaspedTime)
-            self.pos_list.append(position)
+            if self.switchManager.flag == True:
+                self.init_time = time.perf_counter()
+                self.x0 = position
+                self.flag = True
+                self.switchManager.flag = False
 
-            if diff_init >= self.initThreshold:
-                self.rot_n = rotation[0]
-                self.target_index = self.DetermineTarget(self.target, position, self.pos_list[-1]-self.pos_list[-2])
-                self.tf = self.CalculateReachingTime_liner(self.time_list[-25], velocity, self.target[self.target_index]['position'])
-                self.CreateMotionData(rotation, gripper, self.target[self.target_index]['position'], self.target[self.target_index]['rotation'], self.target[self.target_index]['gripper'], self.elaspedTime)
-                isMoving = True
-                self.flag = False
+            if self.flag == True:
+                self.elaspedTime = time.perf_counter() - self.init_time
+                diff_init = np.linalg.norm(np.array(position) - np.array(self.x0))
+                self.time_list.append(self.elaspedTime)
+                self.pos_list.append(position)
+
+                if diff_init >= self.initThreshold:
+                    self.rot_n = rotation[0]
+                    self.target_index = self.DetermineTarget(self.target, position, self.pos_list[-1]-self.pos_list[-2])
+                    if self.mode == 2:
+                        self.tf = self.CalculateReachingTime_liner(self.time_list[-25], velocity, self.target[self.target_index]['position'])
+                    elif self.mode == 3:
+                        self.tf = self.CalculateReachingTime_minimumjerk(self.time_list[-25], velocity, self.target[self.target_index]['position'])
+                    elif self.mode == 4:
+                        self.tf = self.CalculateReachingTime_personal(self.time_list[-25], velocity, self.target[self.target_index]['position'])
+                    self.CreateMotionData(rotation, gripper, self.target[self.target_index]['position'], self.target[self.target_index]['rotation'], self.target[self.target_index]['gripper'], self.elaspedTime)
+                    isMoving = True
+                    self.flag = False
 
         return isMoving
 
@@ -148,7 +161,7 @@ class MinimumJerk:
 
         return c
 
-    def CalculateReachingTime_test(self, t, v, xf):
+    def CalculateReachingTime_minimumjerk(self, t, v, xf):
         ans = 0
         a = self.a =  np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
         c = cf.solve_nploy(np.array([-(30*a*((t - self.t0)**4))/v, (60*a*((t - self.t0)**3))/v, -(30*a*((t - self.t0)**2))/v, 0, 0]))
@@ -162,7 +175,7 @@ class MinimumJerk:
     def CalculateReachingTime_personal(self, t, v, xf):
         ans = 0
         a = self.a =  np.sqrt((xf[0] - self.x0[0])**2 + (xf[1] - self.x0[1])**2 + (xf[2] - self.x0[2])**2)
-        c = cf.solve_nploy(np.array([-(5*self.coe_personalize[0]*a*((t - self.t0)**4))/v, -(4*self.coe_personalize[1]*a*((t - self.t0)**3))/v, -(3*self.coe_personalize[2]*a*((t - self.t0)**2))/v, -(2*self.coe_personalize[3]*a*(t - self.t0))/v, -(1 - (self.coe_personalize[0]+self.coe_personalize[1]+self.coe_personalize[2]+self.coe_personalize[3]))*a/v]))
+        c = cf.solve_nploy(np.array([-(5*self.personalize.coe[0]*a*((t - self.t0)**4))/v, -(4*self.personalize.coe[1]*a*((t - self.t0)**3))/v, -(3*self.personalize.coe[2]*a*((t - self.t0)**2))/v, -(2*self.personalize.coe[3]*a*(t - self.t0))/v, -(1 - (self.personalize.coe[0]+self.personalize.coe[1]+self.personalize.coe[2]+self.personalize.coe[3]))*a/v]))
         for cn in c:
             normalize = (t - self.t0)/cn
             if 0 < normalize and normalize < 0.5:
@@ -187,7 +200,7 @@ class MinimumJerk:
             t = 1
             isMoving = False
         weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
-        weight = fc.liner(weight)
+        # weight = fc.liner(weight)
 
         print(weight)
 
@@ -197,7 +210,7 @@ class MinimumJerk:
         return 6* (t** 5)- 15* (t** 4)+ 10* (t** 3)
 
     def func_personalize(self,t):
-        return self.coe_personalize[0]*(t**5) + self.coe_personalize[1]*(t**4) + self.coe_personalize[2]*(t**3) + self.coe_personalize[3]*(t**2) + (1 - (self.coe_personalize[0] + self.coe_personalize[1] + self.coe_personalize[2] + self.coe_personalize[3]))*t
+        return self.personalize.coe[0]*(t**5) + self.personalize.coe[1]*(t**4) + self.personalize.coe[2]*(t**3) + self.personalize.coe[3]*(t**2) + (1 - (self.personalize.coe[0] + self.personalize.coe[1] + self.personalize.coe[2] + self.personalize.coe[3]))*t
 
     def func_liner(self, t):
         return t
@@ -210,8 +223,15 @@ class MinimumJerk:
             isMoving = False
         weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
         # print(weight)
+        
+        if self.mode == 2:
+            return self.x0 + (xf- self.x0)* self.func_liner(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
+        elif self.mode == 3:
+            return self.x0 + (xf- self.x0)* self.func_minimumjerk(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
+        elif self.mode == 4:
+            return self.x0 + (xf- self.x0)* self.func_personalize(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
 
-        return self.x0 + (xf- self.x0)* self.func_liner(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
+        # return self.x0 + (xf- self.x0)* self.func_liner(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
 
     # def CaluculateMotion(self, elaspedTime, xf): # 割合変化をアレンジしたバージョン
     #     isMoving = True
@@ -224,6 +244,74 @@ class MinimumJerk:
     #     print(weight)
 
         # return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
+
+class Fitting:
+    def __init__(self, path) -> None:
+        data = self.load(path)
+        time = data[:, 0]
+        time = time - time[0]
+        time = time/time[-1]
+        pos = data[:, 1:4]
+        pos = pos - pos[0]
+        norm = np.sqrt(pos[:, 0]**2 + pos[:, 1]**2 + pos[:, 2]**2)
+        norm = norm/norm[-1]
+
+        self.coe = self.custom_fit(time, norm)
+        print(self.coe)
+
+        # y_fit = self.coe[0] * time ** 5 + self.coe[1] * time ** 4 + self.coe[2] * time ** 3 + self.coe[3] * time ** 2 + (1 - (self.coe[0] + self.coe[1] + self.coe[2] + self.coe[3])) * time
+        # plt.plot(time, norm)
+        # plt.plot(time, y_fit)
+        # plt.show()
+
+    def load(self, path):
+        with open(path) as file:
+            reader = csv.reader(file)
+            data = [row for row in reader][1:]
+            data = [[float(v) for v in row] for row in data]
+            data = np.array(data)
+
+        return data
+
+    def custom_fit(self, x, y):
+        a11 = sum((x**5 - x)**2)
+        a12 = sum((x**5 - x)*(x**4 - x))
+        a13 = sum((x**5 - x)*(x**3 - x))
+        a14 = sum((x**5 - x)*(x**2 - x))
+        a21 = sum((x**4 - x)*(x**5 - x))
+        a22 = sum((x**4 - x)**2)
+        a23 = sum((x**4 - x)*(x**3 - x))
+        a24 = sum((x**4 - x)*(x**2 - x))
+        a31 = sum((x**3 - x)*(x**5 - x))
+        a32 = sum((x**3 - x)*(x**4 - x))
+        a33 = sum((x**3 - x)**2)
+        a34 = sum((x**3 - x)*(x**2 - x))
+        a41 = sum((x**2 - x)*(x**5 - x))
+        a42 = sum((x**2 - x)*(x**4 - x))
+        a43 = sum((x**2 - x)*(x**3 - x))
+        a44 = sum((x**2 - x)**2)
+
+        A = np.array([
+            [a11, a12, a13, a14],
+            [a21, a22, a23, a24],
+            [a31, a32, a33, a34],
+            [a41, a42, a43, a44]
+        ])
+        A_inv = np.linalg.inv(A)
+
+        b1 = sum((y - x)*(x**5 - x))
+        b2 = sum((y - x)*(x**4 - x))
+        b3 = sum((y - x)*(x**3 - x))
+        b4 = sum((y - x)*(x**2 - x))
+
+        B = np.array([
+            b1, 
+            b2,
+            b3,
+            b4
+        ])
+
+        return np.dot(A_inv, B)
 
 if __name__ == '__main__':
     def CalculateReachingTime(t, v, xf, x0):
