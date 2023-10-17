@@ -1,6 +1,8 @@
+import csv
+
 import numpy as np
 from matplotlib import pyplot as plt
-import csv
+
 
 def load(path):
     with open(path) as file:
@@ -43,7 +45,7 @@ def custom_fit(x, y):
     b4 = sum((y - x)*(x**2 - x))
 
     B = np.array([
-        b1, 
+        b1,
         b2,
         b3,
         b4
@@ -51,7 +53,7 @@ def custom_fit(x, y):
 
     return np.dot(A_inv, B)
 
-data = load('/Users/yuzu/Documents/GitHub/MotionBlending-CA/resource/SI2023/data20231010_183937.csv')
+data = load('resource\SI2023\shibata20231017_151202.csv')
 time = data[:, 0]
 time = time - time[0]
 time = time/time[-1]
@@ -64,11 +66,11 @@ coe = custom_fit(time, norm)
 print(coe)
 
 y_fit = coe[0] * time ** 5 + coe[1] * time ** 4 + coe[2] * time ** 3 + coe[3] * time ** 2 + (1 - (coe[0] + coe[1] + coe[2] + coe[3])) * time
- 
+
 # 近似パラメータakを算出
 # coe = np.polyfit(time, norm, 5)
 # print(coe)
- 
+
 # 得られたパラメータakからカーブフィット後の波形を作成
 # y_fit = coe[0] * time ** 4 + coe[1] * time ** 3 + coe[2] * time ** 2 + coe[3] * time + coe[4]
 # y_fit = coe[0] * time ** 5 + coe[1] * time ** 4 + coe[2] * time ** 3 + coe[3] * time **2 + coe[4] * time + coe[5]

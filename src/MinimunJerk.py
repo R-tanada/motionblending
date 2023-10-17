@@ -1,7 +1,7 @@
+import csv
 import threading
 import time
 from itertools import cycle as iter_cycle
-import csv
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -9,6 +9,7 @@ from matplotlib import pyplot as plt
 import lib.self.CustomFunction as cf
 import lib.self.function as fc
 from src.DataManager import DataPlotManager
+from src.mode_select import mode, path
 from src.SensorManager import FootSwitchManager
 
 
@@ -48,15 +49,16 @@ class MinimumJerk:
         self.init_rot = 0
         # self.coe_personalize = [-4.42089805, 15.94956842, -20.87811584, 10.45458102]
 
+        self.mode = mode
+
         self.switchManager = FootSwitchManager()
         switchThread = threading.Thread(target=self.switchManager.detect_sensor)
         switchThread.setDaemon(True)
-        switchThread.start()
-
-        self.mode = 4
+        if self.mode != 0:
+            switchThread.start()
 
         if self.mode == 4:
-            self.personalize = Fitting('/Users/yuzu/Documents/GitHub/MotionBlending-CA/resource/SI2023/data20231010_183937.csv')
+            self.personalize = Fitting(path)
 
     def GetPosition(self, elaspedTime):
         self.elaspedTime = time.perf_counter() - self.init_time
@@ -223,7 +225,7 @@ class MinimumJerk:
             isMoving = False
         weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
         # print(weight)
-        
+
         if self.mode == 2:
             return self.x0 + (xf- self.x0)* self.func_liner(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
         elif self.mode == 3:
@@ -305,7 +307,7 @@ class Fitting:
         b4 = sum((y - x)*(x**2 - x))
 
         B = np.array([
-            b1, 
+            b1,
             b2,
             b3,
             b4

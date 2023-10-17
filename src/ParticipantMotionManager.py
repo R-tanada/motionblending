@@ -7,6 +7,7 @@ import numpy as np
 import lib.self.CustomFunction as cf
 from src.DataManager import DataLoadManager, DataPlotManager, DataRecordManager
 from src.MinimunJerk import MinimumJerk
+from src.mode_select import mode, name
 # # ----- Custom class ----- #
 from src.OptiTrackStreamingManager import OptiTrackStreamingManager
 from src.SensorManager import GripperSensorManager
@@ -87,6 +88,9 @@ class MotionManager:
         self.elaspedTime = 0
         self.auto_list = []
 
+        self.mode = mode
+        print(mode)
+
         self.automation = MinimumJerk(Config['Target'], xArmConfig)
 
         self.sensorManager = GripperSensorManager(Config['SerialCOM'], BandRate = 115200)
@@ -94,9 +98,10 @@ class MotionManager:
         sensorThread.setDaemon(True)
         sensorThread.start()
 
-        self.recorder = DataPlotManager(legend = ['x_mocap', 'x_minimumjerk'], xlabel='time[s]', ylabel='position[mm]')
-        self.recorder2 = DataRecordManager(header=['time', 'velocity'], fileName='velocity', custom=False)
-        # self.recorder3 = DataRecordManager(header=['time', 'x', 'y', 'z'], fileName='SI2023/data', custom=True)
+        # self.recorder = DataPlotManager(legend = ['x_mocap', 'x_minimumjerk'], xlabel='time[s]', ylabel='position[mm]')
+        if self.mode == 0:
+            # self.recorder2 = DataRecordManager(header=['time', 'velocity'], fileName='velocity', custom=False)
+            self.recorder3 = DataRecordManager(header=['time', 'x', 'y', 'z'], fileName='SI2023/'+name, custom=True)
         # self.recorder3 = DataPlotManager(legend = ['x_robot'], xlabel='time[s]', ylabel='position[mm]')
 
         if self.recording:
@@ -117,7 +122,8 @@ class MotionManager:
 
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
-        # self.recorder3.custom_record(np.hstack((self.elaspedTime, position)))
+        if self.mode == 0:
+            self.recorder3.custom_record(np.hstack((self.elaspedTime, position)))
         velocity, accelaration = self.GetParticipnatMotionInfo(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
@@ -155,7 +161,7 @@ class MotionManager:
             position = cf.ConvertAxis_Position(position * 1000, self.mount) - np.array(self.initPosition)
             self.position = pos_auto * weight + position * (1 - weight)
 
-            self.recorder.record(np.hstack([position[0], pos_auto[0],  self.elaspedTime]))
+            # self.recorder.record(np.hstack([position[0], pos_auto[0],  self.elaspedTime]))
 
         return self.position
 
@@ -270,7 +276,7 @@ class MotionManager:
         else:
             vel = 0
 
-        self.recorder2.custom_record(np.hstack((self.elaspedTime, [vel])))
+        # self.recorder2.custom_record(np.hstack((self.elaspedTime, [vel])))
 
         # print(vel)
 

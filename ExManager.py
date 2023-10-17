@@ -2,6 +2,8 @@ import json
 import platform
 import time
 
+from src.mode_select import mode as mode_decided
+
 
 class ExManager:
     def __init__(self, is_Simulation: bool = False, is_Visualize: bool = False, is_Recording: bool = False, is_Plotting: bool = False) -> None:
@@ -110,6 +112,11 @@ class ExManager:
         return keycode
 
 if __name__ == '__main__':
-    ExManager(is_Simulation = True, is_Visualize = False, is_Recording = False, is_Plotting = False)
+    is_Recording = False
+    mode = mode_decided
+    print(mode)
+    if mode == 0:
+        is_Recording = True
+    ExManager(is_Simulation = False, is_Visualize = False, is_Recording = is_Recording, is_Plotting = False)
 
     print('\n----- End program: ExManager.py -----')

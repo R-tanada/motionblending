@@ -22,6 +22,7 @@ class GripperSensorManager:
                 if self.ComPort != 'None':
                     data = self.serialObject.readline()
                     self.sensorValue = float(data.strip().decode('utf-8'))
+                    # print(self.sensorValue)
 
                 else:
                     self.sensorValue = 850
