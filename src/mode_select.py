@@ -1,3 +1,3 @@
 mode = 4
-name = "shibata"
-path = "resource\SI2023\shibata20231017_151202.csv"
+name = "kurimoto"
+path = "resource\SI2023\kurimoto20231018_151100.csv"

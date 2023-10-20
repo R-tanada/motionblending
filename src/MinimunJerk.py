@@ -126,7 +126,7 @@ class MinimumJerk:
         self.tn = tn
         DataPlotManager.thres = tn
         frameLength = int((self.tf-(tn - self.t0))* self.freq)
-        self.CreateGripMotion(grip_n, grip_f, frameLength, gripFrame = 200)
+        self.CreateGripMotion(grip_n, grip_f, frameLength, gripFrame = 150)
 
     def DetermineTarget(self, target_list, position, vector):
         D_list = []
@@ -204,7 +204,7 @@ class MinimumJerk:
         weight = (t - (self.tn - self.t0)/self.tf)/(1-(self.tn - self.t0)/self.tf)
         # weight = fc.liner(weight)
 
-        print(weight)
+        # print(weight)
 
         return cf.Slerp_Quaternion(xf, self.rot_n, weight), isMoving, weight
 

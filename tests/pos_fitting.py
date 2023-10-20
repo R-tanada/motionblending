@@ -53,7 +53,7 @@ def custom_fit(x, y):
 
     return np.dot(A_inv, B)
 
-data = load('resource\SI2023\shibata20231017_151202.csv')
+data = load('resource\SI2023\kurimoto20231018_151100.csv')
 time = data[:, 0]
 time = time - time[0]
 time = time/time[-1]
