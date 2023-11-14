@@ -39,7 +39,7 @@
         "participant1": [
             {
                 "Mount": "vertical",
-                "RigidBody": 4,
+                "RigidBody": 1,
                 "SerialCOM": "None",
                 "Weight": 1,
                 "DataPath": {

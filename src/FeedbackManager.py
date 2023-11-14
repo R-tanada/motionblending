@@ -6,11 +6,11 @@ import pyaudio
 
 class Vibrotactile:
     def __init__(self) -> None:
-        self.rate = 44100
+        self.rate = 48000
         self.freq = 200
         self.chunk = int(self.rate / self.freq)
         self.sin = np.sin(2.0 * np.pi * np.arange(self.chunk) * self.freq / self.rate)
-        self.amp = 100
+        self.amp = 11000
         self.data_out = 0
         self.p = pyaudio.PyAudio()
         self.stream = self.p.open(
@@ -19,18 +19,19 @@ class Vibrotactile:
             rate=self.rate,
             output=True,
             frames_per_buffer=self.chunk,
-            output_device_index=2,
+            output_device_index=19,
             stream_callback=self.callback,
         )
         self.stream.start_stream()
 
     def callback(self, in_data, frame_count, time_info, status):
-        out_data = (self.amp * self.data_out * self.sin).astype(np.int16)
-        print(self.amp * self.data_out * self.sin)
+        out_data = (int(self.amp * self.data_out) * self.sin).astype(np.int16)
+        # print(int(self.amp * self.data_out))
         return (out_data, pyaudio.paContinue)
-    
+
     def close(self):
         self.p.terminate()
+
 
 if __name__ == "__main__":
     vibro = Vibrotactile()

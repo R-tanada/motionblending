@@ -9,7 +9,6 @@ from matplotlib import pyplot as plt
 import lib.self.CustomFunction as cf
 import lib.self.function as fc
 from src.DataManager import DataPlotManager
-from src.FeedbackManager import Vibrotactile
 from src.mode_select import mode, path
 from src.SensorManager import FootSwitchManager
 
@@ -54,8 +53,6 @@ class MinimumJerk:
         self.init_rot = 0
         # self.coe_personalize = [-4.42089805, 15.94956842, -20.87811584, 10.45458102]
 
-        self.vibro = Vibrotactile()
-
         self.mode = mode
 
         self.switchManager = FootSwitchManager()
@@ -73,7 +70,6 @@ class MinimumJerk:
             self.elaspedTime, self.target[self.target_index]["position"]
         )
         self.posRetained = position
-        self.vibro.data_out = velocity
 
         if isMoving == False:
             position, isMoving = self.posRetained, False
@@ -257,9 +253,9 @@ class MinimumJerk:
             )
         )
         for cn in c:
-            normalize = (t - self.t0) / cn
+            normalize = (t - self.t0) / cn.real
             if 0 < normalize and normalize < 0.5:
-                ans = cn
+                ans = cn.real
 
         return ans
 
