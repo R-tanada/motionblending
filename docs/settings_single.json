@@ -2,16 +2,16 @@
     "xArmConfigs": {
         "xArm1": {
             "IP": "192.168.1.217",
-            "Mount": "right",
+            "Mount": "vertical",
             "InitPos": [
-                250,
-                -100,
-                100
+                200,
+                0,
+                300
             ],
             "InitRot": [
                 180,
                 0,
-                90
+                0
             ],
             "MaxPos": [
                 650,
@@ -38,9 +38,9 @@
     "ParticipantsConfigs": {
         "participant1": [
             {
-                "Mount": "right",
+                "Mount": "vertical",
                 "RigidBody": 4,
-                "SerialCOM": "COM10",
+                "SerialCOM": "None",
                 "Weight": 1,
                 "DataPath": {
                     "position": "resource/pos20230823_181927.csv",
