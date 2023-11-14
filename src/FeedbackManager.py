@@ -23,7 +23,7 @@ class Vibrotactile:
             rate=self.rate,
             output=True,
             frames_per_buffer=self.chunk,
-            output_device_index=1,
+            output_device_index=12,
             stream_callback=self.callback,
         )
 
