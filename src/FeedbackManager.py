@@ -10,7 +10,7 @@ class Vibrotactile:
         self.freq = 200
         self.chunk = int(self.rate / self.freq)
         self.sin = np.sin(2.0 * np.pi * np.arange(self.chunk) * self.freq / self.rate)
-        self.amp = 100
+        self.amp = 300
         self.data_out = 0
         p = pyaudio.PyAudio()
         stream = self.open_stream(p)
