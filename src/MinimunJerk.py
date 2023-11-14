@@ -11,6 +11,7 @@ import lib.self.function as fc
 from src.DataManager import DataPlotManager
 from src.mode_select import mode, path
 from src.SensorManager import FootSwitchManager
+from src.FeedbackManager import Vibrotactile
 
 
 class MinimumJerk:
@@ -29,6 +30,7 @@ class MinimumJerk:
             target['rotation'] = np.dot(cf.Convert2Matrix(cf.Euler2Quaternion(target['rotation'])), np.dot(initRot, [0, 0, 0, 1]))
             if target['rotation'][3] < 0:
                 target['rotation'] = -target['rotation']
+                
         self.flag = False
         self.initThreshold = 100
         self.wayPoint = []
@@ -49,6 +51,8 @@ class MinimumJerk:
         self.init_rot = 0
         # self.coe_personalize = [-4.42089805, 15.94956842, -20.87811584, 10.45458102]
 
+        self.vibro = Vibrotactile()
+
         self.mode = mode
 
         self.switchManager = FootSwitchManager()
@@ -64,6 +68,7 @@ class MinimumJerk:
         self.elaspedTime = time.perf_counter() - self.init_time
         position, isMoving, weight, velocity = self.CaluculateMotion(self.elaspedTime, self.target[self.target_index]['position'])
         self.posRetained = position
+        self.vibro.data_out = velocity
 
         if isMoving == False:
             position, isMoving = self.posRetained, False
@@ -233,7 +238,7 @@ class MinimumJerk:
         elif self.mode == 4:
             return self.x0 + (xf- self.x0)* self.func_personalize(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
 
-        # return self.x0 + (xf- self.x0)* self.func_liner(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
+        return self.x0 + (xf- self.x0)* self.func_liner(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
 
     # def CaluculateMotion(self, elaspedTime, xf): # 割合変化をアレンジしたバージョン
     #     isMoving = True
