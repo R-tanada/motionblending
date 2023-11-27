@@ -122,6 +122,7 @@ class MotionManager:
 
     def GetMotionData(self):
         position, rotation, gripper = self.GetPosition(), self.GetRotation(), self.GetGripperValue()
+        print(gripper)
         if self.mode == 0:
             self.recorder3.custom_record(np.hstack((self.elaspedTime, position)))
         velocity, accelaration = self.GetParticipnatMotionInfo(position)
@@ -137,7 +138,7 @@ class MotionManager:
                 rotFlag = self.SlerpInitRotation()
                 if posFlag == rotFlag == False:
                     print('finish_automation')
-                    if gripper >= 800:
+                    if gripper >= 500:
                         self.initFlag = False
 
             if self.initFlag == False:
