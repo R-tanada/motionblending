@@ -14,7 +14,7 @@ from src.SensorManager import GripperSensorManager
 
 
 class ParticipantManager:
-    with open('docs/settings_single.json', 'r') as settings_file:
+    with open('docs/settings_dual.json', 'r') as settings_file:
         settings = json.load(settings_file)
     xArmConfig = {}
     for xArm in settings['xArmConfigs'].keys():

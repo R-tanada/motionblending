@@ -12,7 +12,7 @@ class ExManager:
         self.is_Plotting = is_Plotting
         self.is_Recording = is_Recording
 
-        with open('docs/settings_single.json', 'r') as settings_file:
+        with open('docs/settings_dual.json', 'r') as settings_file:
             settings = json.load(settings_file)
 
         from src.CyberneticAvatarMotionManager import \
