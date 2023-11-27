@@ -136,8 +136,9 @@ class MotionManager:
                 posFlag = self.LerpInitPosition()
                 rotFlag = self.SlerpInitRotation()
                 if posFlag == rotFlag == False:
-                    self.initFlag = False
                     print('finish_automation')
+                    if gripper >= 800:
+                        self.initFlag = False
 
             if self.initFlag == False:
                 if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration):
