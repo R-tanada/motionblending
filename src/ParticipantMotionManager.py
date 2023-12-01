@@ -70,7 +70,7 @@ class ParticipantManager:
 
 class MotionManager:
     optiTrackStreamingManager = OptiTrackStreamingManager(
-        mocapServer="127.0.0.1", mocapLocal="127.0.0.1"
+        mocapServer="133.68.108.109", mocapLocal="133.68.108.109"
     )
     streamingThread = threading.Thread(target=optiTrackStreamingManager.stream_run)
     streamingThread.setDaemon(True)
