@@ -2,10 +2,10 @@
     "xArmConfigs": {
         "xArm1": {
             "IP": "192.168.1.199",
-            "Mount": "vertical",
+            "Mount": "right",
             "InitPos": [
-                200,
-                0,
+                350,
+                -100,
                 300
             ],
             "InitRot": [
@@ -14,14 +14,14 @@
                 90
             ],
             "MaxPos": [
-                450,
-                450,
-                400
+                650,
+                100,
+                500
             ],
             "MinPos": [
                 180,
-                -450,
-                210
+                -300,
+                50
             ],
             "MaxRot": [
                 220,
@@ -38,9 +38,9 @@
     "ParticipantsConfigs": {
         "participant1": [
             {
-                "Mount": "vertical",
-                "RigidBody": 4,
-                "SerialCOM": "None",
+                "Mount": "right",
+                "RigidBody": 1,
+                "SerialCOM": "COM10",
                 "Weight": 1,
                 "DataPath": {
                     "position": "resource/pos20230823_181927.csv",
@@ -51,14 +51,14 @@
                 "Target": [
                     {
                         "position": [
-                            407.727325,
-                            241.274719,
-                            210.000031
+                            598.854797,
+                            -254.375107,
+                            341.42691
                         ],
                         "rotation": [
-                            175.643306,
-                            -28.260398,
-                            75.628595
+                            125.578884,
+                            21.519378,
+                            63.309143
                         ],
                         "gripper": 300
                     }
