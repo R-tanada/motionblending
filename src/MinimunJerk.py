@@ -55,11 +55,11 @@ class MinimumJerk:
 
         self.mode = mode
 
-        # self.switchManager = FootSwitchManager()
-        # switchThread = threading.Thread(target=self.switchManager.detect_sensor)
-        # switchThread.setDaemon(True)
-        # if self.mode != 0:
-        #     switchThread.start()
+        self.switchManager = FootSwitchManager()
+        switchThread = threading.Thread(target=self.switchManager.detect_sensor)
+        switchThread.setDaemon(True)
+        if self.mode != 0:
+            switchThread.start()
 
         if self.mode == 4:
             self.personalize = Fitting(path)
@@ -102,12 +102,14 @@ class MinimumJerk:
         isMoving = False
 
         if self.mode != 1:
-            if self.reach_flag == True:
-                if gripper <= 300:
-                    self.init_time = time.perf_counter()
-                    self.x0 = position
-                    self.flag = True
-                    self.reach_flag = False
+            if FootSwitchManager.flag == True:
+                self.init_time = time.perf_counter()
+                self.x0 = position
+                self.flag = True
+                FootSwitchManager.count += 1
+                if FootSwitchManager.count == 2:
+                    FootSwitchManager.flag = False
+                    FootSwitchManager.count = 0
 
             if self.flag == True:
                 self.elaspedTime = time.perf_counter() - self.init_time

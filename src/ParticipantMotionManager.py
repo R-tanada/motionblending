@@ -166,10 +166,7 @@ class MotionManager:
                 rotFlag = self.SlerpInitRotation()
                 if posFlag == rotFlag == False:
                     print("finish_automation")
-                    if gripper >= 500:
-                        self.initFlag = False
-                        self.automation.reach_flag = True
-                        print("placed")
+                    self.initFlag = False
 
             if self.initFlag == False:
                 if self.automation.MonitoringMotion(
