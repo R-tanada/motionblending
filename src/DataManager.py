@@ -8,11 +8,12 @@ from matplotlib import pyplot as plt
 
 
 class DataRecordManager():
+    record_flag = False
+
     def __init__(self, custom: bool = False,  header: list = None, fileName: str = '') -> None:
         self.data = []
         self.header = header
         self.fileName = fileName
-        self.record_flag = False
 
         if custom == True:
             switch_thread = threading.Thread(target=self.key_thread)
@@ -22,9 +23,11 @@ class DataRecordManager():
     def record(self, data):
         self.data.append(data)
 
-    def custom_record(self, data):
-        if self.record_flag == True:
+    def custom_record(self, data, gripper):
+        if DataRecordManager.record_flag == True:
             self.data.append(data)
+            if gripper < 700:
+                DataRecordManager.record_flag = False
         else:
             pass
 
@@ -35,12 +38,7 @@ class DataRecordManager():
             key = input('push foot switch start recording')
 
             if key == 'f':
-                key_count += 1
-
-                if key_count % 2 == 1:
-                    self.record_flag = True
-                else:
-                    self.record_flag = False
+                DataRecordManager.record_flag = True
 
             time.sleep(0.5)
 
