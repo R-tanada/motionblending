@@ -153,7 +153,7 @@ class MotionManager:
             self.GetGripperValue(),
         )
         if self.mode == 0:
-            self.recorder.custom_record(np.hstack((self.elaspedTime, position)))
+            self.recorder.custom_record(np.hstack((self.elaspedTime, position)), gripper)
         velocity, accelaration = self.GetParticipnatMotionInfo(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:

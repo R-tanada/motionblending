@@ -55,7 +55,7 @@ class ExManager:
                     self.cyberneticManager.SetElaspedTime(elapsedTime)
                     transform = self.cyberneticManager.GetSharedTransform()
 
-                    if self.robotManager != None:
+                    if self.robotManager != None and mode != 0:
                         self.robotManager.SendDataToRobot(transform)
 
                     self.FixFrameRate(time.perf_counter() - loopStartTime, 1/FrameRate)
