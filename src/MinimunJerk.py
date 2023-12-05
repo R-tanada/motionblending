@@ -43,7 +43,7 @@ class MinimumJerk:
         self.t0 = 0
         self.tf = 0
         self.x0 = [0, 0, 0]
-        self.target_index = 0
+        self.target_index = 1
         self.pos_list = []
         self.tn = 0
         self.a = 0
@@ -119,9 +119,10 @@ class MinimumJerk:
 
                 if diff_init >= self.initThreshold:
                     self.rot_n = rotation[0]
-                    self.target_index = self.DetermineTarget(
-                        self.target, position, self.pos_list[-1] - self.pos_list[-2]
-                    )
+                    # self.target_index = self.DetermineTarget(
+                    #     self.target, position, self.pos_list[-1] - self.pos_list[-2]
+                    # )
+
                     if self.mode == 2:
                         self.tf = self.CalculateReachingTime_liner(
                             self.time_list[-25],
@@ -150,6 +151,9 @@ class MinimumJerk:
                     )
                     isMoving = True
                     self.flag = False
+                    self.target_index += 1
+                    if self.target_index == 2:
+                        self.target_index = 0
 
         return isMoving
 
