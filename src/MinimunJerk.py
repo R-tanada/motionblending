@@ -24,8 +24,14 @@ class MinimumJerk:
         self.Threshold = Threshold
         self.target = Target
         self.q_init = []
+        self.mount = xArmConfig['Mount']
         for target in self.target:
             target["position"] -= np.array(self.initPos)
+            if self.mount == 'right':
+                target['position'][1] += 100
+            elif self.mount == 'left':
+                target['position'][1] -= 100
+
             target["rotation"] = np.dot(
                 cf.Convert2Matrix(cf.Euler2Quaternion(target["rotation"])),
                 np.dot(initRot, [0, 0, 0, 1]),
@@ -51,6 +57,7 @@ class MinimumJerk:
         self.init_time = time.perf_counter()
         self.init_rot = 0
         self.reach_flag = True
+        self.y_time = 0.8
         # self.coe_personalize = [-4.42089805, 15.94956842, -20.87811584, 10.45458102]
 
         self.mode = mode
@@ -329,26 +336,28 @@ class MinimumJerk:
         # print(weight)
 
         if self.mode == 2:
-            return (
-                self.x0 + (xf - self.x0) * self.func_liner(t),
-                isMoving,
-                weight,
-                30 * self.a * (t**4 - 2 * (t**3) + t**2),
-            )
+                traj = self.x0 + (xf - self.x0) * self.func_liner(t),
+
         elif self.mode == 3:
-            return (
-                self.x0 + (xf - self.x0) * self.func_minimumjerk(t),
-                isMoving,
-                weight,
-                30 * self.a * (t**4 - 2 * (t**3) + t**2),
-            )
+                traj = self.x0 + (xf - self.x0) * self.func_minimumjerk(t),
+
         elif self.mode == 4:
-            return (
-                self.x0 + (xf - self.x0) * self.func_personalize(t),
-                isMoving,
-                weight,
-                30 * self.a * (t**4 - 2 * (t**3) + t**2),
-            )
+                traj = self.x0 + (xf - self.x0) * self.func_personalize(t),
+        
+        if t > self.y_time:
+            t_y = (t - self.y_time)/(1 - self.y_time)
+            print(t_y)
+            if self.mount == 'right':
+                traj[1] -= 100 * self.func_minimumjerk(t_y)
+            elif self.mount == 'left':
+                traj[1] += 100 * self.func_minimumjerk(t_y)
+        
+        return (
+            traj,
+            isMoving,
+            weight,
+            30 * self.a * (t**4 - 2 * (t**3) + t**2),
+        )
 
         # return self.x0 + (xf- self.x0)* self.func_liner(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
 
