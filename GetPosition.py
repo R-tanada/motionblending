@@ -17,10 +17,10 @@ transform = arm.get_position()[1]
 
 with open("docs\settings_dual.json") as f:
     setting_update = json.load(f)
-    setting_update["ParticipantsConfigs"]["participant1"][1]["Target"][1][
+    setting_update["ParticipantsConfigs"]["participant1"][1]["Target"][0][
         "position"
     ] = transform[0:3]
-    setting_update["ParticipantsConfigs"]["participant1"][1]["Target"][1][
+    setting_update["ParticipantsConfigs"]["participant1"][1]["Target"][0][
         "rotation"
     ] = transform[3:6]
 

@@ -18,11 +18,11 @@ def Quaternion2Euler(quaternion, isDeg: bool = True):
 
     if m02 == 1:
         tx = math.atan2(m10, m11)
-        ty = math.pi/2
+        ty = math.pi / 2
         tz = 0
     elif m02 == -1:
         tx = math.atan2(m21, m20)
-        ty = -math.pi/2
+        ty = -math.pi / 2
         tz = 0
     else:
         tx = -math.atan2(-m12, m22)
@@ -37,12 +37,13 @@ def Quaternion2Euler(quaternion, isDeg: bool = True):
     rotEuler = np.array([tx, ty, tz])
     return rotEuler
 
+
 def Euler2Quaternion(euler):
     roll = np.deg2rad(euler[0])
     pitch = np.deg2rad(euler[1])
     yaw = np.deg2rad(euler[2])
 
-    cosRoll = np.cos(roll/2.0)
+    cosRoll = np.cos(roll / 2.0)
     sinRoll = np.sin(roll / 2.0)
     cosPitch = np.cos(pitch / 2.0)
     sinPitch = np.sin(pitch / 2.0)
@@ -56,6 +57,7 @@ def Euler2Quaternion(euler):
 
     rotQuat = [q1, q2, q3, q0]
     return rotQuat
+
 
 def Slerp_Quaternion(Quaternion, initQuaternion, weight):
     if weight == 1:
@@ -72,49 +74,58 @@ def Slerp_Quaternion(Quaternion, initQuaternion, weight):
         elif dot < -1:
             dot = -1
         theta = math.acos(dot)
-        return (math.sin((1 - weight) * theta)/ (math.sin(theta) + e)) * np.array(initQuaternion) + (math.sin(weight * theta)/ (math.sin(theta) + e)) * np.array(Quaternion)
+        return (math.sin((1 - weight) * theta) / (math.sin(theta) + e)) * np.array(
+            initQuaternion
+        ) + (math.sin(weight * theta) / (math.sin(theta) + e)) * np.array(Quaternion)
+
 
 def ConvertAxis_Position(position, axis):
-    if axis == 'vertical':
+    if axis == "vertical":
         position = [position[2], position[0], position[1]]
-    elif axis == 'left':
+    elif axis == "left":
         position = [position[2], -1 * position[1], position[0]]
-    elif axis == 'right':
+    elif axis == "right":
         position = [position[2], position[1], -1 * position[0]]
 
     return position
 
+
 def CnvertAxis_Rotation(rotation, axis):
-    if axis == 'vertical':
+    if axis == "vertical":
         rotation = [rotation[2], rotation[0], rotation[1], rotation[3]]
-    elif axis == 'left':
+    elif axis == "left":
         rotation = [rotation[2], -1 * rotation[1], rotation[0], rotation[3]]
-    elif axis == 'right':
+    elif axis == "right":
         rotation = [rotation[2], rotation[1], -1 * rotation[0], rotation[3]]
 
     return rotation
 
+
 def Convert2Matrix(quaternion):
     qw, qx, qy, qz = quaternion[3], quaternion[1], quaternion[2], quaternion[0]
-    matrix = np.array([ [qw, -qy, qx, qz],
-                        [qy, qw, -qz, qx],
-                        [-qx, qz, qw, qy],
-                        [-qz,-qx, -qy, qw]])
+    matrix = np.array(
+        [[qw, -qy, qx, qz], [qy, qw, -qz, qx], [-qx, qz, qw, qy], [-qz, -qx, -qy, qw]]
+    )
 
     return matrix
 
+
 def Convert2InverseMatrix(quaternion):
     qw, qx, qy, qz = quaternion[3], quaternion[1], quaternion[2], quaternion[0]
-    matrix = np.array([ [qw, -qy, qx, qz],
-                        [qy, qw, -qz, qx],
-                        [-qx, qz, qw, qy],
-                        [-qz,-qx, -qy, qw]])
+    matrix = np.array(
+        [[qw, -qy, qx, qz], [qy, qw, -qz, qx], [-qx, qz, qw, qy], [-qz, -qx, -qy, qw]]
+    )
     matrix = np.linalg.inv(matrix)
 
     return matrix
 
-def ConvertSensorToGripper(sensorValue, InputMax = 1, InputMin = 0, TargetMax = 850, TargetMin = 0):
-    gripperValue = ((sensorValue - InputMin) / (InputMax - InputMin)) * (TargetMax - TargetMin) + TargetMin
+
+def ConvertSensorToGripper(
+    sensorValue, InputMax=1, InputMin=0, TargetMax=850, TargetMin=0
+):
+    gripperValue = ((sensorValue - InputMin) / (InputMax - InputMin)) * (
+        TargetMax - TargetMin
+    ) + TargetMin
 
     if gripperValue > TargetMax:
         gripperValue = TargetMax
@@ -123,13 +134,21 @@ def ConvertSensorToGripper(sensorValue, InputMax = 1, InputMin = 0, TargetMax = 
 
     return gripperValue
 
-def solve_nploy(vec,is_complex=False):
-    dim =len(vec)
+
+def solve_nploy(vec, is_complex=False):
+    ans_list = []
+    dim = len(vec)
     if is_complex:
-        A = np.zeros((dim,dim),dtype=complex)
+        A = np.zeros((dim, dim), dtype=complex)
     else:
-        A = np.zeros((dim,dim))
-    A[np.arange(dim-1),1+np.arange(dim-1)] =1
-    A[-1,:] = -vec
-    ans,vec = np.linalg.eig(A)
-    return ans
+        A = np.zeros((dim, dim))
+    A[np.arange(dim - 1), 1 + np.arange(dim - 1)] = 1
+    A[-1, :] = -vec
+    ans, vec = np.linalg.eig(A)
+    for val in ans:
+        if val.imag == 0:
+            ans_list.append(val.real)
+        else:
+            pass
+    print(ans_list)
+    return ans_list
