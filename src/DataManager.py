@@ -7,13 +7,16 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 
-class DataRecordManager():
+class DataRecordManager:
     record_flag = False
 
-    def __init__(self, custom: bool = False,  header: list = None, fileName: str = '') -> None:
+    def __init__(
+        self, custom: bool = False, header: list = None, fileName: str = ""
+    ) -> None:
         self.data = []
         self.header = header
         self.fileName = fileName
+        self.flag = True
 
         if custom == True:
             switch_thread = threading.Thread(target=self.key_thread)
@@ -23,11 +26,12 @@ class DataRecordManager():
     def record(self, data):
         self.data.append(data)
 
-    def custom_record(self, data, gripper):
-        if DataRecordManager.record_flag == True:
+    def custom_record(self, data, gripper, mount):
+        if DataRecordManager.record_flag == True and self.flag:
             self.data.append(data)
             if gripper < 700:
-                DataRecordManager.record_flag = False
+                self.flag = False
+                print("finish recording" + "_" + mount)
         else:
             pass
 
@@ -35,19 +39,22 @@ class DataRecordManager():
         key_count = 0
 
         while True:
-            key = input('push foot switch start recording')
+            key = input("push foot switch start recording\n")
 
-            if key == 'f':
+            if key == "f":
                 DataRecordManager.record_flag = True
 
             time.sleep(0.5)
 
     def exportAsCSV(self):
         date = datetime.now().strftime("%Y%m%d_%H%M%S")
-        with open('resource/' + self.fileName + date + '.csv', 'w', newline='') as exportFile:
+        with open(
+            "resource/" + self.fileName + date + ".csv", "w", newline=""
+        ) as exportFile:
             writer = csv.writer(exportFile)
             writer.writerow(self.header)
             writer.writerows(self.data)
+
 
 class DataLoadManager:
     def __init__(self, path) -> None:
@@ -70,9 +77,13 @@ class DataLoadManager:
 
         return self.data
 
+
 class DataPlotManager:
     thres = 0
-    def __init__(self, legend: list = None, xlabel: str = None, ylabel: str = None) -> None:
+
+    def __init__(
+        self, legend: list = None, xlabel: str = None, ylabel: str = None
+    ) -> None:
         self.data = []
         self.legend = legend
         self.xlabel = xlabel
@@ -91,7 +102,7 @@ class DataPlotManager:
         #     else:
         #         plt.plot(data[:, -1], data[:, i], label = self.legend[i])
         for i in range(len(self.legend)):
-            plt.plot(data[:, -1], data[:, i], label = self.legend[i])
+            plt.plot(data[:, -1], data[:, i], label=self.legend[i])
         if self.xlabel:
             plt.xlabel(self.xlabel)
         if self.ylabel:
@@ -101,8 +112,9 @@ class DataPlotManager:
         plt.legend()
         plt.show()
 
-if __name__ == '__main__':
-    recorder = DataRecordManager(['x', 'y', 'z'], fileName='position')
+
+if __name__ == "__main__":
+    recorder = DataRecordManager(["x", "y", "z"], fileName="position")
 
     try:
         while True:

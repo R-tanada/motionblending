@@ -6,13 +6,13 @@ import numpy as np
 
 import lib.self.CustomFunction as cf
 from src.DataManager import DataLoadManager, DataPlotManager, DataRecordManager
+from src.FeedbackManager import Vibrotactile
 from src.MinimunJerk import MinimumJerk
 from src.mode_select import mode, name
 
 # # ----- Custom class ----- #
 from src.OptiTrackStreamingManager import OptiTrackStreamingManager
 from src.SensorManager import GripperSensorManager
-from src.FeedbackManager import Vibrotactile
 
 
 class ParticipantManager:
@@ -103,6 +103,7 @@ class MotionManager:
         self.Simulation = is_Simulation
         self.elaspedTime = 0
         self.auto_list = []
+        self.grip_data = 850
 
         self.mode = mode
         print(mode)
@@ -118,19 +119,21 @@ class MotionManager:
         if self.mode == 0:
             # self.recorder2 = DataRecordManager(header=['time', 'velocity'], fileName='velocity', custom=False)
             self.recorder = DataRecordManager(
-                header=["time", "x", "y", "z"], fileName="SI2023_add/" + name + '_' + self.mount, custom=True
+                header=["time", "x", "y", "z"],
+                fileName="SI2023_add/" + name + "_" + self.mount,
+                custom=True,
             )
         # self.recorder = DataPlotManager(legend = ['x_robot'], xlabel='time[s]', ylabel='position[mm]')
 
         # if self.recording:
-            # self.recorder_pos = DataRecordManager(
-            #     header=["x", "y", "z"], fileName="pos"
-            # )
-            # self.recorder_rot = DataRecordManager(
-            #     header=["x", "y", "z", "w"], fileName="rot"
-            # )
-            # self.recorder_grip = DataRecordManager(header=["grip"], fileName="grip")
-            # self.recorder_time = DataRecordManager(header=["time"], fileName="time")
+        # self.recorder_pos = DataRecordManager(
+        #     header=["x", "y", "z"], fileName="pos"
+        # )
+        # self.recorder_rot = DataRecordManager(
+        #     header=["x", "y", "z", "w"], fileName="rot"
+        # )
+        # self.recorder_grip = DataRecordManager(header=["grip"], fileName="grip")
+        # self.recorder_time = DataRecordManager(header=["time"], fileName="time")
 
         if self.Simulation:
             self.data_pos = DataLoadManager(Config["DataPath"]["position"])
@@ -153,7 +156,9 @@ class MotionManager:
             self.GetGripperValue(),
         )
         if self.mode == 0:
-            self.recorder.custom_record(np.hstack((self.elaspedTime, position)), gripper)
+            self.recorder.custom_record(
+                np.hstack((self.elaspedTime, position)), self.grip_data, self.mount
+            )
         velocity, accelaration = self.GetParticipnatMotionInfo(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
@@ -243,7 +248,9 @@ class MotionManager:
         if self.Simulation:
             grip = self.data_grip.getdata()[0]
         else:
-            grip = cf.ConvertSensorToGripper(self.sensorManager.sensorValue)
+            grip = self.grip_data = cf.ConvertSensorToGripper(
+                self.sensorManager.sensorValue
+            )
             # if self.recording:
             #     self.recorder_grip.record([grip])
 
