@@ -212,7 +212,6 @@ class MotionManager:
             position = cf.ConvertAxis_Position(position * 1000, self.mount) - np.array(
                 self.initPosition
             )
-            print(pos_auto)
             self.position = pos_auto * weight + position * (1 - weight)
 
             # self.recorder.record(np.hstack([position[0], pos_auto[0],  self.elaspedTime]))
