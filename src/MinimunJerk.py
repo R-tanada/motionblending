@@ -237,6 +237,8 @@ class MinimumJerk:
             if 0 < normalize and normalize < 0.5:
                 ans = cn
 
+        print(ans)
+
         return ans
 
     def CalculateReachingTime_personal(self, t, v, xf):
@@ -272,7 +274,6 @@ class MinimumJerk:
             if 0 < normalize and normalize < 0.5:
                 ans = cn
 
-        print("ans: {}".format(ans))
         return ans
 
     def CreateGripMotion(self, grip_n, grip_f, frameLength, gripFrame):
@@ -350,13 +351,10 @@ class MinimumJerk:
             if t_y > 1:
                 t_y = 1
                 isMoving = False
-            print(t_y)
             if self.mount == "right":
                 traj[1] -= self.y_pos * np.sin(0.5 * np.pi * t_y)
             elif self.mount == "left":
                 traj[1] += self.y_pos * np.sin(0.5 * np.pi * t_y)
-
-        print(traj)
 
         return (
             traj,

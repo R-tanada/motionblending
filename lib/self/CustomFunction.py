@@ -150,5 +150,4 @@ def solve_nploy(vec, is_complex=False):
             ans_list.append(val.real)
         else:
             pass
-    print(ans_list)
     return ans_list
