@@ -81,9 +81,6 @@ class MinimumJerk:
 
         if isMoving == False:
             position, isMoving = self.posRetained, False
-            self.target_index += 1
-            if self.target_index == 2:
-                self.target_index = 0
 
         return position, isMoving, weight, velocity
 
@@ -106,6 +103,9 @@ class MinimumJerk:
             isMoving = True
         except StopIteration:
             gripper, isMoving = self.gripRetained, False
+            self.target_index += 1
+            if self.target_index == 2:
+                self.target_index = 0
 
         return gripper, isMoving
 
