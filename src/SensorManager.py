@@ -27,7 +27,7 @@ class GripperSensorManager:
                 else:
                     self.sensorValue = 850
 
-                time.sleep(0.004)
+                time.sleep(0.005)
 
         except KeyboardInterrupt:
             print("KeyboardInterrupt >> Stop: BendingSensorManager.py")
@@ -50,7 +50,7 @@ class FootSwitchManager:
                     FootSwitchManager.flag = True
                     print("------ foot switch pressed ------")
 
-                time.sleep(0.004)
+                time.sleep(0.005)
 
         except:
             print("error occured")
