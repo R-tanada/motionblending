@@ -50,7 +50,7 @@ class MinimumJerk:
         self.t0 = 0
         self.tf = 0
         self.x0 = [0, 0, 0]
-        self.target_index = 1
+        self.target_index = 0
         self.pos_list = []
         self.tn = 0
         self.a = 0
