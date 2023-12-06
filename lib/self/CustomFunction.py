@@ -145,6 +145,7 @@ def solve_nploy(vec, is_complex=False):
     A[np.arange(dim - 1), 1 + np.arange(dim - 1)] = 1
     A[-1, :] = -vec
     ans, vec = np.linalg.eig(A)
+    print(ans)
     for val in ans:
         if val.imag == 0:
             ans_list.append(val.real)
