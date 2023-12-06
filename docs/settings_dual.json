@@ -1,1 +1,144 @@
-{"xArmConfigs": {"xArm1": {"IP": "192.168.1.199", "Mount": "right", "InitPos": [350, -100, 120], "InitRot": [180, 0, 90], "MaxPos": [650, 100, 500], "MinPos": [200, -300, 50], "MaxRot": [220, 20, 20], "MinRot": [180, -20, -20]}, "xArm2": {"IP": "192.168.1.228", "Mount": "left", "InitPos": [350, 100, 120], "InitRot": [180, 0, -90], "MaxPos": [650, 300, 490], "MinPos": [200, -100, 50], "MaxRot": [220, 20, 20], "MinRot": [180, -20, -20]}}, "ParticipantsConfigs": {"participant1": [{"Mount": "right", "RigidBody": 1, "SerialCOM": "COM10", "Weight": 1, "Target": [{"position": [553.271484, -277.355438, 186.003571], "rotation": [125.150083, 25.533005, 60.584385], "gripper": 300}, {"position": [616.842651, -268.411133, 114.82502], "rotation": [124.264061, 24.743125, 56.755022], "gripper": 300}]}, {"Mount": "left", "RigidBody": 2, "SerialCOM": "COM6", "Weight": 1, "Target": [{"position": [549.883118, 281.021881, 147.943451], "rotation": [-124.660433, 21.806201, -60.766185], "gripper": 300}, {"position": [636.409851, 254.863373, 78.361748], "rotation": [-119.043269, 26.670211, -51.261674], "gripper": 300}]}]}}
+{
+    "xArmConfigs": {
+        "xArm1": {
+            "IP": "192.168.1.199",
+            "Mount": "right",
+            "InitPos": [
+                350,
+                -100,
+                120
+            ],
+            "InitRot": [
+                180,
+                0,
+                90
+            ],
+            "MaxPos": [
+                650,
+                100,
+                500
+            ],
+            "MinPos": [
+                200,
+                -300,
+                50
+            ],
+            "MaxRot": [
+                220,
+                20,
+                20
+            ],
+            "MinRot": [
+                180,
+                -20,
+                -20
+            ]
+        },
+        "xArm2": {
+            "IP": "192.168.1.228",
+            "Mount": "left",
+            "InitPos": [
+                350,
+                100,
+                120
+            ],
+            "InitRot": [
+                180,
+                0,
+                -90
+            ],
+            "MaxPos": [
+                650,
+                300,
+                490
+            ],
+            "MinPos": [
+                200,
+                -100,
+                50
+            ],
+            "MaxRot": [
+                220,
+                20,
+                20
+            ],
+            "MinRot": [
+                180,
+                -20,
+                -20
+            ]
+        }
+    },
+    "ParticipantsConfigs": {
+        "participant1": [
+            {
+                "Mount": "right",
+                "RigidBody": 1,
+                "SerialCOM": "COM10",
+                "Weight": 1,
+                "Target": [
+                    {
+                        "position": [
+                            553.271484,
+                            -277.355438,
+                            186.003571
+                        ],
+                        "rotation": [
+                            125.150083,
+                            25.533005,
+                            60.584385
+                        ],
+                        "gripper": 300
+                    },
+                    {
+                        "position": [
+                            616.842651,
+                            -268.411133,
+                            114.82502
+                        ],
+                        "rotation": [
+                            124.264061,
+                            24.743125,
+                            56.755022
+                        ],
+                        "gripper": 300
+                    }
+                ]
+            },
+            {
+                "Mount": "left",
+                "RigidBody": 2,
+                "SerialCOM": "COM6",
+                "Weight": 1,
+                "Target": [
+                    {
+                        "position": [
+                            549.883118,
+                            281.021881,
+                            147.943451
+                        ],
+                        "rotation": [
+                            -124.660433,
+                            21.806201,
+                            -60.766185
+                        ],
+                        "gripper": 300
+                    },
+                    {
+                        "position": [
+                            636.409851,
+                            254.863373,
+                            78.361748
+                        ],
+                        "rotation": [
+                            -119.043269,
+                            26.670211,
+                            -51.261674
+                        ],
+                        "gripper": 300
+                    }
+                ]
+            }
+        ]
+    }
+}

@@ -274,6 +274,8 @@ class MinimumJerk:
             if 0 < normalize and normalize < 0.5:
                 ans = cn
 
+        print(ans)
+
         return ans
 
     def CreateGripMotion(self, grip_n, grip_f, frameLength, gripFrame):
