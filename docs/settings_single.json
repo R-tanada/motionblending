@@ -1,7 +1,7 @@
 {
     "xArmConfigs": {
         "xArm1": {
-            "IP": "192.168.1.217",
+            "IP": "192.168.1.199",
             "Mount": "right",
             "InitPos": [
                 250,
@@ -39,7 +39,7 @@
         "participant1": [
             {
                 "Mount": "right",
-                "RigidBody": 4,
+                "RigidBody": 1,
                 "SerialCOM": "COM10",
                 "Weight": 1,
                 "DataPath": {
