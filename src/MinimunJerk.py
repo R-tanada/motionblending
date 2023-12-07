@@ -63,11 +63,11 @@ class MinimumJerk:
 
         self.mode = mode
 
-        self.switchManager = FootSwitchManager()
-        switchThread = threading.Thread(target=self.switchManager.detect_sensor)
-        switchThread.setDaemon(True)
-        if self.mode != 0:
-            switchThread.start()
+        # self.switchManager = FootSwitchManager()
+        # switchThread = threading.Thread(target=self.switchManager.detect_sensor)
+        # switchThread.setDaemon(True)
+        # if self.mode != 0:
+        #     switchThread.start()
 
         if self.mode == 4:
             self.personalize = Fitting(path)

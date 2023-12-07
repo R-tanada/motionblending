@@ -118,13 +118,13 @@ class MotionManager:
         sensorThread.start()
 
         # self.recorder = DataPlotManager(legend = ['x_mocap', 'x_minimumjerk'], xlabel='time[s]', ylabel='position[mm]')
-        if self.mode == 0:
-            # self.recorder2 = DataRecordManager(header=['time', 'velocity'], fileName='velocity', custom=False)
-            self.recorder = DataRecordManager(
-                header=["time", "x", "y", "z"],
-                fileName="SI2023_add/" + name + "_" + self.mount,
-                custom=True,
-            )
+        # if self.mode == 0:
+        #     # self.recorder2 = DataRecordManager(header=['time', 'velocity'], fileName='velocity', custom=False)
+        #     self.recorder = DataRecordManager(
+        #         header=["time", "x", "y", "z"],
+        #         fileName="SI2023_add/" + name + "_" + self.mount,
+        #         custom=True,
+        #     )
         # self.recorder = DataPlotManager(legend = ['x_robot'], xlabel='time[s]', ylabel='position[mm]')
 
         # if self.recording:
@@ -157,10 +157,10 @@ class MotionManager:
             self.GetRotation(),
             self.GetGripperValue(),
         )
-        if self.mode == 0:
-            self.recorder.custom_record(
-                np.hstack((self.elaspedTime, position)), self.grip_data, self.mount
-            )
+        # if self.mode == 0:
+        #     self.recorder.custom_record(
+        #         np.hstack((self.elaspedTime, position)), self.grip_data, self.mount
+        #     )
         velocity, accelaration = self.GetParticipnatMotionInfo(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
@@ -415,7 +415,8 @@ class MotionManager:
         # self.recorder_grip.exportAsCSV()
         # self.recorder_time.exportAsCSV()
         # self.recorder2.exportAsCSV()
-        self.recorder.exportAsCSV()
+        # self.recorder.exportAsCSV()
+        pass
 
     def PlotGraph(self):
         pass
