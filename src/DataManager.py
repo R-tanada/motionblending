@@ -18,10 +18,10 @@ class DataRecordManager:
         self.fileName = fileName
         self.flag = True
 
-        if custom == True:
-            switch_thread = threading.Thread(target=self.key_thread)
-            switch_thread.setDaemon(True)
-            switch_thread.start()
+        # if custom == True:
+        #     switch_thread = threading.Thread(target=self.key_thread)
+        #     switch_thread.setDaemon(True)
+        #     switch_thread.start()
 
     def record(self, data):
         self.data.append(data)
@@ -38,13 +38,23 @@ class DataRecordManager:
     def key_thread(self):
         key_count = 0
 
-        while True:
-            key = input("push foot switch start recording\n")
+        try:
+            while True:
+                key = input("f: start recording, s: export as csv\n")
 
-            if key == "f":
-                DataRecordManager.record_flag = True
+                if key == "f":
+                    DataRecordManager.record_flag = True
 
-            time.sleep(0.5)
+                elif key == "s":
+                    self.exportAsCSV()
+                    break
+
+                time.sleep(0.5)
+
+        except KeyboardInterrupt:
+            print("finish key thread")
+
+        print("finished key thread")
 
     def exportAsCSV(self):
         date = datetime.now().strftime("%Y%m%d_%H%M%S")

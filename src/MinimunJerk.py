@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 import lib.self.CustomFunction as cf
 import lib.self.function as fc
 from src.DataManager import DataPlotManager
-from src.mode_select import mode, path
+from src.mode_select import mode, path_left, path_right
 from src.SensorManager import FootSwitchManager
 
 
@@ -63,14 +63,17 @@ class MinimumJerk:
 
         self.mode = mode
 
-        # self.switchManager = FootSwitchManager()
-        # switchThread = threading.Thread(target=self.switchManager.detect_sensor)
-        # switchThread.setDaemon(True)
-        # if self.mode != 0:
-        #     switchThread.start()
+        self.switchManager = FootSwitchManager()
+        switchThread = threading.Thread(target=self.switchManager.detect_sensor)
+        switchThread.setDaemon(True)
+        if self.mode != 0:
+            switchThread.start()
 
         if self.mode == 4:
-            self.personalize = Fitting(path)
+            if self.mount == "right":
+                self.personalize = Fitting(path_right)
+            elif self.mount == "left":
+                self.personalize = Fitting(path_left)
 
     def GetPosition(self, elaspedTime):
         self.elaspedTime = time.perf_counter() - self.init_time
@@ -394,10 +397,16 @@ class Fitting:
         self.coe = self.custom_fit(time, norm)
         print(self.coe)
 
-        # y_fit = self.coe[0] * time ** 5 + self.coe[1] * time ** 4 + self.coe[2] * time ** 3 + self.coe[3] * time ** 2 + (1 - (self.coe[0] + self.coe[1] + self.coe[2] + self.coe[3])) * time
-        # plt.plot(time, norm)
-        # plt.plot(time, y_fit)
-        # plt.show()
+        y_fit = (
+            self.coe[0] * time**5
+            + self.coe[1] * time**4
+            + self.coe[2] * time**3
+            + self.coe[3] * time**2
+            + (1 - (self.coe[0] + self.coe[1] + self.coe[2] + self.coe[3])) * time
+        )
+        plt.plot(time, norm)
+        plt.plot(time, y_fit)
+        plt.show()
 
     def load(self, path):
         with open(path) as file:
