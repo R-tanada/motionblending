@@ -74,7 +74,7 @@
             {
                 "Mount": "right",
                 "RigidBody": 1,
-                "SerialCOM": "COM6",
+                "SerialCOM": "COM4",
                 "Weight": 1,
                 "Target": [
                     {
@@ -108,7 +108,7 @@
             {
                 "Mount": "left",
                 "RigidBody": 2,
-                "SerialCOM": "COM10",
+                "SerialCOM": "COM5",
                 "Weight": 1,
                 "Target": [
                     {
