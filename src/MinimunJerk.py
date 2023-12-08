@@ -115,7 +115,7 @@ class MinimumJerk:
     def MonitoringMotion(self, position, rotation, gripper, velocity, accelaration):
         isMoving = False
 
-        if self.mode != 1:
+        if self.mode == 2 or self.mode == 3 or self.mode == 4:
             if FootSwitchManager.flag == True:
                 self.init_time = time.perf_counter()
                 self.x0 = position
@@ -172,7 +172,7 @@ class MinimumJerk:
         self.tn = tn
         DataPlotManager.thres = tn
         frameLength = int((self.tf - (tn - self.t0)) * self.freq)
-        self.CreateGripMotion(grip_n, grip_f, frameLength, gripFrame=150)
+        self.CreateGripMotion(grip_n, grip_f, frameLength, gripFrame=200)
 
     def DetermineTarget(self, target_list, position, vector):
         D_list = []

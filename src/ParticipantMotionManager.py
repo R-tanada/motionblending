@@ -9,7 +9,6 @@ from src.DataManager import DataLoadManager, DataPlotManager, DataRecordManager
 from src.FeedbackManager import Vibrotactile
 from src.MinimunJerk import MinimumJerk
 from src.mode_select import mode, name
-
 # # ----- Custom class ----- #
 from src.OptiTrackStreamingManager import OptiTrackStreamingManager
 from src.SensorManager import GripperSensorManager
@@ -130,6 +129,8 @@ class MotionManager:
             switch_thread.start()
         # self.recorder = DataPlotManager(legend = ['x_robot'], xlabel='time[s]', ylabel='position[mm]')
 
+        # elif self.mode != 5:
+        #     self.recorder_pos
         # if self.recording:
         # self.recorder_pos = DataRecordManager(
         #     header=["x", "y", "z"], fileName="pos"
@@ -298,7 +299,7 @@ class MotionManager:
         self.updateInitPosition = self.initPosition - (
             np.array(position) - self.GetPosition()
         )
-        p_list = np.linspace(self.updateInitPosition, self.initPosition, 500)
+        p_list = np.linspace(self.updateInitPosition, self.initPosition, 300)
         self.iter_initPos = iter(p_list)
 
     def UpdateInitRotation(self, rotation):

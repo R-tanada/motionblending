@@ -76,7 +76,7 @@ class ExManager:
                     self.FixFrameRate(
                         time.perf_counter() - loopStartTime, 1 / FrameRate
                     )
-                    self.CheckFrameRate(time.perf_counter() - loopStartTime)
+                    # self.CheckFrameRate(time.perf_counter() - loopStartTime)
 
                 else:
                     keycode = self.MonitorKeyEvent(is_Visualize=self.is_Visualize)
