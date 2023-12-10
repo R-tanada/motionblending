@@ -134,7 +134,7 @@ if __name__ == "__main__":
     is_Recording = False
     mode = mode_decided
     print(mode)
-    if mode == 0:
+    if mode == 1 or mode == 2 or mode == 3 or mode == 4:
         is_Recording = True
     ExManager(
         is_Simulation=False,

@@ -129,17 +129,13 @@ class MotionManager:
             switch_thread.start()
         # self.recorder = DataPlotManager(legend = ['x_robot'], xlabel='time[s]', ylabel='position[mm]')
 
-        # elif self.mode != 5:
-        #     self.recorder_pos
-        # if self.recording:
-        # self.recorder_pos = DataRecordManager(
-        #     header=["x", "y", "z"], fileName="pos"
-        # )
-        # self.recorder_rot = DataRecordManager(
-        #     header=["x", "y", "z", "w"], fileName="rot"
-        # )
-        # self.recorder_grip = DataRecordManager(header=["grip"], fileName="grip")
-        # self.recorder_time = DataRecordManager(header=["time"], fileName="time")
+        elif self.mode == 1 or self.mode == 2 or self.mode == 3 or self.mode == 4:
+            self.recorder_user = DataRecordManager(
+                header=["x", "y", "z"], fileName="user_data/" + name + '_' + self.mode
+            )
+            self.recorder_robot = DataRecordManager(
+                header=["x", "y", "z"], fileName="robot_data/" + name + '_' + self.mode
+            )
 
         if self.Simulation:
             self.data_pos = DataLoadManager(Config["DataPath"]["position"])
@@ -200,13 +196,14 @@ class MotionManager:
             position = self.data_pos.getdata()
         else:
             position = MotionManager.optiTrackStreamingManager.position[self.rigidBody]
-            # if self.recording:
-            #     self.recorder_pos.record(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             self.position = cf.ConvertAxis_Position(
                 position * 1000, self.mount
             ) - np.array(self.initPosition)
+
+            self.recorder_user.record(self.position)
+            self.recorder_robot.record(self.position)
 
         else:
             (
@@ -219,6 +216,9 @@ class MotionManager:
                 self.initPosition
             )
             self.position = pos_auto * weight + position * (1 - weight)
+
+            self.recorder_user.record(position)
+            self.recorder_robot.record(self.position)
 
             # self.recorder.record(np.hstack([position[0], pos_auto[0],  self.elaspedTime]))
 
@@ -420,7 +420,8 @@ class MotionManager:
         # self.recorder_time.exportAsCSV()
         # self.recorder2.exportAsCSV()
         # self.recorder.exportAsCSV()
-        pass
+        self.recorder_robot.exportAsCSV()
+        self.recorder_user.exportAsCSV()
 
     def PlotGraph(self):
         pass

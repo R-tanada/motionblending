@@ -14,6 +14,12 @@ from src.SensorManager import FootSwitchManager
 
 
 class MinimumJerk:
+    footswitch = FootSwitchManager()
+    switchThread = threading.Thread(target=footswitch.detect_sensor)
+    switchThread.setDaemon(True)
+    if mode != 0:
+        switchThread.start()
+
     def __init__(self, Target: list, xArmConfig: dict, Threshold=300) -> None:
         print("minimum init rot" + str(xArmConfig["InitRot"]))
         self.initPos = xArmConfig["InitPos"]
@@ -63,12 +69,6 @@ class MinimumJerk:
 
         self.mode = mode
 
-        self.switchManager = FootSwitchManager()
-        switchThread = threading.Thread(target=self.switchManager.detect_sensor)
-        switchThread.setDaemon(True)
-        if self.mode != 0:
-            switchThread.start()
-
         if self.mode == 4:
             if self.mount == "right":
                 self.personalize = Fitting(path_right)
@@ -116,14 +116,14 @@ class MinimumJerk:
         isMoving = False
 
         if self.mode == 2 or self.mode == 3 or self.mode == 4:
-            if FootSwitchManager.flag == True:
+            if MinimumJerk.footswitch.flag == True:
                 self.init_time = time.perf_counter()
                 self.x0 = position
                 self.flag = True
-                FootSwitchManager.count += 1
-                if FootSwitchManager.count == 2:
-                    FootSwitchManager.flag = False
-                    FootSwitchManager.count = 0
+                MinimumJerk.footswitch.count += 1
+                if MinimumJerk.footswitch.count == 2:
+                    MinimumJerk.footswitch.flag = False
+                    MinimumJerk.footswitch.count = 0
 
             if self.flag == True:
                 self.elaspedTime = time.perf_counter() - self.init_time

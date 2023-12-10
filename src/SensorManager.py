@@ -34,11 +34,9 @@ class GripperSensorManager:
 
 
 class FootSwitchManager:
-    flag = False
-    count = 0
-
     def __init__(self) -> None:
-        pass
+        self.flag = False
+        self.count = 0
 
     def detect_sensor(self):
         time.sleep(3)
@@ -47,7 +45,7 @@ class FootSwitchManager:
             while True:
                 key = input("press foot switch to start predicition")
                 if key == "f":
-                    FootSwitchManager.flag = True
+                    self.flag = True
                     print("------ foot switch pressed ------")
 
                 time.sleep(0.005)
