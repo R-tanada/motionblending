@@ -88,6 +88,7 @@ class ExManager:
 
         except KeyboardInterrupt:
             print("\nKeyboardInterrupt >> Stop: mainLoop()")
+            print('Task Completion Time >> {}[s]'.format(str(time.perf_counter()-initTime)))
             if self.robotManager != None:
                 self.robotManager.DisConnect()
                 print("Successfully Disconnected")
