@@ -40,7 +40,7 @@
             {
                 "Mount": "right",
                 "RigidBody": 1,
-                "SerialCOM": "COM10",
+                "SerialCOM": "None",
                 "Weight": 1,
                 "DataPath": {
                     "position": "resource/pos20230823_181927.csv",

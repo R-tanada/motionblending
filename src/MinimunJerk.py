@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 
 import lib.self.CustomFunction as cf
 import lib.self.function as fc
-from src.DataManager import DataPlotManager
+from src.DataManager import DataPlotManager, DataRecordManager
 from src.mode_select import mode, path
 from src.SensorManager import FootSwitchManager
 
@@ -46,11 +46,13 @@ class MinimumJerk:
         self.target_index = 0
         self.pos_list = []
         self.tn = 0
-        self.a = 0
+        self.a
         self.elaspedTime = 0
         self.init_time = time.perf_counter()
         self.init_rot = 0
         # self.coe_personalize = [-4.42089805, 15.94956842, -20.87811584, 10.45458102]
+        self.recorder = DataRecordManager(header = ['t_0', 't_f', 'x_0', 'x_f'], fileName='resource\linear')
+
 
         self.mode = mode
 
@@ -136,6 +138,9 @@ class MinimumJerk:
                             velocity,
                             self.target[self.target_index]["position"],
                         )
+
+                    self.recorder.record([0, self.tf, self.x0, self.target[self.target_index]["position"]])
+
                     self.CreateMotionData(
                         rotation,
                         gripper,
@@ -357,6 +362,10 @@ class MinimumJerk:
     # return self.x0 + (xf- self.x0)* (6* (t** 5)- 15* (t** 4)+ 10* (t** 3)), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)
 
 
+    def exportascsv(self):
+        self.recorder.exportAsCSV()
+
+
 class Fitting:
     def __init__(self, path) -> None:
         data = self.load(path)
@@ -371,10 +380,10 @@ class Fitting:
         self.coe = self.custom_fit(time, norm)
         print(self.coe)
 
-        # y_fit = self.coe[0] * time ** 5 + self.coe[1] * time ** 4 + self.coe[2] * time ** 3 + self.coe[3] * time ** 2 + (1 - (self.coe[0] + self.coe[1] + self.coe[2] + self.coe[3])) * time
-        # plt.plot(time, norm)
-        # plt.plot(time, y_fit)
-        # plt.show()
+        y_fit = self.coe[0] * time ** 5 + self.coe[1] * time ** 4 + self.coe[2] * time ** 3 + self.coe[3] * time ** 2 + (1 - (self.coe[0] + self.coe[1] + self.coe[2] + self.coe[3])) * time
+        plt.plot(time, norm)
+        plt.plot(time, y_fit)
+        plt.show()
 
     def load(self, path):
         with open(path) as file:

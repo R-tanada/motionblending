@@ -57,7 +57,7 @@ class ParticipantManager:
             self.motionManagers[Config['Mount']].PlotGraph()
 
 class MotionManager:
-    optiTrackStreamingManager = OptiTrackStreamingManager(mocapServer = "133.68.108.109", mocapLocal = "133.68.108.109")
+    optiTrackStreamingManager = OptiTrackStreamingManager(mocapServer = "127.0.0.1", mocapLocal = "127.0.0.1")
     streamingThread = threading.Thread(target = optiTrackStreamingManager.stream_run)
     streamingThread.setDaemon(True)
     streamingThread.start()
@@ -104,11 +104,14 @@ class MotionManager:
             self.recorder3 = DataRecordManager(header=['time', 'x', 'y', 'z'], fileName='SI2023/'+name, custom=True)
         # self.recorder3 = DataPlotManager(legend = ['x_robot'], xlabel='time[s]', ylabel='position[mm]')
 
-        if self.recording:
-            self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'], fileName='pos')
-            self.recorder_rot = DataRecordManager(header = ['x', 'y', 'z', 'w'], fileName='rot')
-            self.recorder_grip = DataRecordManager(header = ['grip'], fileName='grip')
-            self.recorder_time = DataRecordManager(header = ['time'], fileName='time')
+        if self.mode == 1 or self.mode == 2 or self.mode == 3 or self.mode == 4:
+            self.recorder = DataRecordManager(header=['time', 'x', 'y', 'z'], fileName='linear/pos')
+
+        # if self.recording:
+        #     self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'], fileName='pos')
+        #     self.recorder_rot = DataRecordManager(header = ['x', 'y', 'z', 'w'], fileName='rot')
+        #     self.recorder_grip = DataRecordManager(header = ['grip'], fileName='grip')
+        #     self.recorder_time = DataRecordManager(header = ['time'], fileName='time')
 
         if self.Simulation:
             self.data_pos = DataLoadManager(Config['DataPath']['position'])
@@ -321,6 +324,7 @@ class MotionManager:
         # self.recorder_time.exportAsCSV()
         # self.recorder2.exportAsCSV()
         self.recorder3.exportAsCSV()
+        self.automation.exportascsv()
 
     def PlotGraph(self):
         pass
