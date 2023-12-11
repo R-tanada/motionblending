@@ -121,7 +121,7 @@ class MotionManager:
             # self.recorder2 = DataRecordManager(header=['time', 'velocity'], fileName='velocity', custom=False)
             self.recorder = DataRecordManager(
                 header=["time", "x", "y", "z"],
-                fileName="SI2023_add/" + name + "_" + self.mount,
+                fileName=name + "/" + "model_data/" + self.mount,
                 custom=True,
             )
             switch_thread = threading.Thread(target=self.recorder.key_thread)
@@ -131,10 +131,16 @@ class MotionManager:
 
         elif self.mode == 1 or self.mode == 2 or self.mode == 3 or self.mode == 4:
             self.recorder_user = DataRecordManager(
-                header=["x", "y", "z"], fileName="user_data/" + name + '_' + self.mode
+                header=["x", "y", "z"], fileName=name + "/" + 'user_data/' + str(self.mode) + '_' + self.mount
             )
             self.recorder_robot = DataRecordManager(
-                header=["x", "y", "z"], fileName="robot_data/" + name + '_' + self.mode
+                header=["x", "y", "z"], fileName=name + "/" + 'robot_data/' + str(self.mode) + '_' + self.mount
+            )
+            self.recorder_traj = DataRecordManager(
+                header=["x", "y", "z"], fileName=name + "/" + 'auto_data/' + str(self.mode) + '_' + self.mount
+            )
+            self.recorder_time = DataRecordManager(
+                header=["x", "y", "z"], fileName=name + "/" + 'time_data/' + str(self.mode) + '_' + self.mount
             )
 
         if self.Simulation:
@@ -202,8 +208,10 @@ class MotionManager:
                 position * 1000, self.mount
             ) - np.array(self.initPosition)
 
-            self.recorder_user.record(self.position)
-            self.recorder_robot.record(self.position)
+            if self.mode == 1 or self.mode == 2 or self.mode == 3 or self.mode == 4:
+                self.recorder_user.record(self.position)
+                self.recorder_robot.record(self.position)
+                self.recorder_traj.record([0, 0, 0])
 
         else:
             (
@@ -217,8 +225,10 @@ class MotionManager:
             )
             self.position = pos_auto * weight + position * (1 - weight)
 
-            self.recorder_user.record(position)
-            self.recorder_robot.record(self.position)
+            if self.mode == 1 or self.mode == 2 or self.mode == 3 or self.mode == 4:
+                self.recorder_user.record(position)
+                self.recorder_robot.record(self.position)
+                self.recorder_traj.record(pos_auto)
 
             # self.recorder.record(np.hstack([position[0], pos_auto[0],  self.elaspedTime]))
 
@@ -422,6 +432,8 @@ class MotionManager:
         # self.recorder.exportAsCSV()
         self.recorder_robot.exportAsCSV()
         self.recorder_user.exportAsCSV()
+        self.recorder_traj.exportAsCSV()
+        self.recorder_time.exportAsCSV()
 
     def PlotGraph(self):
         pass
@@ -434,5 +446,5 @@ class MotionManager:
 
         else:
             self.elaspedTime = elaspedTime
-            # if self.recording == True:
-            #     self.recorder_time.record([self.elaspedTime])
+            if self.mode == 1 or self.mode == 2 or self.mode == 3 or self.mode == 4:
+                self.recorder_time.record([self.elaspedTime])

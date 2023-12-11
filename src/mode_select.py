@@ -1,4 +1,4 @@
 mode = 3
-name = "nakamura"
-path_right = "resource\SI2023_add/nakamura_right20231208_145037.csv"
-path_left = "resource\SI2023_add/nakamura_left20231208_145040.csv"
+name = "sakurai"
+path_right = "resource/sakurai/model_data/right20231211_164037.csv"
+path_left = "resource/sakurai/model_data\left20231211_164042.csv"
