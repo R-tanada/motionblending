@@ -87,6 +87,7 @@ class MotionManager:
         self.Simulation = is_Simulation
         self.elaspedTime = 0
         self.auto_list = []
+        self.switch_flag = False
 
         self.mode = mode
         print(mode)
@@ -143,7 +144,8 @@ class MotionManager:
                     print('finish_automation')
 
             if self.initFlag == False:
-                if self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration):
+                self.auto_flag, self.switch_flag = self.automation.MonitoringMotion(position, rotation, gripper, velocity, accelaration)
+                if self.auto_flag == True:
                     self.isMoving_Pos = self.isMoving_Rot = self.isMoving_Grip = self.isMoving = self.initFlag = True
 
         return {'position': position, 'rotation': rotation, 'gripper': gripper, 'weight': self.weight}
@@ -153,18 +155,23 @@ class MotionManager:
             position = self.data_pos.getdata()
         else:
             position = MotionManager.optiTrackStreamingManager.position[self.rigidBody]
-            if self.recording:
-                self.recorder_pos.record(position)
+            # if self.recording:
+            #     self.recorder_pos.record(position)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             self.position = cf.ConvertAxis_Position(position * 1000, self.mount) - np.array(self.initPosition)
+            print(self.switch_flag)
+            if self.switch_flag == True:
+                self.recorder.record(np.hstack([self.elaspedTime,  self.position]))
 
         else:
             pos_auto, self.isMoving_Pos, weight, velocity_auto = self.automation.GetPosition(self.elaspedTime)
             position = cf.ConvertAxis_Position(position * 1000, self.mount) - np.array(self.initPosition)
             self.position = pos_auto * weight + position * (1 - weight)
 
-            # self.recorder.record(np.hstack([position[0], pos_auto[0],  self.elaspedTime]))
+            if self.isMoving_Pos == True:
+                self.recorder.record(np.hstack([self.elaspedTime,  position]))
+                self.switch_flag = False
 
         return self.position
 
@@ -173,8 +180,8 @@ class MotionManager:
             rotation = self.data_rot.getdata()
         else:
             rotation = MotionManager.optiTrackStreamingManager.rotation[self.rigidBody]
-            if self.recording:
-                self.recorder_rot.record(rotation)
+            # if self.recording:
+            #     self.recorder_rot.record(rotation)
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             quaternion = cf.CnvertAxis_Rotation(rotation, self.mount)
@@ -197,8 +204,8 @@ class MotionManager:
             grip = self.data_grip.getdata()[0]
         else:
             grip = cf.ConvertSensorToGripper(self.sensorManager.sensorValue)
-            if self.recording:
-                self.recorder_grip.record([grip])
+            # if self.recording:
+            #     self.recorder_grip.record([grip])
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             gripper = grip
@@ -212,8 +219,8 @@ class MotionManager:
             initPosition = self.data_pos.getdata()
         else:
             initPosition = MotionManager.optiTrackStreamingManager.position[self.rigidBody]
-            if self.recording:
-                self.recorder_pos.record(initPosition)
+            # if self.recording:
+            #     self.recorder_pos.record(initPosition)
 
         self.initPosition = cf.ConvertAxis_Position(initPosition * 1000, self.mount)
 
@@ -222,8 +229,8 @@ class MotionManager:
             initQuaternion = self.data_rot.getdata()
         else:
             initQuaternion = MotionManager.optiTrackStreamingManager.rotation[self.rigidBody]
-            if self.recording:
-                self.recorder_rot.record(initQuaternion)
+            # if self.recording:
+            #     self.recorder_rot.record(initQuaternion)
 
         quaternion = cf.CnvertAxis_Rotation(initQuaternion, self.mount)
         if quaternion[3] < 0:
@@ -323,7 +330,7 @@ class MotionManager:
         # self.recorder_grip.exportAsCSV()
         # self.recorder_time.exportAsCSV()
         # self.recorder2.exportAsCSV()
-        self.recorder3.exportAsCSV()
+        self.recorder.exportAsCSV()
         self.automation.exportascsv()
 
     def PlotGraph(self):
@@ -337,5 +344,5 @@ class MotionManager:
 
         else:
             self.elaspedTime = elaspedTime
-            if self.recording == True:
-                self.recorder_time.record([self.elaspedTime])
+            # if self.recording == True:
+                # self.recorder_time.record([self.elaspedTime])
