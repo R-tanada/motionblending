@@ -106,7 +106,7 @@ class MotionManager:
         # self.recorder3 = DataPlotManager(legend = ['x_robot'], xlabel='time[s]', ylabel='position[mm]')
 
         if self.mode == 1 or self.mode == 2 or self.mode == 3 or self.mode == 4:
-            self.recorder = DataRecordManager(header=['time', 'x', 'y', 'z'], fileName='linear/pos')
+            self.recorder = DataRecordManager(header=['time', 'x', 'y', 'z'], fileName='minimum/pos')
 
         # if self.recording:
         #     self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'], fileName='pos')

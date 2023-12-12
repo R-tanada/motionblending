@@ -50,7 +50,7 @@ class MinimumJerk:
         self.init_time = time.perf_counter()
         self.init_rot = 0
         # self.coe_personalize = [-4.42089805, 15.94956842, -20.87811584, 10.45458102]
-        self.recorder = DataRecordManager(header = ['t_0', 't_f', 'x_0', 'x_f', 't_p'], fileName='linear/params')
+        self.recorder = DataRecordManager(header = ['t_0', 't_f', 'x_0', 'x_f', 't_p'], fileName='minimum/params')
         self.switch_flag = False
 
 
