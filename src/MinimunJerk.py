@@ -50,7 +50,7 @@ class MinimumJerk:
         self.init_time = time.perf_counter()
         self.init_rot = 0
         # self.coe_personalize = [-4.42089805, 15.94956842, -20.87811584, 10.45458102]
-        self.recorder = DataRecordManager(header = ['t_0', 't_f', 'x_0', 'x_f', 't_p'], fileName='minimum/params')
+        self.recorder = DataRecordManager(header = ['t_0', 't_f', 'x_0', 'x_f', 't_p'], fileName='linear/params')
         self.switch_flag = False
 
 
@@ -101,7 +101,7 @@ class MinimumJerk:
 
     def MonitoringMotion(self, position, rotation, gripper, velocity, accelaration):
         isMoving = False
-        self.switch_flag = False
+        return_switch = False
 
         if self.mode != 1:
             if self.switchManager.flag == True:
@@ -116,8 +116,11 @@ class MinimumJerk:
                 diff_init = np.linalg.norm(np.array(position) - np.array(self.x0))
                 self.time_list.append(self.elaspedTime)
                 self.pos_list.append(position)
+                if self.switch_flag == True:
+                    return_switch = True
 
                 if diff_init >= self.initThreshold:
+                    self.switch_flag = False
                     self.rot_n = rotation[0]
                     self.target_index = self.DetermineTarget(
                         self.target, position, self.pos_list[-1] - self.pos_list[-2]
@@ -154,7 +157,7 @@ class MinimumJerk:
                     isMoving = True
                     self.flag = False
 
-        return isMoving, self.switch_flag
+        return isMoving, return_switch
 
     def CreateMotionData(self, rot_n, grip_n, pos_f, rot_f, grip_f, tn):
         self.tn = tn

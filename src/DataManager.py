@@ -21,6 +21,7 @@ class DataRecordManager():
 
     def record(self, data):
         self.data.append(data)
+        print('recording')
 
     def custom_record(self, data):
         if self.record_flag == True:

@@ -106,7 +106,7 @@ class MotionManager:
         # self.recorder3 = DataPlotManager(legend = ['x_robot'], xlabel='time[s]', ylabel='position[mm]')
 
         if self.mode == 1 or self.mode == 2 or self.mode == 3 or self.mode == 4:
-            self.recorder = DataRecordManager(header=['time', 'x', 'y', 'z'], fileName='minimum/pos')
+            self.recorder = DataRecordManager(header=['time', 'x', 'y', 'z'], fileName='linear/pos')
 
         # if self.recording:
         #     self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'], fileName='pos')
@@ -160,7 +160,6 @@ class MotionManager:
 
         if self.isMoving_Pos == self.isMoving_Rot == self.isMoving_Grip == False:
             self.position = cf.ConvertAxis_Position(position * 1000, self.mount) - np.array(self.initPosition)
-            print(self.switch_flag)
             if self.switch_flag == True:
                 self.recorder.record(np.hstack([self.elaspedTime,  self.position]))
 
