@@ -1,4 +1,4 @@
-mode = 4
-name = "tsuboi"
-path_right = "resource/tsuboi\model_data/right20231212_163624.csv"
-path_left = "resource/tsuboi\model_data\left20231212_163630.csv"
+mode = 2
+name = "kusahuka"
+path_right = "resource\kusahuka\model_data/right20231218_104025.csv"
+path_left = "resource\kusahuka\model_data\left20231218_104029.csv"

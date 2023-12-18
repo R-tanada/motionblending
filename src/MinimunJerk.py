@@ -30,7 +30,7 @@ class MinimumJerk:
         self.Threshold = Threshold
         self.target = Target
         self.q_init = []
-        self.y_pos = 50
+        self.y_pos = 100
         self.mount = xArmConfig["Mount"]
         for target in self.target:
             target["position"] -= np.array(self.initPos)
