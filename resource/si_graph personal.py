@@ -2,6 +2,18 @@ import csv
 import numpy as np
 from matplotlib import pyplot as plt
 
+def getNearestValue(list, num):
+    """
+    概要: リストからある値に最も近い値を返却する関数
+    @param list: データ配列
+    @param num: 対象値
+    @return 対象値に最も近い値
+    """
+
+    # リスト要素と対象値の差分を計算し最小値のインデックスを取得
+    idx = np.abs(np.asarray(list) - num).argmin()
+    return idx
+
 class Fitting:
     def __init__(fitting, path) -> None:
         data = fitting.load(path)
@@ -62,7 +74,7 @@ class Fitting:
         return np.dot(A_inv, B)
 
 
-path = '/Users/yuzu/Documents/GitHub/MotionBlending-CA/resource/personal/pos20231212_102854.csv'
+path = '/Users/yuzu/Documents/GitHub/MotionBlending-CA/resource/personal/pos20231212_113157.csv'
 
 with open(path) as file:
     reader = csv.reader(file)
@@ -71,10 +83,10 @@ with open(path) as file:
     data = np.array(data)
 
 t0 = 0
-tf = 2.8230353374534696
-tp = 0.9183381000000015/tf
-x0 = np.array([ 22.97712117, -53.87949944,   5.52171469])
-xf = np.array([ 302.543274, -184.999939,   64.862747])
+tf = 2.6241200880578734
+tp = 0.7354852999999988/tf
+x0 = np.array([  4.64791059 ,-37.59099543  ,19.39898729])
+xf = np.array([ 302.543274, -184.999939  , 64.862747])
 target = xf - x0
 xf_norm = np.sqrt(target[0]**2 + target[1]**2 + target[2]**2)
 
@@ -87,16 +99,41 @@ user_pos = norm/xf_norm
 time = time - time[0]
 time = time/time[-1]
 
+index_tp = getNearestValue(time, tp)
+
+time_n_1 = time[index_tp:]
+time_n = time_n_1 - time_n_1[0]
+time_n = time_n/time_n[-1]
+
+pos_n = user_pos[index_tp:]
+
+
 fitting = Fitting('/Users/yuzu/Documents/GitHub/MotionBlending-CA/resource/SI2023/tanada20231211_180827.csv')
 
 y_fit = fitting.coe[0] * time ** 5 + fitting.coe[1] * time ** 4 + fitting.coe[2] * time ** 3 + fitting.coe[3] * time ** 2 + (1 - (fitting.coe[0] + fitting.coe[1] + fitting.coe[2] + fitting.coe[3])) * time
 
-plt.plot(time, user_pos)
-plt.plot(time, y_fit)
-plt.vlines(tp, 0, 1, color='k', linestyles='dotted')
-plt.plot()
+y_fit_n = y_fit[index_tp:]
+
+combined1 = [x * y for (x, y) in zip(pos_n, 1-time_n)]
+print(combined1[-1])
+combined2 = [x * y for (x, y) in zip(y_fit_n, time_n)]
+print(combined2[-1])
+y_robot = [x + y for (x, y) in zip(combined1, combined2)]
+# print(y_robot)
+
+print(len(y_robot), len(time_n))
+
+plt.plot(time, user_pos, label = 'user', linewidth=3)
+plt.plot(time, y_fit, label = 'traject', linewidth=3)
+plt.plot(time_n_1, y_robot, label = 'robot', linewidth=3)
+plt.vlines(tp, 0, 0.7, color='k', linestyles='dotted')
+
+plt.legend(loc = 'upper left', fontsize = 15) 
+plt.xlabel('time', fontsize = 15)
+plt.ylabel('norm', fontsize = 15)
+plt.xticks(fontsize=15)
+plt.yticks(fontsize=15)
+
 plt.show()
-
-
 
 
