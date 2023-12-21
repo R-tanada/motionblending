@@ -8,11 +8,11 @@ import lib.self.CustomFunction as cf
 from src.DataManager import DataLoadManager, DataPlotManager, DataRecordManager
 from src.FeedbackManager import Vibrotactile
 from src.MinimunJerk import MinimumJerk
-from src.mode_select import mode, name
+from src.mode_select import mode, name, feedback
 # # ----- Custom class ----- #
 from src.OptiTrackStreamingManager import OptiTrackStreamingManager
 from src.SensorManager import GripperSensorManager
-
+from src.FeedbackManager import Vibrotactile, LED_Feedback
 
 class ParticipantManager:
     with open("docs/settings_dual.json", "r") as settings_file:
@@ -105,9 +105,18 @@ class MotionManager:
         self.elaspedTime = 0
         self.auto_list = []
         self.grip_data = 850
+        self.feedback_count = 255
 
         self.mode = mode
         print(mode)
+
+
+        if mode == 4:
+            self.fb_manager = LED_Feedback(Config['LED_serial'])
+        elif mode == 3:
+            self.fb_manager = Vibrotactile(Config['AudioIndex'])
+        else:
+            pass
 
         self.automation = MinimumJerk(Config["Target"], xArmConfig)
 
@@ -225,6 +234,9 @@ class MotionManager:
             )
             self.position = pos_auto * weight + position * (1 - weight)
 
+            if mode == 3 or mode == 4:
+                self.fb_manager.data_out = int(weight * 255)
+
             if self.mode == 1 or self.mode == 2 or self.mode == 3 or self.mode == 4:
                 self.recorder_user.record(position)
                 self.recorder_robot.record(self.position)
@@ -336,8 +348,14 @@ class MotionManager:
     def LerpInitPosition(self):
         try:
             self.initPosition, flag = next(self.iter_initPos), True
+
+            if mode == 3 or mode == 4:
+                self.feedback_count -= (255/300)
+                self.fb_manager.data_out = int(self.feedback_count)
         except StopIteration:
             flag = False
+            if mode == 3 or mode == 4:
+                self.feedback_count = 255
 
         return flag
 

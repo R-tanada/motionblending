@@ -137,24 +137,11 @@ class MinimumJerk:
                     #     self.target, position, self.pos_list[-1] - self.pos_list[-2]
                     # )
 
-                    if self.mode == 2:
-                        self.tf = self.CalculateReachingTime_liner(
-                            self.time_list[-25],
-                            velocity,
-                            self.target[self.target_index]["position"],
-                        )
-                    elif self.mode == 3:
-                        self.tf = self.CalculateReachingTime_minimumjerk(
-                            self.time_list[-25],
-                            velocity,
-                            self.target[self.target_index]["position"],
-                        )
-                    elif self.mode == 4:
-                        self.tf = self.CalculateReachingTime_personal(
-                            self.time_list[-25],
-                            velocity,
-                            self.target[self.target_index]["position"],
-                        )
+                    self.tf = self.CalculateReachingTime_personal(
+                        self.time_list[-25],
+                        velocity,
+                        self.target[self.target_index]["position"],
+                    )
                     self.CreateMotionData(
                         rotation,
                         gripper,
@@ -342,14 +329,7 @@ class MinimumJerk:
         )
         # print(weight)
 
-        if self.mode == 2:
-            traj = self.x0 + (xf - self.x0) * self.func_liner(t)
-
-        elif self.mode == 3:
-            traj = self.x0 + (xf - self.x0) * self.func_minimumjerk(t)
-
-        elif self.mode == 4:
-            traj = self.x0 + (xf - self.x0) * self.func_personalize(t)
+        traj = self.x0 + (xf - self.x0) * self.func_personalize(t)
 
         if t > self.y_time:
             t_y = (t_2 - self.y_time) / ((2 - self.y_time) - self.y_time)

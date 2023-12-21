@@ -1,11 +1,12 @@
 import time
-
+import serial
 import numpy as np
 import pyaudio
+import threading
 
 
 class Vibrotactile:
-    def __init__(self) -> None:
+    def __init__(self, index) -> None:
         self.rate = 48000
         self.freq = 150
         self.chunk = int(self.rate / self.freq)
@@ -19,7 +20,7 @@ class Vibrotactile:
             rate=self.rate,
             output=True,
             frames_per_buffer=self.chunk,
-            output_device_index=31,
+            output_device_index=index,
             stream_callback=self.callback,
         )
         self.stream.start_stream()
@@ -32,6 +33,28 @@ class Vibrotactile:
 
     def close(self):
         self.p.terminate()
+
+class LED_Feedback:
+    def __init__(self, port) -> None:
+        self.data_out = 0
+        if port != None:
+            self.ser = serial.Serial(port, 115200, timeout = 0.1)
+        time.sleep(1)
+        send_thread = threading.Thread(target=self.send_data)
+        send_thread.setDaemon(True)
+        send_thread.start()
+
+    def send_data(self):
+        try:
+            while True:
+
+                self.ser.write(bytes([self.data_out]))
+
+                time.sleep(0.005)
+
+        except KeyboardInterrupt:
+            self.ser.close()
+            print('closed socket')
 
 
 if __name__ == "__main__":
