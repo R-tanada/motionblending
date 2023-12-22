@@ -74,9 +74,9 @@
             {
                 "Mount": "right",
                 "RigidBody": 1,
-                "SerialCOM": "COM4",
-                "LED_serial": "None",
-                "AudioIndex": "None",
+                "SerialCOM": "None",
+                "LED_serial": "COM9",
+                "AudioIndex": 12,
                 "Weight": 1,
                 "Target": [
                     {
@@ -110,7 +110,7 @@
             {
                 "Mount": "left",
                 "RigidBody": 2,
-                "SerialCOM": "COM5",
+                "SerialCOM": "None",
                 "LED_serial": "None",
                 "AudioIndex": "None",
                 "Weight": 1,

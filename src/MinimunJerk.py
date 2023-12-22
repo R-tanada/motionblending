@@ -69,7 +69,7 @@ class MinimumJerk:
 
         self.mode = mode
 
-        if self.mode == 4:
+        if self.mode == 4 or self.mode == 2 or self.mode == 3:
             if self.mount == "right":
                 self.personalize = Fitting(path_right)
             elif self.mount == "left":

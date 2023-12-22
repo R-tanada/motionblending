@@ -6,13 +6,14 @@ import numpy as np
 
 import lib.self.CustomFunction as cf
 from src.DataManager import DataLoadManager, DataPlotManager, DataRecordManager
-from src.FeedbackManager import Vibrotactile
+from src.FeedbackManager import LED_Feedback, Vibrotactile
 from src.MinimunJerk import MinimumJerk
-from src.mode_select import mode, name, feedback
+from src.mode_select import mode, name
+
 # # ----- Custom class ----- #
 from src.OptiTrackStreamingManager import OptiTrackStreamingManager
 from src.SensorManager import GripperSensorManager
-from src.FeedbackManager import Vibrotactile, LED_Feedback
+
 
 class ParticipantManager:
     with open("docs/settings_dual.json", "r") as settings_file:
@@ -110,11 +111,10 @@ class MotionManager:
         self.mode = mode
         print(mode)
 
-
         if mode == 4:
-            self.fb_manager = LED_Feedback(Config['LED_serial'])
+            self.fb_manager = LED_Feedback(Config["LED_serial"])
         elif mode == 3:
-            self.fb_manager = Vibrotactile(Config['AudioIndex'])
+            self.fb_manager = Vibrotactile(Config["AudioIndex"])
         else:
             pass
 
@@ -140,16 +140,20 @@ class MotionManager:
 
         elif self.mode == 1 or self.mode == 2 or self.mode == 3 or self.mode == 4:
             self.recorder_user = DataRecordManager(
-                header=["x", "y", "z"], fileName=name + "/" + 'user_data/' + str(self.mode) + '_' + self.mount
+                header=["x", "y", "z"],
+                fileName=name + "/" + "user_data/" + str(self.mode) + "_" + self.mount,
             )
             self.recorder_robot = DataRecordManager(
-                header=["x", "y", "z"], fileName=name + "/" + 'robot_data/' + str(self.mode) + '_' + self.mount
+                header=["x", "y", "z"],
+                fileName=name + "/" + "robot_data/" + str(self.mode) + "_" + self.mount,
             )
             self.recorder_traj = DataRecordManager(
-                header=["x", "y", "z"], fileName=name + "/" + 'auto_data/' + str(self.mode) + '_' + self.mount
+                header=["x", "y", "z"],
+                fileName=name + "/" + "auto_data/" + str(self.mode) + "_" + self.mount,
             )
             self.recorder_time = DataRecordManager(
-                header=["x", "y", "z"], fileName=name + "/" + 'time_data/' + str(self.mode) + '_' + self.mount
+                header=["x", "y", "z"],
+                fileName=name + "/" + "time_data/" + str(self.mode) + "_" + self.mount,
             )
 
         if self.Simulation:
@@ -350,7 +354,7 @@ class MotionManager:
             self.initPosition, flag = next(self.iter_initPos), True
 
             if mode == 3 or mode == 4:
-                self.feedback_count -= (255/300)
+                self.feedback_count -= 255 / 300
                 self.fb_manager.data_out = int(self.feedback_count)
         except StopIteration:
             flag = False
