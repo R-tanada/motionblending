@@ -1,26 +1,17 @@
-from socket import *
+from socket import socket, AF_INET, SOCK_DGRAM
 
+HOST = ''
+PORT = 9000
+ADDRESS = "133.68.108.109" 
 
-## UDP送信クラス
-class udpsend:
-    def __init__(self):
-        SrcIP = "127.0.0.1"  # 送信元IP
-        SrcPort = 11111  # 送信元ポート番号
-        self.SrcAddr = (SrcIP, SrcPort)  # アドレスをtupleに格納
+s = socket(AF_INET, SOCK_DGRAM)
+# ブロードキャストする場合は、ADDRESSを
+# ブロードキャスト用に設定して、以下のコメントを外す
+# s.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
 
-        DstIP = "127.0.0.1"  # 宛先IP
-        DstPort = 22222  # 宛先ポート番号
-        self.DstAddr = (DstIP, DstPort)  # アドレスをtupleに格納
+while True:
+    msg = input("> ")
+    # 送信
+    s.sendto(msg.encode(), (ADDRESS, PORT))
 
-        self.udpClntSock = socket(AF_INET, SOCK_DGRAM)  # ソケット作成
-        self.udpClntSock.bind(self.SrcAddr)  # 送信元アドレスでバインド
-
-    def send(self):
-        data = "Hello"
-        data = data.encode("utf-8")  # バイナリに変換
-
-        self.udpClntSock.sendto(data, self.DstAddr)  # 宛先アドレスに送信
-
-
-udp = udpsend()  # クラス呼び出し
-udp.send()  # 関数実行
+s.close()
