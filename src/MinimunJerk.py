@@ -1,8 +1,8 @@
 import csv
+import random
 import threading
 import time
 from itertools import cycle as iter_cycle
-import random
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -25,10 +25,12 @@ class MinimumJerk:
     target_index_left = []
 
     while True:
-        target_index_left = random.sample(range(1, 5), k = 2)
-        target_index_right = random.sample(range(1, 5), k = 2)
+        target_index_left = random.sample(range(0, 4), k=2)
+        target_index_right = random.sample(range(0, 4), k=2)
 
-        if (target_index_right[0] != target_index_left[0]) and (target_index_right[1] != target_index_left[1]):
+        if (target_index_right[0] != target_index_left[0]) and (
+            target_index_right[1] != target_index_left[1]
+        ):
             break
 
         time.sleep(0.05)
@@ -44,10 +46,18 @@ class MinimumJerk:
         self.q_init = []
         self.y_pos = 100
         self.mount = xArmConfig["Mount"]
-        if self.mount == 'right':
-            self.target = [Target[MinimumJerk.target_index_right[0]], Target[MinimumJerk.target_index_right[1]]]
-        elif self.mount == 'left':
-            self.target = [Target[MinimumJerk.target_index_left[0]], Target[MinimumJerk.target_index_left[1]]]
+        if self.mount == "right":
+            print("target_right: " + str(np.array(MinimumJerk.target_index_right) + 1))
+            self.target = [
+                Target[MinimumJerk.target_index_right[0]],
+                Target[MinimumJerk.target_index_right[1]],
+            ]
+        elif self.mount == "left":
+            print("target_left: " + str(np.array(MinimumJerk.target_index_left) + 1))
+            self.target = [
+                Target[MinimumJerk.target_index_left[0]],
+                Target[MinimumJerk.target_index_left[1]],
+            ]
         for target in self.target:
             target["position"] -= np.array(self.initPos)
             if self.mount == "right":

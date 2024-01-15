@@ -5,7 +5,17 @@ import time
 
 from lib.xarm.wrapper import XArmAPI
 
-ip = "192.168.1.228"
+arm = "right"
+target = 1
+
+
+if arm == "right":
+    num = 0
+    ip = "192.168.1.199"
+elif arm == "left":
+    num = 1
+    ip = "192.168.1.228"
+target -= 1
 
 arm = XArmAPI(ip)
 arm.motion_enable(enable=True)
@@ -17,10 +27,10 @@ transform = arm.get_position()[1]
 
 with open("docs\settings_dual.json") as f:
     setting_update = json.load(f)
-    setting_update["ParticipantsConfigs"]["participant1"][1]["Target"][1][
+    setting_update["ParticipantsConfigs"]["participant1"][num]["Target"][target][
         "position"
     ] = transform[0:3]
-    setting_update["ParticipantsConfigs"]["participant1"][1]["Target"][1][
+    setting_update["ParticipantsConfigs"]["participant1"][num]["Target"][target][
         "rotation"
     ] = transform[3:6]
 
