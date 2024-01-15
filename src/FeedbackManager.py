@@ -65,8 +65,10 @@ class LED_Feedback:
 
 
 if __name__ == "__main__":
-    vibro = Vibrotactile(37)
-    vibro.data_out = 255
+    # vibro = Vibrotactile(18)
+    vibro2 = Vibrotactile(15)
+    # vibro.data_out = 255
+    vibro2.data_out = 255
     start_time = time.perf_counter()
 
     try:
@@ -75,7 +77,10 @@ if __name__ == "__main__":
             time.sleep(0.005)
 
     except KeyboardInterrupt:
-        vibro.stream.stop_stream()
-        vibro.stream.close()
-        vibro.close()
+        # vibro.stream.stop_stream()
+        # vibro.stream.close()
+        # vibro.close()
+        vibro2.stream.stop_stream()
+        vibro2.stream.close()
+        vibro2.close()
         print("finish loop")
