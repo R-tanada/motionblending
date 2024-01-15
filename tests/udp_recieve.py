@@ -18,7 +18,7 @@ import sys
 import time
 
 host = '192.168.1.100'  # 自身のIPアドレス
-port =  9000
+port =  88888
 bufsize = 1024
 
 with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as sock:
