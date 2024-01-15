@@ -53,7 +53,7 @@ def custom_fit(x, y):
 
     return np.dot(A_inv, B)
 
-data = load('resource\SI2023\kurimoto20231018_151100.csv')
+data = load('resource/nanri/model_data/right20231212_090202.csv')
 time = data[:, 0]
 time = time - time[0]
 time = time/time[-1]
@@ -75,6 +75,6 @@ y_fit = coe[0] * time ** 5 + coe[1] * time ** 4 + coe[2] * time ** 3 + coe[3] * 
 # y_fit = coe[0] * time ** 4 + coe[1] * time ** 3 + coe[2] * time ** 2 + coe[3] * time + coe[4]
 # y_fit = coe[0] * time ** 5 + coe[1] * time ** 4 + coe[2] * time ** 3 + coe[3] * time **2 + coe[4] * time + coe[5]
 
-plt.plot(time, norm)
-plt.plot(time, y_fit)
+plt.plot(time, norm, linestyle = "dotted", linewidth = 2)
+plt.plot(time, y_fit, linewidth = 2, alpha = 0.6)
 plt.show()
