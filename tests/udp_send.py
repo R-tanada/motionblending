@@ -10,7 +10,7 @@ host = '192.168.1.100'  # 送り先のIPアドレス
 port = 8888
 with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
     while True:
-        message = 'hello'.encode('utf-8')
+        message = '100'.encode('utf-8')
         print(message)
         sock.sendto(message, (host, port))
         time.sleep(1)
