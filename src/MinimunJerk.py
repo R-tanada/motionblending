@@ -25,13 +25,13 @@ class MinimumJerk:
     target_index_left = []
 
     while True:
-        target_left = random.sample(range(1, 5), k = 2)
-        target_right = random.sample(range(1, 5), k = 2)
+        target_index_left = random.sample(range(1, 5), k = 2)
+        target_index_right = random.sample(range(1, 5), k = 2)
 
         if (target_index_right[0] != target_index_left[0]) and (target_index_right[1] != target_index_left[1]):
             break
 
-        time.sleep(0.5)
+        time.sleep(0.05)
 
     def __init__(self, Target: list, xArmConfig: dict, Threshold=300) -> None:
         print("minimum init rot" + str(xArmConfig["InitRot"]))
