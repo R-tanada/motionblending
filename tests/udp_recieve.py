@@ -18,7 +18,7 @@ import sys
 import time
 
 host = '192.168.1.100'  # 自身のIPアドレス
-port =  88888
+port =  8888
 bufsize = 1024
 
 with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as sock:
@@ -30,7 +30,7 @@ with socket.socket(socket.AF_INET,socket.SOCK_DGRAM) as sock:
 		try:
 			# print(sock.recv(bufsize))   #Python2:only ASCII,Python3:impossible
 			data = sock.recv(bufsize).decode()
-			result = float(data)
+			result = data
 			# addr = sock.accept()
 			print(result)   #Python2:Japanese,Python3:anything
 
