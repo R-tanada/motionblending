@@ -2,7 +2,7 @@ from socket import socket, AF_INET, SOCK_DGRAM
 
 HOST = ''
 PORT = 9000
-ADDRESS = "133.68.108.109" 
+ADDRESS = "192.168.1.100" 
 
 s = socket(AF_INET, SOCK_DGRAM)
 # ブロードキャストする場合は、ADDRESSを

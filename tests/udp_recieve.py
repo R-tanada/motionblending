@@ -1,6 +1,6 @@
 from socket import socket, AF_INET, SOCK_DGRAM
 
-HOST = '133.68.108.96'   
+HOST = '192.168.1.100'   
 PORT = 9000
 
 # ソケットを用意
