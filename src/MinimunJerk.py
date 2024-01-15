@@ -2,6 +2,7 @@ import csv
 import threading
 import time
 from itertools import cycle as iter_cycle
+import random
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -20,6 +21,18 @@ class MinimumJerk:
     if mode != 0:
         switchThread.start()
 
+    target_index_right = []
+    target_index_left = []
+
+    while True:
+        target_left = random.sample(range(1, 5), k = 2)
+        target_right = random.sample(range(1, 5), k = 2)
+
+        if (target_index_right[0] != target_index_left[0]) and (target_index_right[1] != target_index_left[1]):
+            break
+
+        time.sleep(0.5)
+
     def __init__(self, Target: list, xArmConfig: dict, Threshold=300) -> None:
         print("minimum init rot" + str(xArmConfig["InitRot"]))
         self.initPos = xArmConfig["InitPos"]
@@ -28,10 +41,13 @@ class MinimumJerk:
         self.predictedRotation = []
         self.predictedGripper = []
         self.Threshold = Threshold
-        self.target = Target
         self.q_init = []
         self.y_pos = 100
         self.mount = xArmConfig["Mount"]
+        if self.mount == 'right':
+            self.target = [Target[MinimumJerk.target_index_right[0]], Target[MinimumJerk.target_index_right[1]]]
+        elif self.mount == 'left':
+            self.target = [Target[MinimumJerk.target_index_left[0]], Target[MinimumJerk.target_index_left[1]]]
         for target in self.target:
             target["position"] -= np.array(self.initPos)
             if self.mount == "right":
