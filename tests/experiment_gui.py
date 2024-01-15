@@ -1,6 +1,7 @@
 import sys
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtNetwork import QUdpSocket  # 修正: QUdpSocketのimportを追加
+from PySide6.QtGui import QFont
+from PySide6.QtNetwork import QUdpSocket
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel
 
 class SplitWindowApp(QWidget):
@@ -23,7 +24,7 @@ class SplitWindowApp(QWidget):
 
         # 中央の縦線
         line = QWidget()
-        line.setFixedWidth(1)
+        line.setFixedWidth(3)  # 太さを変更
         line.setStyleSheet("background-color: black;")
         main_layout.addWidget(line)
 
@@ -36,10 +37,16 @@ class SplitWindowApp(QWidget):
 
         # UDP通信用の設定
         self.udp_socket = QUdpSocket(self)
-        self.udp_socket.bind(8888)  # ポート番号を適切なものに変更
+        self.udp_socket.bind(8888)  # ポート番号を8888に変更
 
         # UDPデータ受信時の処理を設定
         self.udp_socket.readyRead.connect(self.process_udp_datagrams)
+
+        # フォントサイズを大きくする
+        font = QFont()
+        font.setPointSize(300)  # フォントサイズを300に設定
+        self.left_label.setFont(font)
+        self.right_label.setFont(font)
 
     def process_udp_datagrams(self):
         while self.udp_socket.hasPendingDatagrams():
