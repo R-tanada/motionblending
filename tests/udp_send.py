@@ -1,17 +1,18 @@
-from socket import socket, AF_INET, SOCK_DGRAM
+# -*- coding: utf-8 -*-
+from __future__ import print_function
+import socket
+import time
+from contextlib import closing
 
-HOST = ''
-PORT = 9000
-ADDRESS = "192.168.1.130" 
+# host = 'localhost'
 
-s = socket(AF_INET, SOCK_DGRAM)
-# ブロードキャストする場合は、ADDRESSを
-# ブロードキャスト用に設定して、以下のコメントを外す
-# s.setsockopt(SOL_SOCKET, SO_BROADCAST, 1)
+host = '192.168.1.130'  # 送り先のIPアドレス
+port = 8888
+with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+    while True:
+        message = 'hello'.encode('utf-8')
+        print(message)
+        sock.sendto(message, (host, port))
+        time.sleep(1)
 
-while True:
-    msg = input("> ")
-    # 送信
-    s.sendto(msg.encode(), (ADDRESS, PORT))
-
-s.close()
+	    
