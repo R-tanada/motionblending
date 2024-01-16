@@ -76,7 +76,7 @@
                 "RigidBody": 3,
                 "SerialCOM": "COM6",
                 "LED_serial": "COM11",
-                "AudioIndex": 15,
+                "AudioIndex": 16,
                 "Weight": 1,
                 "Target": [
                     {
@@ -137,8 +137,8 @@
                 "Mount": "left",
                 "RigidBody": 4,
                 "SerialCOM": "COM10",
-                "LED_serial": "COM9",
-                "AudioIndex": 18,
+                "LED_serial": "COM12",
+                "AudioIndex": 20,
                 "Weight": 1,
                 "Target": [
                     {

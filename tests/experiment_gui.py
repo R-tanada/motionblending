@@ -1,15 +1,17 @@
 import sys
+
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtGui import QFont
 from PySide6.QtNetwork import QUdpSocket
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel
+from PySide6.QtWidgets import QApplication, QHBoxLayout, QLabel, QVBoxLayout, QWidget
+
 
 class SplitWindowApp(QWidget):
     def __init__(self):
         super().__init__()
 
         # ウィンドウの初期設定
-        self.setWindowTitle('UDP Communication App')
+        self.setWindowTitle("UDP Communication App")
         self.setGeometry(100, 100, 600, 400)
 
         # レイアウトの設定
@@ -18,7 +20,7 @@ class SplitWindowApp(QWidget):
         # 左側のウィジェット
         self.left_widget = QWidget(self)
         left_layout = QVBoxLayout(self.left_widget)
-        self.left_label = QLabel('-', alignment=Qt.AlignCenter)
+        self.left_label = QLabel("-", alignment=Qt.AlignCenter)
         left_layout.addWidget(self.left_label)
         main_layout.addWidget(self.left_widget)
 
@@ -31,7 +33,7 @@ class SplitWindowApp(QWidget):
         # 右側のウィジェット
         self.right_widget = QWidget(self)
         right_layout = QVBoxLayout(self.right_widget)
-        self.right_label = QLabel('-', alignment=Qt.AlignCenter)
+        self.right_label = QLabel("-", alignment=Qt.AlignCenter)
         right_layout.addWidget(self.right_label)
         main_layout.addWidget(self.right_widget)
 
@@ -44,23 +46,25 @@ class SplitWindowApp(QWidget):
 
         # フォントサイズを大きくする
         font = QFont()
-        font.setPointSize(300)  # フォントサイズを300に設定
+        font.setPointSize(400)  # フォントサイズを300に設定
         self.left_label.setFont(font)
         self.right_label.setFont(font)
 
     def process_udp_datagrams(self):
         while self.udp_socket.hasPendingDatagrams():
-            datagram, host, port = self.udp_socket.readDatagram(self.udp_socket.pendingDatagramSize())
-            data_list = datagram.data().decode().split(',')
+            datagram, host, port = self.udp_socket.readDatagram(
+                self.udp_socket.pendingDatagramSize()
+            )
+            data_list = datagram.data().decode().split(",")
             received_mount = data_list[0]
             received_number = int(data_list[1])
-            if received_mount == 'right':
+            if received_mount == "right":
                 self.right_label.setText(str(received_number))
-            elif received_mount == 'left':
+            elif received_mount == "left":
                 self.left_label.setText(str(received_number))
-            
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = SplitWindowApp()
     window.show()
