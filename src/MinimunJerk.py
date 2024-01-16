@@ -20,7 +20,9 @@ class MinimumJerk:
     if mode != 0:
         switchThread.start()
 
-    def __init__(self, Target: list, xArmConfig: dict, target_index: list, Threshold=300) -> None:
+    def __init__(
+        self, Target: list, xArmConfig: dict, target_index: list, Threshold=300
+    ) -> None:
         print("minimum init rot" + str(xArmConfig["InitRot"]))
         self.initPos = xArmConfig["InitPos"]
         initRot = cf.Convert2InverseMatrix(cf.Euler2Quaternion(xArmConfig["InitRot"]))
@@ -31,11 +33,8 @@ class MinimumJerk:
         self.q_init = []
         self.y_pos = 100
         self.mount = xArmConfig["Mount"]
-        print("target_right: " + str(np.array(MinimumJerk.target_index) + 1))
-        self.target = [
-            Target[MinimumJerk.target_index[0]],
-            Target[MinimumJerk.target_index[1]]
-        ]
+        print("target_right: " + str(np.array(target_index) + 1))
+        self.target = [Target[target_index[0]], Target[target_index[1]]]
 
         for target in self.target:
             target["position"] -= np.array(self.initPos)

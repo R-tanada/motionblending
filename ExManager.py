@@ -21,8 +21,7 @@ class ExManager:
         with open("docs/settings_dual.json", "r") as settings_file:
             settings = json.load(settings_file)
 
-        from src.CyberneticAvatarMotionManager import \
-            CyberneticAvatarMotionManager
+        from src.CyberneticAvatarMotionManager import CyberneticAvatarMotionManager
 
         self.cyberneticManager = CyberneticAvatarMotionManager(
             settings["ParticipantsConfigs"],
@@ -88,7 +87,11 @@ class ExManager:
 
         except KeyboardInterrupt:
             print("\nKeyboardInterrupt >> Stop: mainLoop()")
-            print('Task Completion Time >> {}[s]'.format(str(time.perf_counter()-initTime)))
+            print(
+                "Task Completion Time >> {}[s]".format(
+                    str(time.perf_counter() - initTime)
+                )
+            )
             if self.robotManager != None:
                 self.robotManager.DisConnect()
                 print("Successfully Disconnected")
