@@ -10,7 +10,7 @@ class DataLoadManager:
         data_new = []
         with open(path) as file:
             reader = csv.reader(file)
-            data = [row for row in reader][1:]
+            data = [row for row in reader][0:]
             data = [[v for v in row] for row in data]
             data = np.array(data)
             for val in data:
