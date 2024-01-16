@@ -17,7 +17,7 @@ import os
 import sys
 import time
 
-host = '192.168.1.100'  # 自身のIPアドレス
+host = '127.0.0.1'  # 自身のIPアドレス
 port =  8888
 bufsize = 1024
 

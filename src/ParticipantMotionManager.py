@@ -1,7 +1,8 @@
 import json
 import threading
 import time
-
+import random
+import socket
 import numpy as np
 
 import lib.self.CustomFunction as cf
@@ -78,6 +79,31 @@ class MotionManager:
     streamingThread.setDaemon(True)
     streamingThread.start()
 
+    target_index_right = []
+    target_index_left = []
+
+    while True:
+        target_index_left = random.sample(range(0, 4), k=2)
+        target_index_right = random.sample(range(0, 4), k=2)
+
+        if (target_index_right[0] != target_index_left[0]) and (
+            target_index_right[1] != target_index_left[1]
+        ):
+            break
+
+        time.sleep(0.05)
+
+    host = '192.168.1.100'
+    port = 8888
+    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+        data_right = 'right,' + str(target_index_right[0])
+        data_left = 'left,' + str(target_index_left[0])
+        message_right = data_right.encode('utf-8')
+        message_left = data_left.encode('utf-8')
+        sock.sendto(message_right, (host, port))
+        sock.sendto(message_left, (host, port))
+        time.sleep(1)
+
     def __init__(self, Config, xArmConfig, is_Simulation, is_Recording) -> None:
         self.mount = Config["Mount"]
         self.rigidBody = str(Config["RigidBody"])
@@ -118,7 +144,11 @@ class MotionManager:
         else:
             pass
 
-        self.automation = MinimumJerk(Config["Target"], xArmConfig)
+        if self.mount == 'right':
+            target_index = MotionManager.target_index_right
+        elif self.mount == 'left':
+            target_index = MotionManager.target_index_left
+        self.automation = MinimumJerk(Config["Target"], xArmConfig, target_index)
 
         self.sensorManager = GripperSensorManager(Config["SerialCOM"], BandRate=115200)
         sensorThread = threading.Thread(target=self.sensorManager.StartReceiving)
@@ -194,6 +224,16 @@ class MotionManager:
                 if posFlag == rotFlag == False:
                     print("finish_automation")
                     self.initFlag = False
+                    host = '192.168.1.100'
+                    port = 8888
+                    with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+                        if self.mount == 'right':
+                            data = 'right,' + str(MotionManager.target_index_right[1])
+                        elif self.mount == 'left':
+                            data = 'left,' + str(MotionManager.target_index_left[1])
+                        message = data.encode('utf-8')
+                        sock.sendto(message, (host, port))
+                        time.sleep(1)
 
             if self.initFlag == False:
                 if self.automation.MonitoringMotion(
