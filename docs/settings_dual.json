@@ -73,10 +73,10 @@
         "participant1": [
             {
                 "Mount": "right",
-                "RigidBody": 3,
-                "SerialCOM": "COM6",
-                "LED_serial": "COM11",
-                "AudioIndex": 16,
+                "RigidBody": 1,
+                "SerialCOM": "COM4",
+                "LED_serial": "COM6",
+                "AudioIndex": 41,
                 "Weight": 1,
                 "Target": [
                     {
@@ -135,10 +135,10 @@
             },
             {
                 "Mount": "left",
-                "RigidBody": 4,
-                "SerialCOM": "COM10",
-                "LED_serial": "COM12",
-                "AudioIndex": 20,
+                "RigidBody": 2,
+                "SerialCOM": "COM5",
+                "LED_serial": "COM3",
+                "AudioIndex": 39,
                 "Weight": 1,
                 "Target": [
                     {
