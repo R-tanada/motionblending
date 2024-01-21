@@ -69,6 +69,17 @@ plt.ylabel('norm', fontsize = 15)
 plt.xticks(fontsize=15)
 plt.yticks(fontsize=15)
 
-plt.show()
+data_1 = np.array([time, user_pos, y_fit]).transpose()
+data_2 = np.array([time_n_1, y_robot]).transpose()
+
+with open('/Users/yuzu/Desktop/M2/修論/matlab/' + 'minimum_1.csv', 'w', newline='') as exportFile:
+    writer = csv.writer(exportFile)
+    writer.writerows(data_1)
+
+with open('/Users/yuzu/Desktop/M2/修論/matlab/' + 'minimum_2.csv', 'w', newline='') as exportFile:
+    writer = csv.writer(exportFile)
+    writer.writerows(data_2)
+
+# plt.show()
 
 
