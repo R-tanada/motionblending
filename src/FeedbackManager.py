@@ -13,7 +13,7 @@ class Vibrotactile:
         self.freq = 150
         self.chunk = int(self.rate / self.freq)
         self.sin = np.sin(2.0 * np.pi * np.arange(self.chunk) * self.freq / self.rate)
-        self.amp = 5
+        self.amp = 4
         self.data_out = 0
 
         if self.index != "None":
@@ -65,8 +65,8 @@ class LED_Feedback:
 
 
 if __name__ == "__main__":
-    vibro = Vibrotactile(39)
-    vibro2 = Vibrotactile(41)
+    vibro = Vibrotactile(36)
+    vibro2 = Vibrotactile(38)
     vibro.data_out = 255
     vibro2.data_out = 255
     start_time = time.perf_counter()

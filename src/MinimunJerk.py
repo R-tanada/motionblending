@@ -33,7 +33,7 @@ class MinimumJerk:
         self.q_init = []
         self.y_pos = 100
         self.mount = xArmConfig["Mount"]
-        print("target_right: " + str(np.array(target_index) + 1))
+        print("target_: " + self.mount + str(np.array(target_index) + 1))
         self.target = [Target[target_index[0]], Target[target_index[1]]]
 
         for target in self.target:
