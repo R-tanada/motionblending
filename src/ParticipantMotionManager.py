@@ -11,7 +11,6 @@ from src.DataManager import DataLoadManager, DataPlotManager, DataRecordManager
 from src.FeedbackManager import LED_Feedback, Vibrotactile
 from src.MinimunJerk import MinimumJerk
 from src.mode_select import mode, name
-
 # # ----- Custom class ----- #
 from src.OptiTrackStreamingManager import OptiTrackStreamingManager
 from src.SensorManager import GripperSensorManager
@@ -72,9 +71,9 @@ class ParticipantManager:
 
 class MotionManager:
     optiTrackStreamingManager = OptiTrackStreamingManager(
-        # mocapServer="133.68.108.109", mocapLocal="133.68.108.109"
-        mocapServer="127.0.0.1",
-        mocapLocal="127.0.0.1",
+        mocapServer="133.68.108.58", mocapLocal="133.68.108.58"
+        # mocapServer="127.0.0.1",
+        # mocapLocal="127.0.0.1",
     )
     streamingThread = threading.Thread(target=optiTrackStreamingManager.stream_run)
     streamingThread.setDaemon(True)
