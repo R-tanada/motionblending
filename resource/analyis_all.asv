@@ -2,12 +2,12 @@
 close all;
 
 name = "sakurai";
-num = "2";
+num = "4";
 mount = "right";
 
 plot_num = 0;
-name_list = ["sato","sakurai","oda","nanri","kusahuka","hanai"];
-num_list = ["4"];
+name_list = ["tsuboi","sato","sakurai","oda","nanri","kusahuka","hanai","guenzu"];
+num_list = ["2"];
 mount_list = ["right"];
 
 for name = name_list
@@ -109,10 +109,28 @@ for name = name_list
             % norm_robot(index_list_2(2)) = norm_robot(index_list_2(2)-1)
             
             % disp(model_2)
+
+            % 速度計算
+            vel_user = [];
+            for i = 0:numel(norm_user)-25
+                vel_user(i) = (norm_user(i+25) - norm(i))/(25*time(i))
+            end
+            vel_model_1 = [];
+            for i = 0:numel(model_1)-25
+                vel_model_1(i) = (model_1(i+25) - model_1(i))/sum(time(i))
+            end
+            vel_model_2 = [];
+            for i = 0:numel(model_2)-25
+                vel_model_2(i) = (model_2(i+25) - model_2(i))/(25*time_2(i))
+            end
+            vel_robot = [];
+            for i = 0:numel(norm_robot)-25
+                vel_robot(i) = (norm_robot(i+25) - norm_robot(i))/(25*time(i))
+            end
                     
             % グラフを作成
             % figure;
-            subplot(2, 3, plot_num)
+            subplot(2, 4, plot_num)
             
             % プロット
             plot(time, norm_user, 'LineWidth', 2, 'DisplayName', 'user trajectory');

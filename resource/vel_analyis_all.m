@@ -2,12 +2,12 @@
 close all;
 
 name = "sakurai";
-num = "2";
+num = "4";
 mount = "right";
 
 plot_num = 0;
-name_list = ["sato","sakurai","oda","nanri","kusahuka","hanai"];
-num_list = ["4"];
+name_list = ["tsuboi","sato","sakurai","oda","nanri","kusahuka","hanai","guenzu"];
+num_list = ["2"];
 mount_list = ["right"];
 
 for name = name_list
@@ -109,17 +109,43 @@ for name = name_list
             % norm_robot(index_list_2(2)) = norm_robot(index_list_2(2)-1)
             
             % disp(model_2)
+
+            % 速度計算
+            interval = 30;
+            vel_user = [];
+            for i = 1:numel(norm_user)-interval
+                vel_user(i) = (norm_user(i+interval) - norm_user(i))/(time(i+interval)-time(i));
+            end
+            vel_model_1 = [];
+            for i = 1:numel(model_1)-interval
+                vel_model_1(i) = (model_1(i+interval) - model_1(i))/(time_1(i+interval)-time_1(i));
+            end
+            vel_model_2 = [];
+            for i = 1:numel(model_2)-interval
+                vel_model_2(i) = (model_2(i+interval) - model_2(i))/(time_2(i+interval)-time_2(i));
+            end
+            vel_robot = [];
+            for i = 1:numel(norm_robot)-interval
+                vel_robot(i) = (norm_robot(i+interval) - norm_robot(i))/(time(i+interval)-time(i));;
+            end
                     
             % グラフを作成
             % figure;
-            subplot(2, 3, plot_num)
+            subplot(2, 4, plot_num)
             
             % プロット
-            plot(time, norm_user, 'LineWidth', 2, 'DisplayName', 'user trajectory');
+            % plot(time, norm_user, 'LineWidth', 2, 'DisplayName', 'user trajectory');
+            % hold on;
+            % plot(time_1, model_1, 'LineWidth', 2, 'DisplayName', 'model_1 trajectory','Color','r');
+            % plot(time_2, model_2, 'LineWidth', 2, 'DisplayName', 'model_2 trajectory','Color','r');
+            % plot(time, norm_robot, 'LineWidth', 2, 'DisplayName', 'robot trajectory');
+            
+            % 速度プロット
+            plot(time(1:numel(time)-interval), vel_user, 'LineWidth', 2, 'DisplayName', 'user trajectory');
             hold on;
-            plot(time_1, model_1, 'LineWidth', 2, 'DisplayName', 'model_1 trajectory','Color','r');
-            plot(time_2, model_2, 'LineWidth', 2, 'DisplayName', 'model_2 trajectory','Color','r');
-            plot(time, norm_robot, 'LineWidth', 2, 'DisplayName', 'robot trajectory');
+            plot(time_1(1:numel(time_1)-interval), vel_model_1, 'LineWidth', 2, 'DisplayName', 'model_1 trajectory','Color','r');
+            plot(time_2(1:numel(time_2)-interval), vel_model_2, 'LineWidth', 2, 'DisplayName', 'model_2 trajectory','Color','r');
+            plot(time(1:numel(time)-interval), vel_robot, 'LineWidth', 2, 'DisplayName', 'robot trajectory');
             
             xregion(time(index_list_1(1)),time(index_list_2(1)+300))
             xregion(time(index_list_1(2)),time(index_list_2(2)+300))
