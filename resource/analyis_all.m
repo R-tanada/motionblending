@@ -1,17 +1,18 @@
-% clear all;
+clear all;
 close all;
 
-plot_num = 0;
+
 name_list = ["sato","sakurai","oda","nanri","kusahuka","hanai"];
-num_list = ["4"];
-mount_list = ["right"];
+num_list = ["2", "3", "4"];
+mount_list = ["left", "right"];
 
-for name = name_list
-    plot_num = plot_num + 1;
-    disp(name)
-    for num = num_list
-        for mount = mount_list
-
+for num = num_list
+    for mount = mount_list
+        figure('Name',num + mount,'NumberTitle','off');
+        plot_num = 0;
+        for name = name_list
+            plot_num = plot_num + 1;
+            disp(name)
             time = readmatrix(name+"/time_data/"+num+"_"+mount+".csv");
             user = readmatrix(name+"/user_data/"+num+"_"+mount+".csv");
             model = readmatrix(name+"/auto_data/"+num+"_"+mount+".csv");
@@ -76,7 +77,6 @@ for name = name_list
                 norm_user(j+1+index_list_2(2)) = norm_user(j+1+index_list_2(2)) + diff_list(j);
             end
             
-            % なんか知らんけど飛んでるロボットデータの1つを修正
             norm_robot(index_list_2(1)+1) = norm_robot(index_list_2(1)+2);
             norm_robot(index_list_2(2)+1) = norm_robot(index_list_2(2)+2);
             
@@ -107,14 +107,14 @@ for name = name_list
             % disp(model_2)
                     
             % グラフを作成
-            % figure;
             subplot(2, 3, plot_num)
+            title('First Subplot')
             
             % プロット
             plot(time, norm_user, 'LineWidth', 2, 'DisplayName', 'user trajectory');
             hold on;
-            plot(time_1, model_1, 'LineWidth', 2, 'DisplayName', 'model_1 trajectory','Color','r');
-            plot(time_2, model_2, 'LineWidth', 2, 'DisplayName', 'model_2 trajectory','Color','r');
+            % plot(time_1, model_1, 'LineWidth', 2, 'DisplayName', 'model_1 trajectory','Color','r');
+            % plot(time_2, model_2, 'LineWidth', 2, 'DisplayName', 'model_2 trajectory','Color','r');
             plot(time, norm_robot, 'LineWidth', 2, 'DisplayName', 'robot trajectory');
             
             xregion(time(index_list_1(1)),time(index_list_2(1)+300))
@@ -123,7 +123,7 @@ for name = name_list
             % pbaspect([1 1 1])
             
             % 軸ラベルの設定
-            xlabel('Normalized time');
+            xlabel(name);
             ylabel('Normalized norm');
             
             % 凡例の表示

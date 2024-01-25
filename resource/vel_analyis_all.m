@@ -76,7 +76,6 @@ for name = name_list
                 norm_user(j+1+index_list_2(2)) = norm_user(j+1+index_list_2(2)) + diff_list(j);
             end
             
-            % なんか知らんけど飛んでるロボットデータの1つを修正
             norm_robot(index_list_2(1)+1) = norm_robot(index_list_2(1)+2);
             norm_robot(index_list_2(2)+1) = norm_robot(index_list_2(2)+2);
             

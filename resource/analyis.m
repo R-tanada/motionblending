@@ -1,5 +1,5 @@
-name = "sakurai";
-num = "2";
+name = "kusahuka";
+num = "4";
 mount = "right";
 
 % name_list = ["tsuboi","sato","sakurai","oda","nanri","kusahuka","hurukawa","hanai","guenzu"];
@@ -107,12 +107,12 @@ model_2 = norm_model(index_list_1(2):index_list_2(2));
 % プロット
 plot(time, norm_user, 'LineWidth', 2, 'DisplayName', 'user trajectory');
 hold on;
-plot(time_1, model_1, 'LineWidth', 2, 'DisplayName', 'model_1 trajectory','Color','r');
-plot(time_2, model_2, 'LineWidth', 2, 'DisplayName', 'model_2 trajectory','Color','r');
+% plot(time_1, model_1, 'LineWidth', 2, 'DisplayName', 'model_1 trajectory','Color','r');
+% plot(time_2, model_2, 'LineWidth', 2, 'DisplayName', 'model_2 trajectory','Color','r');
 plot(time, norm_robot, 'LineWidth', 2, 'DisplayName', 'robot trajectory');
 
-xregion(time(index_list_1(1)),time(index_list_2(1)))
-xregion(time(index_list_1(2)),time(index_list_2(2)))
+xregion(time(index_list_1(1)),time(index_list_2(1)+300))
+xregion(time(index_list_1(2)),time(index_list_2(2)+300))
 
 % pbaspect([1 1 1])
 
@@ -125,6 +125,7 @@ ylabel('Normalized norm');
 
 % 軸の範囲の調整（必要に応じて）
 xlim([time(1) time(end)]);
+% saveas(gcf,'compare_'+mount+"_"+num,'epsc')
 % ylim([0.05 inf]);
 
 % set(gca,'FontSize',16); 
