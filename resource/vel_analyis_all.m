@@ -1,13 +1,9 @@
 % clear all;
 close all;
 
-name = "sakurai";
-num = "4";
-mount = "right";
-
 plot_num = 0;
-name_list = ["tsuboi","sato","sakurai","oda","nanri","kusahuka","hanai","guenzu"];
-num_list = ["2"];
+name_list = ["sato","sakurai","oda","nanri","kusahuka","hanai"];
+num_list = ["3"];
 mount_list = ["right"];
 
 for name = name_list
@@ -131,7 +127,7 @@ for name = name_list
                     
             % グラフを作成
             % figure;
-            subplot(2, 4, plot_num)
+            subplot(2, 3, plot_num)
             
             % プロット
             % plot(time, norm_user, 'LineWidth', 2, 'DisplayName', 'user trajectory');

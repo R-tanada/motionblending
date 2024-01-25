@@ -1,10 +1,6 @@
 % clear all;
 close all;
 
-name = "sakurai";
-num = "2";
-mount = "right";
-
 plot_num = 0;
 name_list = ["sato","sakurai","oda","nanri","kusahuka","hanai"];
 num_list = ["4"];
