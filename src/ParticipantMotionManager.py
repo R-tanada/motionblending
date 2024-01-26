@@ -69,7 +69,7 @@ class ParticipantManager:
 
 class MotionManager:
     optiTrackStreamingManager = OptiTrackStreamingManager(
-        mocapServer="127.0.0.1", mocapLocal="127.0.0.1"
+        mocapServer="133.58.108.58", mocapLocal="133.58.108.58"
     )
     streamingThread = threading.Thread(target=optiTrackStreamingManager.stream_run)
     streamingThread.setDaemon(True)
@@ -126,11 +126,14 @@ class MotionManager:
                 header=["time", "x", "y", "z"], fileName="linear/pos"
             )
 
-        # if self.recording:
-        #     self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'], fileName='pos')
-        #     self.recorder_rot = DataRecordManager(header = ['x', 'y', 'z', 'w'], fileName='rot')
-        #     self.recorder_grip = DataRecordManager(header = ['grip'], fileName='grip')
-        #     self.recorder_time = DataRecordManager(header = ['time'], fileName='time')
+        if self.mode == 4:
+            self.recorder_vel_weight = DataRecordManager(header=['time', 'vel', 'weight'], fileName='vel_weight')
+
+        if self.recording:
+            self.recorder_pos = DataRecordManager(header = ['x', 'y', 'z'], fileName='pos')
+            self.recorder_rot = DataRecordManager(header = ['x', 'y', 'z', 'w'], fileName='rot')
+            self.recorder_grip = DataRecordManager(header = ['grip'], fileName='grip')
+            self.recorder_time = DataRecordManager(header = ['time'], fileName='time')
 
         if self.Simulation:
             self.data_pos = DataLoadManager(Config["DataPath"]["position"])
@@ -204,6 +207,7 @@ class MotionManager:
                 weight,
                 velocity_auto,
             ) = self.automation.GetPosition(self.elaspedTime)
+            self.recorder_vel_weight.record([time, velocity_auto, weight])
             position = cf.ConvertAxis_Position(position * 1000, self.mount) - np.array(
                 self.initPosition
             )
@@ -406,8 +410,10 @@ class MotionManager:
         # self.recorder_grip.exportAsCSV()
         # self.recorder_time.exportAsCSV()
         # self.recorder2.exportAsCSV()
-        self.recorder3.exportAsCSV()
-        self.automation.exportascsv()
+        # self.recorder3.exportAsCSV()
+        # self.automation.exportascsv()
+        if self.mode == 4:
+            self.recorder_vel_weight.exportAsCSV()
 
     def PlotGraph(self):
         pass
