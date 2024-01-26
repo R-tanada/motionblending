@@ -349,7 +349,7 @@ class MinimumJerk:
             traj,
             isMoving,
             weight,
-            30 * self.a * (t**4 - 2 * (t**3) + t**2),
+            self.personalize.coe[0]*5*t**4 + self.personalize.coe[1]*4*t**3 + self.personalize.coe[2]*3*t**2 + self.personalize.coe[3]*2*t,
         )
 
         # return self.x0 + (xf- self.x0)* self.func_liner(t), isMoving, weight, 30 * self.a * (t**4 - 2*(t**3) + t**2)

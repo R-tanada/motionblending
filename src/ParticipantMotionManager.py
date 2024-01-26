@@ -17,7 +17,7 @@ from src.SensorManager import GripperSensorManager
 
 
 class ParticipantManager:
-    with open("docs/settings_dual.json", "r") as settings_file:
+    with open("docs/settings_single.json", "r") as settings_file:
         settings = json.load(settings_file)
     xArmConfig = {}
     for xArm in settings["xArmConfigs"].keys():
@@ -184,6 +184,12 @@ class MotionManager:
                 fileName=name + "/" + "time_data/" + str(self.mode) + "_" + self.mount,
             )
 
+        elif self.mode == 6:
+            self.recorder_vel = DataRecordManager(
+                header=["time", "vel", "weight"],
+                fileName=name + "/" + "vel_weight/" + str(self.mode) + "_" + self.mount,
+            )
+
         if self.Simulation:
             self.data_pos = DataLoadManager(Config["DataPath"]["position"])
             self.data_rot = DataLoadManager(Config["DataPath"]["rotation"])
@@ -197,6 +203,7 @@ class MotionManager:
             MotionManager.optiTrackStreamingManager.rotation[self.rigidBody] = np.zeros(
                 4
             )
+
 
     def GetMotionData(self):
         position, rotation, gripper = (
@@ -271,6 +278,7 @@ class MotionManager:
                 weight,
                 velocity_auto,
             ) = self.automation.GetPosition(self.elaspedTime)
+            self.recorder_vel.record([self.elaspedTime, velocity_auto, weight])
             position = cf.ConvertAxis_Position(position * 1000, self.mount) - np.array(
                 self.initPosition
             )
@@ -490,10 +498,14 @@ class MotionManager:
         # self.recorder_time.exportAsCSV()
         # self.recorder2.exportAsCSV()
         # self.recorder.exportAsCSV()
-        self.recorder_robot.exportAsCSV()
-        self.recorder_user.exportAsCSV()
-        self.recorder_traj.exportAsCSV()
-        self.recorder_time.exportAsCSV()
+        if self.mode == 1 or self.mode == 2 or self.mode == 3 or self.mode == 4:
+            self.recorder_robot.exportAsCSV()
+            self.recorder_user.exportAsCSV()
+            self.recorder_traj.exportAsCSV()
+            self.recorder_time.exportAsCSV()
+
+        elif self.mode == 6:
+            self.recorder_vel.exportAsCSV()
 
     def PlotGraph(self):
         pass
