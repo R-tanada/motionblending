@@ -5,7 +5,7 @@ import time
 
 from lib.xarm.wrapper import XArmAPI
 
-arm = "right"
+arm = "left"
 target = 1
 
 

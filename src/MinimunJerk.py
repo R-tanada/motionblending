@@ -31,7 +31,7 @@ class MinimumJerk:
         self.predictedGripper = []
         self.Threshold = Threshold
         self.q_init = []
-        self.y_pos = 100
+        self.y_pos = 50
         self.mount = xArmConfig["Mount"]
         print("target_: " + self.mount + str(np.array(target_index) + 1))
         self.target = [Target[target_index[0]], Target[target_index[1]]]

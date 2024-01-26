@@ -158,7 +158,7 @@ class MotionManager:
             # self.recorder2 = DataRecordManager(header=['time', 'velocity'], fileName='velocity', custom=False)
             self.recorder = DataRecordManager(
                 header=["time", "x", "y", "z"],
-                fileName=name + "/" + "model_data/" + self.mount,
+                fileName=name + "/" + "model_data/_" + self.mount,
                 custom=True,
             )
             switch_thread = threading.Thread(target=self.recorder.key_thread)

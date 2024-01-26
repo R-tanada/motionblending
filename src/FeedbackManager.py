@@ -65,8 +65,8 @@ class LED_Feedback:
 
 
 if __name__ == "__main__":
-    vibro = Vibrotactile(36)
-    vibro2 = Vibrotactile(38)
+    vibro = Vibrotactile(38)
+    vibro2 = Vibrotactile(36)
     vibro.data_out = 255
     vibro2.data_out = 255
     start_time = time.perf_counter()
