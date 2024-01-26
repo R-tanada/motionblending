@@ -1,0 +1,35 @@
+all_2 = [];
+all_3 = [];
+all_4 = [];
+
+name_list = ["sugimoto", "kaneko", "kato", "mizuno", "ushida"];
+condition_list = ["2", "3", "4"];
+num_list = ["2", "3"];
+
+for name = name_list
+    for num = num_list
+        data_2 = readmatrix(name+"/safety_2_"+num+".csv");
+        data_2 = data_2(:, 2);
+        data_2(3) = 8 - data_2(3);
+        
+        all_2 = [all_2,data_2];
+        
+        data_3 = readmatrix(name+"/safety_3_"+num+".csv");
+        data_3 = data_3(:, 2);
+        data_3(3) = 8 - data_3(3);
+        
+        all_3 = [all_3,data_3];
+        
+        data_4 = readmatrix(name+"/safety_4_"+num+".csv");
+        data_4 = data_4(:, 2);
+        data_4(3) = 8 - data_4(3);
+        
+        all_4 = [all_4,data_4];
+
+    end
+end
+
+score_2 = sum(all_2,"all")/numel(all_2)
+score_3 = sum(all_3,"all")/numel(all_3)
+score_4 = sum(all_4,"all")/numel(all_4)
+
