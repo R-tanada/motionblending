@@ -8,7 +8,6 @@ import lib.self.CustomFunction as cf
 from src.DataManager import DataLoadManager, DataPlotManager, DataRecordManager
 from src.MinimunJerk import MinimumJerk
 from src.mode_select import mode, name
-
 # # ----- Custom class ----- #
 from src.OptiTrackStreamingManager import OptiTrackStreamingManager
 from src.SensorManager import GripperSensorManager
@@ -69,7 +68,7 @@ class ParticipantManager:
 
 class MotionManager:
     optiTrackStreamingManager = OptiTrackStreamingManager(
-        mocapServer="133.58.108.58", mocapLocal="133.58.108.58"
+        mocapServer="133.68.108.58", mocapLocal="133.68.108.58"
     )
     streamingThread = threading.Thread(target=optiTrackStreamingManager.stream_run)
     streamingThread.setDaemon(True)
@@ -207,7 +206,7 @@ class MotionManager:
                 weight,
                 velocity_auto,
             ) = self.automation.GetPosition(self.elaspedTime)
-            self.recorder_vel_weight.record([time, velocity_auto, weight])
+            self.recorder_vel_weight.record([self.elaspedTime, velocity_auto.real, weight.real])
             position = cf.ConvertAxis_Position(position * 1000, self.mount) - np.array(
                 self.initPosition
             )
@@ -413,6 +412,7 @@ class MotionManager:
         # self.recorder3.exportAsCSV()
         # self.automation.exportascsv()
         if self.mode == 4:
+            # print(1111111111111)
             self.recorder_vel_weight.exportAsCSV()
 
     def PlotGraph(self):
