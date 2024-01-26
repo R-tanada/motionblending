@@ -33,9 +33,9 @@ for num = num_list
             norm_model=[];
             norm_robot=[];
             for i = 1:numel(model(:, 1))
-                norm_user(i) = norm([user(i, 1) user(i, 3)]);
-                norm_model(i) = norm([model(i, 1) model(i, 3)]);
-                norm_robot(i) = norm([robot(i, 1) robot(i, 3)]);
+                norm_user(i) = norm([user(i, 1) user(i, 2) user(i, 3)]);
+                norm_model(i) = norm([model(i, 1) model(i, 2) model(i, 3)]);
+                norm_robot(i) = norm([robot(i, 1) robot(i, 2) robot(i, 3)]);
             end
             
             % time = linspace(0,time(end),numel(user(:, 1)));

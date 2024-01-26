@@ -1,10 +1,11 @@
+clear all;
+% close all;
+
+
 name = "kusahuka";
 num = "4";
 mount = "right";
 
-% name_list = ["tsuboi","sato","sakurai","oda","nanri","kusahuka","hurukawa","hanai","guenzu"];
-% num_list = ["2","3","4"];
-% mount_list = ["right","left"];
 
 time = readmatrix(name+"/time_data/"+num+"_"+mount+".csv");
 user = readmatrix(name+"/user_data/"+num+"_"+mount+".csv");
@@ -12,7 +13,7 @@ model = readmatrix(name+"/auto_data/"+num+"_"+mount+".csv");
 robot = readmatrix(name+"/robot_data/"+num+"_"+mount+".csv");
 
 n = numel(time);
-s = 2;
+s = 0;
 user = user(s+1:n+s, :);
 model = model(s+1:n+s, :);
 robot = robot(s+1:n+s, :);
@@ -26,9 +27,9 @@ norm_user=[];
 norm_model=[];
 norm_robot=[];
 for i = 1:numel(model(:, 1))
-    norm_user(i) = norm([user(i, 1) user(i, 2) user(i, 3)]);
-    norm_model(i) = norm([model(i, 1) model(i, 2) model(i, 3)]);
-    norm_robot(i) = norm([robot(i, 1) robot(i, 2) robot(i, 3)]);
+    norm_user(i) = norm([user(i, 1) user(i, 3)]);
+    norm_model(i) = norm([model(i, 1) model(i, 3)]);
+    norm_robot(i) = norm([robot(i, 1) robot(i, 3)]);
 end
 
 % time = linspace(0,time(end),numel(user(:, 1)));
@@ -70,7 +71,6 @@ for j = 1:numel(diff_list)
     norm_user(j+1+index_list_2(2)) = norm_user(j+1+index_list_2(2)) + diff_list(j);
 end
 
-% なんか知らんけど飛んでるロボットデータの1つを修正
 norm_robot(index_list_2(1)+1) = norm_robot(index_list_2(1)+2);
 norm_robot(index_list_2(2)+1) = norm_robot(index_list_2(2)+2);
 
@@ -99,10 +99,8 @@ model_2 = norm_model(index_list_1(2):index_list_2(2));
 % norm_robot(index_list_2(2)) = norm_robot(index_list_2(2)-1)
 
 % disp(model_2)
-            
         
 % グラフを作成
-% figure;
 
 % プロット
 plot(time, norm_user, 'LineWidth', 2, 'DisplayName', 'user trajectory');
@@ -117,7 +115,7 @@ xregion(time(index_list_1(2)),time(index_list_2(2)+300))
 % pbaspect([1 1 1])
 
 % 軸ラベルの設定
-xlabel('Normalized time');
+xlabel(name);
 ylabel('Normalized norm');
 
 % 凡例の表示
@@ -125,10 +123,11 @@ ylabel('Normalized norm');
 
 % 軸の範囲の調整（必要に応じて）
 xlim([time(1) time(end)]);
-% saveas(gcf,'compare_'+mount+"_"+num,'epsc')
 % ylim([0.05 inf]);
 
 % set(gca,'FontSize',16); 
 % set(gca,'linewidth',1);
 % set(gca,'FontName', 'Times New Roman');
 % set(gca,'FontAngle', 'normal');
+
+
