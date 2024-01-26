@@ -7,7 +7,7 @@ agency_control_all_3 = [];
 agency_all_4 = [];
 agency_control_all_4 = [];
 
-name_list = ["sugimoto", "kaneko", "ushida", "kato", "mizuno"];
+name_list = ["sugimoto", "kaneko", "ushida", "kato", "mizuno","hanai"];
 condition_list = ["2", "3", "4"];
 num_list = ["2", "3"];
 

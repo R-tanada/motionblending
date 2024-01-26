@@ -4,7 +4,7 @@ all_2 = [];
 all_3 = [];
 all_4 = [];
 
-name_list = ["sugimoto", "kaneko", "ushida", "kato", "mizuno"];
+name_list = ["sugimoto", "kaneko", "ushida", "kato", "mizuno","hanai"];
 condition_list = ["2", "3", "4"];
 num_list = ["2", "3"];
 
