@@ -3,8 +3,8 @@ clear all;
 
 
 name = "kusahuka";
-num = "2";
-mount = "left";
+num = "4";
+mount = "right";
 
 
 time = readmatrix(name+"/time_data/"+num+"_"+mount+".csv");
@@ -27,9 +27,9 @@ norm_user=[];
 norm_model=[];
 norm_robot=[];
 for i = 1:numel(model(:, 1))
-    norm_user(i) = norm([user(i, 1) user(i, 3) user(i, 2)]);
-    norm_model(i) = norm([model(i, 1) model(i, 3) model(i, 2)]);
-    norm_robot(i) = norm([robot(i, 1) robot(i, 3) robot(i, 2)]);
+    norm_user(i) = norm([user(i, 1) user(i, 3)]);
+    norm_model(i) = norm([model(i, 1) model(i, 3)]);
+    norm_robot(i) = norm([robot(i, 1) robot(i, 3)]);
 end
 
 % time = linspace(0,time(end),numel(user(:, 1)));
@@ -116,7 +116,7 @@ xregion(time(index_list_1(2)),time(index_list_2(2)+300))
 
 % 軸ラベルの設定
 xlabel('time[s]');
-ylabel('norm[mm]');
+ylabel('norm');
 
 % 凡例の表示
 % legend('Location', 'northwest', 'Box', 'off');
