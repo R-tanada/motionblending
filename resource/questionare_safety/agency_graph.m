@@ -49,6 +49,9 @@ score_agency_control_3 = sum(agency_control_all_3,"all")/numel(agency_control_al
 score_agency_4 = sum(agency_all_4,"all")/numel(agency_all_4);
 score_agency_control_4 = sum(agency_control_all_4,"all")/numel(agency_control_all_4);
 
+std_a_2 = std(agency_all_2)
+agency_all_2
+
 x = categorical({'1. Without feedback','2. Vibrotactile feedback','3. Visual feedback'});
 x = reordercats(x,{'1. Without feedback','2. Vibrotactile feedback','3. Visual feedback'});
 ylim([0 7])
