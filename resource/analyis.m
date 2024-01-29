@@ -2,9 +2,9 @@ clear all;
 % close all;
 
 
-name = "kusahuka";
+name = "sakurai";
 num = "2";
-mount = "left";
+mount = "right";
 
 
 time = readmatrix(name+"/time_data/"+num+"_"+mount+".csv");
