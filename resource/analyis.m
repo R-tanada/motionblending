@@ -1,11 +1,11 @@
 clear all;
-% close all;
+close all;
 
 
 name = "sakurai";
 num = "2";
-mount = "right";
-
+mount = "left";
+s
 
 time = readmatrix(name+"/time_data/"+num+"_"+mount+".csv");
 user = readmatrix(name+"/user_data/"+num+"_"+mount+".csv");
@@ -101,25 +101,38 @@ model_2 = norm_model(index_list_1(2):index_list_2(2));
 % disp(model_2)
         
 % グラフを作成
+figure
 
 % プロット
-plot(time, norm_user, 'LineWidth', 2, 'DisplayName', 'user trajectory');
+p1 = plot(time, norm_user, 'LineWidth', 2, 'DisplayName', 'user trajectory');
 hold on;
 % plot(time_1, model_1, 'LineWidth', 2, 'DisplayName', 'model_1 trajectory','Color','r');
 % plot(time_2, model_2, 'LineWidth', 2, 'DisplayName', 'model_2 trajectory','Color','r');
-plot(time, norm_robot, 'LineWidth', 2, 'DisplayName', 'robot trajectory');
+p2 = plot(time, norm_robot, 'LineWidth', 2, 'DisplayName', 'robot trajectory');
+
+fp = {'FontName', 'Times New Roman'} ;
+xlabel('Time[s]',fp{:})
+ylabel('3D-norm[mm]',fp{:})
+ax = gca;
+ax.XAxis(1).Color = [0 0 0];
+% set(gca,'FontWeight','bold'); 
+set(gca,'FontSize',15); 
+set(gca,'linewidth',1);
+set(gca,'FontName', 'Times New Roman');
+set(gca,'FontAngle', 'normal');
+% title('NASA TLX',fp{:},'fontsize', 15)
+% box off
+
+% legend('Location','northwest',Box='off')
 
 xregion(time(index_list_1(1)),time(index_list_2(1)+300))
 xregion(time(index_list_1(2)),time(index_list_2(2)+300))
 
 % pbaspect([1 1 1])
 
-% 軸ラベルの設定
-xlabel('time[s]');
-ylabel('norm[mm]');
 
 % 凡例の表示
-% legend('Location', 'northwest', 'Box', 'off');
+legend([p1 p2], 'Location', 'northwest', 'Box', 'off');
 
 % 軸の範囲の調整（必要に応じて）
 xlim([time(1) time(end)]);
