@@ -31,12 +31,36 @@ for name = name_list
     end
 end
 
-score_2 = sum(all_2,"all")/numel(all_2)
-score_3 = sum(all_3,"all")/numel(all_3)
-score_4 = sum(all_4,"all")/numel(all_4)
+score_2 = sum(all_2,"all")/numel(all_2);
+score_3 = sum(all_3,"all")/numel(all_3);
+score_4 = sum(all_4,"all")/numel(all_4);
+
+agency_2 = [];
+all_2 = sum(all_2, 1)/3;
+for i = 1:6
+    agency_2 = [agency_2, (all_2(i+(i-1))+all_2(i+(i-1)+1))/2];
+end
+
+agency_3 = [];
+all_3 = sum(all_3, 1)/3;
+for i = 1:6
+    agency_3 = [agency_3, (all_3(i+(i-1))+all_3(i+(i-1)+1))/2];
+end
+
+agency_4 = [];
+all_4 = sum(all_4, 1)/3;
+for i = 1:6
+    agency_4 = [agency_4, (all_4(i+(i-1))+all_4(i+(i-1)+1))/2];
+end
+
+std_a_2 = std(agency_2);
+std_a_3 = std(agency_3);
+std_a_4 = std(agency_4);
+
 
 % data = load('result_all.txt');
 data = [score_2, score_3, score_4];
+err = [std_a_2 std_a_3 std_a_4]
  
 %棒グラフ作成
 figure();
@@ -54,13 +78,12 @@ pbaspect([2 1 1])
 % hold on
  
 %標準偏差
-% hold on
-% error=data(2,:);
-% error = [9.85, 2.8, 3.35, 2.77];
-% er = errorbar(x,y,error,error);    
-% er.Color = [0 0 0];                            
-% er.LineStyle = 'none';  
-% hold off
+hold on
+
+er = errorbar(x,y,err,err);    
+er.Color = [0 0 0];                            
+er.LineStyle = 'none';  
+hold off
  
 %軸などの設定
 fp = {'FontName', 'Times New Roman','FontWeight','bold'} ;
