@@ -53,7 +53,7 @@ def custom_fit(x, y):
 
     return np.dot(A_inv, B)
 
-data = load('resource/nanri/model_data/right20231212_090202.csv')
+data = load('resource/sato/model_data/right20231211_130826.csv')
 time = data[:, 0]
 time = time - time[0]
 time = time/time[-1]
@@ -82,7 +82,7 @@ y_fit = coe[0] * time ** 5 + coe[1] * time ** 4 + coe[2] * time ** 3 + coe[3] * 
 data = np.array([time, norm, y_fit]).transpose()
 
 with open(
-    "/Users/yuzu/Desktop/修論関係/fitting.csv", "w", newline=""
+    "/Users/yuzu/Desktop/修論関係/fitting_sato_right.csv", "w", newline=""
 ) as exportFile:
     writer = csv.writer(exportFile)
     writer.writerows(data)

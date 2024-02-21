@@ -2,13 +2,15 @@ clear all;
 close all;
 
 
-name = "sato";
-num_list = ["3"];
+name_list = ["oda"];
+num = "3";
 mount = "right";
 
-for num = num_list
+back = 230;
 
-    figure('Name',num + mount,'NumberTitle','off');
+for name = name_list
+
+    figure('Name',name + mount,'NumberTitle','off');
     % plot_num = 0;
 
     % plot_num = plot_num + 1;
@@ -105,10 +107,9 @@ for num = num_list
     
     % disp(model_2)
 
-    model_x = model(index_list_1(1):index_list_2(1), 1);
-    model_y = model(index_list_1(1):index_list_2(1), 3);
-    model_z = model(index_list_1(1):index_list_2(1), 2);
-    
+    model_x = model(index_list_1(1):index_list_2(1)-back, 1);
+    model_y = model(index_list_1(1):index_list_2(1)-back, 3);
+    model_z = model(index_list_1(1):index_list_2(1)-back, 2);
 
     x_end = model_x(end) - model_x(1);
     x_start = model_x(1);
@@ -145,7 +146,7 @@ for num = num_list
     end
 
     % グラフを作成
-    title('First Subplot')
+    % title('First Subplot')
 
     % numel(normalized_z)
     % numel(normalized_x)
@@ -154,7 +155,79 @@ for num = num_list
 
     
     % プロット
-    plot3(normalized_x(1:n), normalized_y(1:n), normalized_z_rev(1:n), LineWidth=2)
+    % plot3(normalized_x(1:n), normalized_y(1:n), normalized_z_rev(1:n), LineWidth=2, DisplayName='Model trajectory')
+    % plot3(model_x, model_y, model_z, LineWidth=2, DisplayName='Model trajectory', Color=[0 0.4470 0.7410])
+
+    % hold on
+
+    user_x = user(245:index_list_2(1)-back, 1);
+    user_y = user(245:index_list_2(1)-back, 3);
+    user_z = user(245:index_list_2(1)-back, 2);
+
+    x_end = user_x(end) - user_x(1);
+    x_start = user_x(1);
+    normalized_x = [];
+    for x = user_x
+        diff = x - x_start;
+        normalized_x = [normalized_x, diff/x_end];
+    end
+
+    y_end = user_y(end) - user_y(1);
+    y_start = user_y(1);
+    normalized_y = [];
+    for y = user_y
+        diff = y - y_start;
+        normalized_y = [normalized_y, diff/y_end];
+    end
+
+    z_end = user_z(end) - user_z(1);
+    z_start = user_z(1);
+    normalized_z = [];
+    normalized_z_rev = [];
+    for z = user_z
+        diff = z - z_start;
+        normalized_z_rev = [normalized_z_rev, 1-(diff/z_end)];
+        normalized_z = [normalized_z, (diff/z_end)];
+    end
+
+    % plot3(normalized_x(1:n), normalized_y(1:n), normalized_z_rev(1:n), LineWidth=2, DisplayName='User trajectory')
+    % plot3(user_x, user_y, user_z, LineWidth=2, DisplayName='Model trajectory', Color=[0.8500 0.3250 0.0980])
+
+
+    robot_x = robot(index_list_1(1):index_list_2(1)-back, 1);
+    robot_y = robot(index_list_1(1):index_list_2(1)-back, 3);
+    robot_z = robot(index_list_1(1):index_list_2(1)-back, 2);
+
+    x_end = robot_x(end) - robot_x(1);
+    x_start = robot_x(1);
+    normalized_x = [];
+    for x = robot_x
+        diff = x - x_start;
+        normalized_x = [normalized_x, diff/x_end];
+    end
+
+    y_end = robot_y(end) - robot_y(1);
+    y_start = robot_y(1);
+    normalized_y = [];
+    for y = robot_y
+        diff = y - y_start;
+        normalized_y = [normalized_y, diff/y_end];
+    end
+
+    z_end = robot_z(end) - robot_z(1);
+    z_start = robot_z(1);
+    normalized_z = [];
+    normalized_z_rev = [];
+    for z = robot_z
+        diff = z - z_start;
+        normalized_z_rev = [normalized_z_rev, 1-(diff/z_end)];
+        normalized_z = [normalized_z, (diff/z_end)];
+    end
+
+    % plot3(normalized_x(1:n), normalized_y(1:n), normalized_z_rev(1:n), LineWidth=2, DisplayName='Robot trajectory')
+    % plot3(robot_x, robot_y, robot_z, LineWidth=2, DisplayName='Model trajectory')
+
+    % hold off
 
     % plot(time_1, model_1, 'LineWidth', 2, 'DisplayName', 'model_1 trajectory','Color','r');
     % plot(time_2, model_2, 'LineWidth', 2, 'DisplayName', 'model_2 trajectory','Color','r');
@@ -185,10 +258,12 @@ for num = num_list
     % legend('Location', 'northwest', 'Box', 'off');
     
     % 軸の範囲の調整（必要に応じて）
-    xlim([0 1]);
-    ylim([0 1]);
-    zlim([0 1]);
+    xlim([-50 230]);
+    ylim([0 200]);
+    zlim([-170 0]);
     % ylim([0.05 inf]);
+
+    
 
     grid on
     
